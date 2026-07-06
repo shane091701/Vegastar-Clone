@@ -60,8 +60,8 @@ function colorizeProjectSelectsById() {
   }
 }
 
-// â”€â”€ Generic project-dropdown company highlight (reused across many sections) â”€â”€
-// Distinct from Expense Log's dedicated implementation â€” does not touch or
+// ── Generic project-dropdown company highlight (reused across many sections) ──
+// Distinct from Expense Log's dedicated implementation — does not touch or
 // interfere with it. Safe to call multiple times on the same element.
 
 function whenProjectMapReady(callback) {
@@ -76,7 +76,7 @@ function applyDropdownCompanyHighlight(selectEl) {
   if (!selectEl) return;
   selectEl.classList.remove('proj-hl-ct', 'proj-hl-vegastar', 'proj-hl-krone');
   const val = selectEl.value;
-  if (!val || val === 'All') return; // no selection or "All" filter state â†’ default look
+  if (!val || val === 'All') return; // no selection or "All" filter state → default look
   const company = (projectCompanyMap[val] || '').toString().trim().toLowerCase();
   if (company === 'ct') selectEl.classList.add('proj-hl-ct');
   else if (company === 'vegastar') selectEl.classList.add('proj-hl-vegastar');
@@ -101,7 +101,7 @@ function setupProjectDropdownHighlight(selectEl) {
 // Applies a background-highlight CSS class to the CLOSED Expense Log project
 // dropdown, based on the selected project's company. Per-option font coloring
 // alone does not reliably show on a closed <select> in most browsers, so this
-// highlights the box itself instead â€” matches the requested "highlight the
+// highlights the box itself instead — matches the requested "highlight the
 // whole word/row" fallback behavior.
 function applyExpenseProjectHighlight() {
   const select = document.getElementById('expenseProjectSelect');
@@ -111,7 +111,7 @@ function applyExpenseProjectHighlight() {
   select.classList.remove('company-highlight-ct', 'company-highlight-vegastar', 'company-highlight-krone');
 
   const projectCode = select.value;
-  if (!projectCode) return; // no selection â€” leave default appearance
+  if (!projectCode) return; // no selection — leave default appearance
 
   const company = (projectCompanyMap[projectCode] || '').toString().trim().toLowerCase();
   if (company === 'ct') {
@@ -121,7 +121,7 @@ function applyExpenseProjectHighlight() {
   } else if (company === 'krone konstruct') {
     select.classList.add('company-highlight-krone');
   }
-  // any other/blank company â†’ no class added â†’ default appearance (per your spec)
+  // any other/blank company → no class added → default appearance (per your spec)
 }
 
 function loadProjectCompanyMap(callback) {
@@ -225,7 +225,7 @@ window.onload = () => {
       });
       return;
     } catch (e) {
-      // Corrupt entry â€” clear it and fall through to the login screen.
+      // Corrupt entry — clear it and fall through to the login screen.
       localStorage.removeItem('alphaErpUser');
     }
   }
@@ -443,9 +443,9 @@ function applyPermissions(allowedTabs) {
 
   const allowed = allowedTabs.map(t => t.trim().toLowerCase());
 
-  // â”€â”€ Step 1: Show/hide every individual nav item that carries data-permission.
+  // ── Step 1: Show/hide every individual nav item that carries data-permission.
   // The attribute value may be a pipe-separated list of alternatives, e.g.
-  // "site engineer|record petty cash" â€” the item shows if the user has ANY of them.
+  // "site engineer|record petty cash" — the item shows if the user has ANY of them.
   document.querySelectorAll('#app-content [data-permission]').forEach(el => {
     const required = el.getAttribute('data-permission')
                        .split('|')
@@ -453,8 +453,8 @@ function applyPermissions(allowedTabs) {
     el.style.display = required.some(p => allowed.includes(p)) ? '' : 'none';
   });
 
-  // â”€â”€ Step 2: Collapse entire dropdown groups whose every permissioned <li> is hidden.
-  // The group wrapper itself has no data-permission â€” it is driven by its children.
+  // ── Step 2: Collapse entire dropdown groups whose every permissioned <li> is hidden.
+  // The group wrapper itself has no data-permission — it is driven by its children.
   ['nav-group-boq', 'nav-group-site-engineer', 'nav-group-project-engineer', 'nav-group-subcontractor', 'nav-group-material-requests', 'nav-group-payments'].forEach(groupId => {
     const group = document.getElementById(groupId);
     if (!group) return;
@@ -463,7 +463,7 @@ function applyPermissions(allowedTabs) {
     group.style.display = anyVisible ? 'inline-block' : 'none';
   });
 
-  // â”€â”€ Step 3: Return the first section the user is allowed to see (for post-login redirect).
+  // ── Step 3: Return the first section the user is allowed to see (for post-login redirect).
   for (const entry of SECTION_MAP) {
     if (allowed.includes(entry.perm)) return entry.section;
   }
@@ -528,7 +528,7 @@ function initApp() {
         allData = data.items || [];
         const projectSelect = document.getElementById('projectSelect');
         if(projectSelect) {
-          projectSelect.innerHTML = '<option value="">â€” Select project â€”</option>';
+          projectSelect.innerHTML = '<option value="">— Select project —</option>';
           if(data.projects) {
             data.projects.forEach(p => {
               let opt = document.createElement('option');
@@ -562,8 +562,8 @@ function onMrfProjectChange() {
     if (searchInput) { searchInput.value = ''; searchInput.disabled = true; }
     if (searchList) searchList.innerHTML = '';
     if (submitBtn) submitBtn.style.display = 'none';
-    if (phaseFilter) { phaseFilter.innerHTML = '<option value="">â€” All Phases â€”</option>'; phaseFilter.disabled = true; }
-    if (scopeFilter) { scopeFilter.innerHTML = '<option value="">â€” All Scopes â€”</option>'; scopeFilter.disabled = true; }
+    if (phaseFilter) { phaseFilter.innerHTML = '<option value="">— All Phases —</option>'; phaseFilter.disabled = true; }
+    if (scopeFilter) { scopeFilter.innerHTML = '<option value="">— All Scopes —</option>'; scopeFilter.disabled = true; }
     return;
   }
 
@@ -587,13 +587,13 @@ function populateMrfPhaseFilter() {
   if (!phaseFilter) return;
 
   const phases = [...new Set(currentFilteredData.map(i => i.phase || 'Uncategorized Phase'))].sort();
-  phaseFilter.innerHTML = '<option value="">â€” All Phases â€”</option>' +
+  phaseFilter.innerHTML = '<option value="">— All Phases —</option>' +
     phases.map(p => `<option value="${p.replace(/"/g, '&quot;')}">${p}</option>`).join('');
   phaseFilter.disabled = phases.length === 0;
   phaseFilter.value = '';
 
   if (scopeFilter) {
-    scopeFilter.innerHTML = '<option value="">â€” All Scopes â€”</option>';
+    scopeFilter.innerHTML = '<option value="">— All Scopes —</option>';
     scopeFilter.disabled = true;
     scopeFilter.value = '';
   }
@@ -604,7 +604,7 @@ function populateMrfScopeFilter(selectedPhase) {
   if (!scopeFilter) return;
 
   if (!selectedPhase) {
-    scopeFilter.innerHTML = '<option value="">â€” All Scopes â€”</option>';
+    scopeFilter.innerHTML = '<option value="">— All Scopes —</option>';
     scopeFilter.disabled = true;
     scopeFilter.value = '';
     return;
@@ -616,7 +616,7 @@ function populateMrfScopeFilter(selectedPhase) {
       .map(i => i.scope ? cleanBullets(i.scope) : 'General / Uncategorized')
   )].sort();
 
-  scopeFilter.innerHTML = '<option value="">â€” All Scopes â€”</option>' +
+  scopeFilter.innerHTML = '<option value="">— All Scopes —</option>' +
     scopesInPhase.map(s => `<option value="${s.replace(/"/g, '&quot;')}">${s}</option>`).join('');
   scopeFilter.disabled = scopesInPhase.length === 0;
   scopeFilter.value = '';
@@ -634,7 +634,7 @@ function onMrfScopeFilterChange() {
 
 // Pure visual narrowing: shows/hides phase blocks and scope rows in the
 // already-built accordion. Does NOT alter currentFilteredData or restrict
-// what can be entered/submitted â€” a user can still fill in values on hidden
+// what can be entered/submitted — a user can still fill in values on hidden
 // rows via search, and everything already filled in remains part of the
 // submission regardless of filter state.
 function applyMrfPhaseScopeFilter() {
@@ -958,20 +958,20 @@ function renderHistoryGrouped(rows) {
 
     const innerRows = items.map(it => `
       <tr>
-        <td class="ps-4">${it.phase || 'â€”'}</td>
-        <td>${it.scope ? cleanBullets(it.scope) : 'â€”'}</td>
+        <td class="ps-4">${it.phase || '—'}</td>
+        <td>${it.scope ? cleanBullets(it.scope) : '—'}</td>
         <td class="fw-bold">${cleanBullets(it.item)}</td>
         <td>${it.unit}</td>
         <td class="text-end">${it.qty}</td>
-        <td class="text-muted">${it.remarks || 'â€”'}</td>
+        <td class="text-muted">${it.remarks || '—'}</td>
         <td class="text-center">${statusBadge(it.status)}</td>
       </tr>`).join('');
 
     return `
       <tr style="cursor:pointer; background:#f8f9fa;" onclick="toggleHistoryGroup('${collapseId}')">
         <td class="fw-bold">
-          <span class="me-2">â–¸</span>${code}
-          <span class="text-muted small ms-2">${first.project} Â· ${first.date}</span>
+          <span class="me-2">▸</span>${code}
+          <span class="text-muted small ms-2">${first.project} · ${first.date}</span>
           <span class="float-end">${headerBadge}</span>
         </td>
       </tr>
@@ -1005,7 +1005,7 @@ function loadRFQs() {
         // Populate Project Filter
         const projFilter = document.getElementById('rfqProjectFilter');
         const projects = [...new Set(data.map(r => r.project))].sort();
-        projFilter.innerHTML = '<option value="">â€” All Projects â€”</option>' + projects.map(p => `<option value="${p}">${p}</option>`).join('');
+        projFilter.innerHTML = '<option value="">— All Projects —</option>' + projects.map(p => `<option value="${p}">${p}</option>`).join('');
         colorizeProjectSelect(projFilter);
         whenProjectMapReady(function(){ setupProjectDropdownHighlight(projFilter); });
 
@@ -1040,7 +1040,7 @@ function filterRFQs() {
         return `
         <tr>
             <td class="align-middle fw-bold text-dark">${r.mrfId} ${badge}</td>
-            <td class="align-middle">${r.createdBy || 'â€”'}</td>
+            <td class="align-middle">${r.createdBy || '—'}</td>
             <td class="align-middle">${r.project}</td>
             <td class="align-middle">${r.date}</td>
             <td class="align-middle">
@@ -1216,7 +1216,7 @@ function renderApprovalQueue(requests) {
         <div class="row align-items-center">
           <div class="col-md-12">
             <div class="fw-bold text-dark">${req.code}</div>
-            <span class="text-muted small">${req.id} Â· ${req.user} Â· ${req.date}</span>
+            <span class="text-muted small">${req.id} · ${req.user} · ${req.date}</span>
           </div>
         </div>
       </div>
@@ -1354,7 +1354,7 @@ function loadBidTabulation() {
         bidDataRaw = data.items;
 
         const projFilter = document.getElementById('bidProjectFilter');
-        projFilter.innerHTML = '<option value="">â€” Select Project â€”</option>' + data.projects.map(p => `<option value="${p}">${p}</option>`).join('');
+        projFilter.innerHTML = '<option value="">— Select Project —</option>' + data.projects.map(p => `<option value="${p}">${p}</option>`).join('');
         colorizeProjectSelect(projFilter);
         whenProjectMapReady(function(){ setupProjectDropdownHighlight(projFilter); });
 
@@ -1381,7 +1381,7 @@ function loadBidSupplierNames() {
                     input.disabled = true;
                 }
                 if (feedback) {
-                    feedback.innerHTML = 'No suppliers found â€” add one in <strong>Accounting â†’ Supplier Data</strong> first.';
+                    feedback.innerHTML = 'No suppliers found — add one in <strong>Accounting → Supplier Data</strong> first.';
                     feedback.className = 'small mt-1 text-danger fw-bold';
                     feedback.style.display = 'block';
                 }
@@ -1436,7 +1436,7 @@ function updateBidMrfDropdown() {
     const proj = document.getElementById('bidProjectFilter').value;
     const mrfSelect = document.getElementById('mrfSelectDropdown');
     
-    mrfSelect.innerHTML = '<option value="">â€” Select MRF â€”</option>';
+    mrfSelect.innerHTML = '<option value="">— Select MRF —</option>';
     
     // MRFs that have a PO are ALREADY excluded by the backend
     Object.keys(globalBidData.mrfMap).forEach(mrfId => {
@@ -1461,7 +1461,7 @@ function addPaymentTermRow() {
     row.innerHTML = `
          <input type="text" class="form-control term-desc" list="termOptions" placeholder="Select or type term...">
          <input type="number" class="form-control term-pct" placeholder="%" style="max-width: 80px;" oninput="calcTermTotal()">
-         <button class="btn btn-outline-danger" onclick="this.parentElement.remove(); calcTermTotal();" tabindex="-1">âœ•</button>
+         <button class="btn btn-outline-danger" onclick="this.parentElement.remove(); calcTermTotal();" tabindex="-1">✕</button>
     `;
     container.appendChild(row);
 }
@@ -1512,7 +1512,7 @@ function filterBids() {
 
         if (!brands || brands.trim() === "" || brands.trim().toUpperCase() === "N/A") {
             finalItemsToQuote.push({ 
-                description: itemName, quantity: approvedQty, brand: "â€”", originalId: originalIdx 
+                description: itemName, quantity: approvedQty, brand: "—", originalId: originalIdx 
             });
         } else {
             let brandArray = brands.toString().split(',');
@@ -1544,7 +1544,7 @@ function submitQuotes(mrfId) {
     const supplier = supplierInput ? supplierInput.value.trim() : "";
     if(!supplier) { alert("Please select a supplier name."); return; }
 
-    // Enforce exact match against the Supplier Database â€” prevents saving quotes
+    // Enforce exact match against the Supplier Database — prevents saving quotes
     // under a misspelled/unregistered supplier name.
     const isValidSupplier = bidSupplierNamesCache.some(function(name) {
         return name.toLowerCase() === supplier.toLowerCase();
@@ -1586,7 +1586,7 @@ function submitQuotes(mrfId) {
         if(!isNaN(amt) && amt > 0) {
             const originalIndex = parseInt(inp.dataset.originalIdx);
             const originalItemName = items[originalIndex].description || items[originalIndex].item;
-            const brandVal = inp.dataset.brand || "â€”"; 
+            const brandVal = inp.dataset.brand || "—"; 
             quotes.push({ item: originalItemName, amount: amt, brand: brandVal }); 
         }
     });
@@ -1612,7 +1612,7 @@ function submitQuotes(mrfId) {
             <div class="input-group input-group-sm mb-2 term-row">
               <input type="text" class="form-control term-desc" list="termOptions" placeholder="Select or type term...">
               <input type="number" class="form-control term-pct" placeholder="%" style="max-width: 80px;" oninput="calcTermTotal()">
-              <button class="btn btn-outline-danger" onclick="this.parentElement.remove(); calcTermTotal();" tabindex="-1">âœ•</button>
+              <button class="btn btn-outline-danger" onclick="this.parentElement.remove(); calcTermTotal();" tabindex="-1">✕</button>
             </div>
         `;
         
@@ -1638,7 +1638,7 @@ function loadCanvasMRFs() {
 
         const projFilter = document.getElementById('canvasProjectFilter');
         const projects = [...new Set(data.map(r => r.project))].sort();
-        projFilter.innerHTML = '<option value="">â€” All Projects â€”</option>' + projects.map(p => `<option value="${p}">${p}</option>`).join('');
+        projFilter.innerHTML = '<option value="">— All Projects —</option>' + projects.map(p => `<option value="${p}">${p}</option>`).join('');
         colorizeProjectSelect(projFilter);
         whenProjectMapReady(function(){ setupProjectDropdownHighlight(projFilter); });
 
@@ -1651,7 +1651,7 @@ function updateCanvasMrfDropdown() {
     const status = document.getElementById('canvasStatusFilter').value;
     const mrfSelect = document.getElementById('canvasMrfSelect');
 
-    mrfSelect.innerHTML = '<option value="">â€” Select MRF â€”</option>';
+    mrfSelect.innerHTML = '<option value="">— Select MRF —</option>';
     document.getElementById('canvasContainer').innerHTML = 'Select an MRF to view canvass sheet';
     document.getElementById('canvasSubmitBtn').style.display = 'none';
 
@@ -1686,7 +1686,7 @@ function loadCanvasPivot() {
 
         let html = `
             <div class="d-flex justify-content-end align-items-center mb-3">
-                <h5 class="mb-0 text-success fw-bold p-2 border border-success rounded bg-light">Running Total: <span id="canvasRunningTotal">â‚±0.00</span></h5>
+                <h5 class="mb-0 text-success fw-bold p-2 border border-success rounded bg-light">Running Total: <span id="canvasRunningTotal">₱0.00</span></h5>
             </div>
             <div class="table-responsive"><table class="table table-bordered table-sm align-middle">
             <thead class="table-light"><tr><th>Item Description</th><th class="text-center">Qty / Unit</th>`;
@@ -1697,14 +1697,14 @@ function loadCanvasPivot() {
         let lockedRunningTotal = 0;
 
         data.items.forEach((it, rIdx) => {
-            const remDisplay = `â‚±${(it.remainingCost || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            const remDisplay = `₱${(it.remainingCost || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
             
             html += `<tr>
                 <td><span class="fw-bold">${it.desc}</span><br><small class="text-danger fw-bold">Rem: ${remDisplay}</small></td>
                 <td class="text-center">${it.qty === 0 ? 'Lot/Cost' : it.qty} ${it.unit}</td>`;
             
             data.suppliers.forEach((sup, cIdx) => {
-                const amt = it.quotes[sup] ? `â‚±${it.quotes[sup].toLocaleString(undefined, {minimumFractionDigits: 2})}` : '-';
+                const amt = it.quotes[sup] ? `₱${it.quotes[sup].toLocaleString(undefined, {minimumFractionDigits: 2})}` : '-';
                 const safeDesc = it.desc.replace(/"/g, '&quot;');
                 const safeSup = sup.replace(/"/g, '&quot;');
                 const rawAmt = it.quotes[sup] || 0;
@@ -1743,7 +1743,7 @@ function loadCanvasPivot() {
 
         // Auto-update running total if viewing a finished/read-only Canvas
         if (isReadOnly) {
-            document.getElementById('canvasRunningTotal').innerText = `â‚±${lockedRunningTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            document.getElementById('canvasRunningTotal').innerText = `₱${lockedRunningTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         }
         
     }).getCanvasPivotData(mrfId);
@@ -1773,7 +1773,7 @@ function selectWinner(cell) {
         runningTotal += data.amount;
     });
     
-    document.getElementById('canvasRunningTotal').innerText = `â‚±${runningTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    document.getElementById('canvasRunningTotal').innerText = `₱${runningTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 }
 
 function submitCanvasWinners() {
@@ -1814,7 +1814,7 @@ function renderSukiTable() {
            <td>${it.unit}</td>
            <td class="text-center">${qtyDisplay}</td>
            <td><input type="number" class="form-control form-control-sm suki-price-input" data-idx="${idx}" placeholder="${placeholder}" oninput="calcSuki()"></td>
-           <td class="suki-line-total fw-bold text-end" id="suki-total-${idx}">â‚±0.00</td>
+           <td class="suki-line-total fw-bold text-end" id="suki-total-${idx}">₱0.00</td>
          </tr>
       `;
    }).join('');
@@ -1830,10 +1830,10 @@ function calcSuki() {
       const price = parseFloat(inp.value) || 0;
       
       const lineTotal = isCost ? price : (price * it.qty);
-      document.getElementById(`suki-total-${idx}`).innerText = `â‚±${lineTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById(`suki-total-${idx}`).innerText = `₱${lineTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
       grandTotal += lineTotal;
    });
-   document.getElementById('suki-grand-total').innerText = `â‚±${grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+   document.getElementById('suki-grand-total').innerText = `₱${grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 }
 
 function submitSuki() {
@@ -1878,7 +1878,7 @@ function loadReceiving() {
         .withSuccessHandler(res => {
             receivingData = res;
             const pSelect = document.getElementById('receivingProjectSelect');
-            pSelect.innerHTML = '<option value="">â€” Select Project â€”</option>';
+            pSelect.innerHTML = '<option value="">— Select Project —</option>';
             
             res.projects.forEach(p => {
                 let opt = document.createElement('option');
@@ -1900,7 +1900,7 @@ function loadReceiving() {
 function updateReceivingPoDropdown() {
    const proj = document.getElementById('receivingProjectSelect').value;
    const poSelect = document.getElementById('receivingPoSelect');
-   poSelect.innerHTML = '<option value="">â€” Select PO â€”</option>';
+   poSelect.innerHTML = '<option value="">— Select PO —</option>';
    document.getElementById('receivingTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Select a PO</td></tr>';
    
    if(proj && receivingData.pos[proj]) {
@@ -2103,7 +2103,7 @@ function renderReceivingHistory() {
             <td class="fw-bold">${row.item}</td>
             <td class="text-center fw-bold">${row.qty}</td>
             <td>${row.receiver}</td>
-            <td class="text-muted">${row.remarks || 'â€”'}</td>
+            <td class="text-muted">${row.remarks || '—'}</td>
             <td>${attachmentHtml}</td>
         </tr>`;
     }).join('');
@@ -2143,7 +2143,7 @@ function startUpload() {
   }
 
   if (!/^[A-Za-z0-9 ]+$/.test(projectCode)) {
-    updateStatus('Project Code may contain only letters, numbers, and spaces â€” no hyphens or symbols.', 'text-danger');
+    updateStatus('Project Code may contain only letters, numbers, and spaces — no hyphens or symbols.', 'text-danger');
     return;
   }
 
@@ -2278,7 +2278,7 @@ function loadPurchaseOrders() {
     
     if (projFilter) {
       const projects = [...new Set(poDataRaw.map(po => po.projectName).filter(p => p))].sort();
-      projFilter.innerHTML = '<option value="">â€” All Projects â€”</option>' +
+      projFilter.innerHTML = '<option value="">— All Projects —</option>' +
         projects.map(p => `<option value="${p}">${p}</option>`).join('');
       colorizeProjectSelect(projFilter);
       whenProjectMapReady(function(){ setupProjectDropdownHighlight(projFilter); });
@@ -2352,7 +2352,7 @@ function renderPOTable(data) {
       <td>${po.supplier}</td>
       <td>${po.projectName}</td>
       <td>${po.phase}</td>
-      <td class="fw-bold">â‚±${Number(po.total).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+      <td class="fw-bold">₱${Number(po.total).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
       <td><span class="badge ${statusClass}" style="font-size: 0.7rem; padding: 0.5em 0.8em;">${po.status}</span></td>
       <td><span class="badge ${paymentBadgeClass}" style="font-size: 0.7rem; padding: 0.5em 0.8em;">${po.paymentStatus || 'Not Yet Paid'}</span></td>
       <td>
@@ -2369,9 +2369,9 @@ function renderPOTable(data) {
 // --- PAYMENTS & CHECKS LOGIC ---
 function initPayments() {
   const pSelect = document.getElementById('paymentProjectSelect');
-  pSelect.innerHTML = '<option value="">â€” Loading â€”</option>';
+  pSelect.innerHTML = '<option value="">— Loading —</option>';
   google.script.run.withSuccessHandler(projects => {
-    pSelect.innerHTML = '<option value="">â€” Select project â€”</option>';
+    pSelect.innerHTML = '<option value="">— Select project —</option>';
     projects.forEach(p => {
       let opt = document.createElement('option');
       opt.value = p; opt.innerHTML = p;
@@ -2416,7 +2416,7 @@ function generateBulkRows() {
       <td><input type="text" class="form-control form-control-sm bulk-bank" placeholder="e.g. BDO, BPI"></td>
       <td><input type="text" class="form-control form-control-sm bulk-check-num" placeholder="Check #"></td>
       <td><input type="number" class="form-control form-control-sm bulk-amt" value="${amount}" step="0.01"></td>
-      <td><button class="btn btn-link text-danger p-0" onclick="this.closest('tr').remove()">âœ•</button></td>
+      <td><button class="btn btn-link text-danger p-0" onclick="this.closest('tr').remove()">✕</button></td>
     `;
     tr.dataset.project = project;
     body.appendChild(tr);
@@ -2525,7 +2525,7 @@ function renderPendingChecksTable(data) {
         <td class="text-nowrap">${check.date || ''}${dateBadge}</td>
         <td>${check.bank || ''}</td>
         <td><code style="font-size:0.85em;">${check.checkNumber || ''}</code></td>
-        <td class="fw-bold text-end">â‚±${(check.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+        <td class="fw-bold text-end">₱${(check.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
       </tr>`;
   }).join('');
 }
@@ -2571,7 +2571,7 @@ function processDepositedChecks() {
 // --- EXPENSES LOGIC ---
 function initExpense() {
   const pSelect = document.getElementById('expenseProjectSelect');
-  pSelect.innerHTML = '<option value="">â€” Loading Projects â€”</option>';
+  pSelect.innerHTML = '<option value="">— Loading Projects —</option>';
 
   const manageWrap = document.getElementById('expense-manage-projects-wrap');
   if (manageWrap) {
@@ -2583,7 +2583,7 @@ function initExpense() {
   loadProjectCompanyMap(function() {
     google.script.run.withSuccessHandler(data => {
       expenseCategories = data.categories;
-      pSelect.innerHTML = '<option value="">â€” Select project â€”</option>';
+      pSelect.innerHTML = '<option value="">— Select project —</option>';
       data.projects.forEach(p => {
         let opt = document.createElement('option');
         opt.value = p; opt.innerHTML = p;
@@ -2666,10 +2666,10 @@ function loadExpenseItems() {
   
   google.script.run.withSuccessHandler(res => {
     expenseSummary = res;
-    document.getElementById('exp-summary-budget').innerText = `â‚±${res.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-    document.getElementById('exp-summary-mrf').innerText = `â‚±${res.totalMrfUtilized.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-    document.getElementById('exp-summary-rem').innerText = `â‚±${res.totalRemaining.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-    document.getElementById('exp-summary-manual').innerText = `â‚±${res.totalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    document.getElementById('exp-summary-budget').innerText = `₱${res.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    document.getElementById('exp-summary-mrf').innerText = `₱${res.totalMrfUtilized.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    document.getElementById('exp-summary-rem').innerText = `₱${res.totalRemaining.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    document.getElementById('exp-summary-manual').innerText = `₱${res.totalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
     
     document.getElementById('expenseItemBody').innerHTML = '';
     for(let i=0; i<3; i++) addExpenseRow(); 
@@ -2687,7 +2687,7 @@ function addExpenseRow() {
     typeOptions += `<option value="${type}">${type}</option>`;
   });
 
-  // 2. Generate the row HTML â€” Type, Particular, Total Amount (editable), Delete
+  // 2. Generate the row HTML — Type, Particular, Total Amount (editable), Delete
   tr.innerHTML = `
     <td>
       <select class="form-select exp-type-input" onchange="updateParticularDatalist(this, '${uniqueId}')">
@@ -2821,7 +2821,7 @@ function loadRefundables() {
       refundableData = data || [];
 
       if (refundableData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted"><div style="font-size:2rem;">âœ…</div>No pending refunds. All refundable items have been processed.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted"><div style="font-size:2rem;">✅</div>No pending refunds. All refundable items have been processed.</td></tr>';
         return;
       }
 
@@ -2843,7 +2843,7 @@ function loadRefundables() {
     .getPendingRefunds();
 }
 
-// Shared renderer â€” used by both the initial load and the filter.
+// Shared renderer — used by both the initial load and the filter.
 function renderRefundRows(data) {
   const tbody = document.getElementById('refundable-table-body');
   if (!data || data.length === 0) {
@@ -2856,7 +2856,7 @@ function renderRefundRows(data) {
       <td class="ps-4 text-nowrap text-muted small">${r.date}</td>
       <td>${r.project}</td>
       <td class="fw-bold">${r.particular}</td>
-      <td class="text-end fw-bold text-danger">â‚±${fmt(r.originalAmount)}</td>
+      <td class="text-end fw-bold text-danger">₱${fmt(r.originalAmount)}</td>
       <td class="text-center">
         <input type="text"
                id="refund-input-${r.rowIndex}"
@@ -2875,7 +2875,7 @@ function renderRefundRows(data) {
     </tr>`).join('');
 }
 
-// Filters the cached data by the selected project and re-renders â€” no network call.
+// Filters the cached data by the selected project and re-renders — no network call.
 function filterRefundsByProject() {
   const selected = document.getElementById('filter-refund-project').value;
   const filtered = selected === 'all'
@@ -2896,7 +2896,7 @@ function processRefund(rowIndex, project, particular, originalAmount) {
   }
 
   const fmtAmt = refundAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 });
-  if (!confirm(`Credit back â‚±${fmtAmt} for "${particular}" in project "${project}"?\n\nThis will mark the item as Refunded and post a negative Refund Credit entry to the Expense Log.`)) return;
+  if (!confirm(`Credit back ₱${fmtAmt} for "${particular}" in project "${project}"?\n\nThis will mark the item as Refunded and post a negative Refund Credit entry to the Expense Log.`)) return;
 
   const btn = inputEl.closest('tr').querySelector('button');
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
@@ -2952,7 +2952,7 @@ function renderRecentExpensesTable(data) {
     tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No expense records match this filter.</td></tr>';
     return;
   }
-  const fmt = n => 'â‚±' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt = n => '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   tbody.innerHTML = data.map(r => `
     <tr>
       <td class="ps-3 text-nowrap">${r.date}</td>
@@ -2980,11 +2980,11 @@ function filterRecentExpenses() {
 // --- PETTY CASH LOGIC ---
 function initPettyCash() {
   const pSelect = document.getElementById('pcProjectSelect');
-  pSelect.innerHTML = '<option value="">â€” Loading Projects â€”</option>';
+  pSelect.innerHTML = '<option value="">— Loading Projects —</option>';
   
   // We can reuse your existing getProjectsListOnly() function!
   google.script.run.withSuccessHandler(projects => {
-    pSelect.innerHTML = '<option value="">â€” Select project â€”</option>';
+    pSelect.innerHTML = '<option value="">— Select project —</option>';
     projects.forEach(p => {
       let opt = document.createElement('option');
       opt.value = p; opt.innerHTML = p;
@@ -3111,7 +3111,7 @@ function renderPCBalances(debtByProject) {
       ? `<span class="badge bg-danger ms-2" style="font-size: 0.65rem;">UNPAID DEBT</span>`
       : `<span class="badge bg-success ms-2" style="font-size: 0.65rem;">SETTLED</span>`;
 
-    const formattedAmt = `â‚±${Math.abs(debt).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    const formattedAmt = `₱${Math.abs(debt).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 
     const settleBtn = hasDebt
       ? `<button class="btn btn-primary btn-sm fw-bold px-3" onclick="openReplenishModal('${proj}')">Settle Debt</button>`
@@ -3147,7 +3147,7 @@ function filterPCLedger() {
     filtered = filtered.filter(r => new Date(r.rawDate) <= toDate);
   }
 
-  // â”€â”€ Compute Amount Owed per project from the filtered set â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Compute Amount Owed per project from the filtered set ──────────────────
   // Expenses / non-settlement rows ADD to the debt; Settlement / Replenishment
   // rows SUBTRACT from it (i.e. they are payouts by Accounting).
   const debtByProject = {};
@@ -3158,7 +3158,7 @@ function filterPCLedger() {
   });
   renderPCBalances(debtByProject);
 
-  // â”€â”€ Render transactions table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render transactions table ──────────────────────────────────────────────
   const tbody = document.getElementById('pcTransactionsTableBody');
   if (filtered.length === 0) {
     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No transactions match filters.</td></tr>';
@@ -3168,13 +3168,13 @@ function filterPCLedger() {
   tbody.innerHTML = filtered.map(r => {
     const isSettlement = ['settlement', 'replenishment'].includes(r.type.toLowerCase());
 
-    // Expenses are red "+â‚±" (adds to debt); Settlements are green "-â‚±" (reduces debt).
+    // Expenses are red "+₱" (adds to debt); Settlements are green "-₱" (reduces debt).
     const amountHtml = isSettlement
-      ? `<span class="text-success fw-bold">-â‚±${r.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`
-      : `<span class="text-danger fw-bold">+â‚±${r.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`;
+      ? `<span class="text-success fw-bold">-₱${r.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`
+      : `<span class="text-danger fw-bold">+₱${r.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`;
 
     const typeLabel = isSettlement ? 'Settlement' : 'Expense';
-    const fileHtml  = r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="text-decoration-none">View Attachment</a>` : 'â€”';
+    const fileHtml  = r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="text-decoration-none">View Attachment</a>` : '—';
 
     return `
       <tr>
@@ -3263,10 +3263,10 @@ let currentBoqItemsData = [];
 
 function initBoqAdjust() {
   const pSelect = document.getElementById('boqAdjustProjectSelect');
-  pSelect.innerHTML = '<option value="">â€” Loading Projects â€”</option>';
+  pSelect.innerHTML = '<option value="">— Loading Projects —</option>';
   
   google.script.run.withSuccessHandler(projects => {
-    pSelect.innerHTML = '<option value="">â€” Select project â€”</option>';
+    pSelect.innerHTML = '<option value="">— Select project —</option>';
     projects.forEach(p => {
       let opt = document.createElement('option');
       opt.value = p; opt.innerHTML = p;
@@ -3304,8 +3304,8 @@ function loadBoqAdjustItems() {
            <span class="small text-muted d-block text-truncate" style="max-width: 250px;">${item.phase}</span>
         </td>
         <td>${item.unit}</td>
-        <td class="text-end">â‚±${item.matCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-        <td class="text-end">â‚±${item.labCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+        <td class="text-end">₱${item.matCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+        <td class="text-end">₱${item.labCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
         <td class="text-center">
           <button class="btn btn-sm btn-outline-warning fw-bold py-0" onclick="openAdjustModal(${item.rowIdx})">Adjust</button>
         </td>
@@ -3325,8 +3325,8 @@ function openAdjustModal(rowIdx) {
   document.getElementById('adjNewMat').value = item.matCost;
   document.getElementById('adjNewLab').value = item.labCost;
   
-  document.getElementById('adjOldMatDisplay').innerText = `Old: â‚±${item.matCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-  document.getElementById('adjOldLabDisplay').innerText = `Old: â‚±${item.labCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+  document.getElementById('adjOldMatDisplay').innerText = `Old: ₱${item.matCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+  document.getElementById('adjOldLabDisplay').innerText = `Old: ₱${item.labCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
   
   document.getElementById('adjReason').value = '';
   document.getElementById('adjust-boq-alert').style.display = 'none';
@@ -3445,7 +3445,7 @@ function loadReturnableItems() {
   // Reuse the existing project loader function if the dropdown is empty
   if (pSelect && pSelect.options.length <= 1) {
     google.script.run.withSuccessHandler(projects => {
-      pSelect.innerHTML = '<option value="">â€” Select project â€”</option>';
+      pSelect.innerHTML = '<option value="">— Select project —</option>';
       projects.forEach(p => {
         let opt = document.createElement('option');
         opt.value = p; opt.innerHTML = p;
@@ -3484,7 +3484,7 @@ function addReturnableRow() {
   tr.innerHTML = `
     <td><input type="text" class="form-control form-control-sm ret-item-name" placeholder="e.g. Scaffolding, Excavator"></td>
     <td><input type="number" class="form-control form-control-sm ret-item-qty" placeholder="0" min="1"></td>
-    <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">âœ•</button></td>
+    <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">✕</button></td>
   `;
   tbody.appendChild(tr);
 }
@@ -3570,9 +3570,9 @@ function initComputeCost() {
   const pSelect = document.getElementById('pricing-project-select');
   // Re-use your existing project fetcher to populate the dropdown
   if (pSelect.options.length <= 1) { 
-    pSelect.innerHTML = '<option value="">â€” Loading Projects â€”</option>';
+    pSelect.innerHTML = '<option value="">— Loading Projects —</option>';
     google.script.run.withSuccessHandler(projects => {
-      pSelect.innerHTML = '<option value="">â€” Select project â€”</option>';
+      pSelect.innerHTML = '<option value="">— Select project —</option>';
       projects.forEach(p => {
         let opt = document.createElement('option');
         opt.value = p; opt.innerHTML = p;
@@ -3591,7 +3591,7 @@ function loadPricingData() {
   
   if (!project) {
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">Select a project to load data.</td></tr>';
-    document.getElementById('pricing-grand-total').textContent = 'â‚±0.00';
+    document.getElementById('pricing-grand-total').textContent = '₱0.00';
     saveBtn.style.display = 'none';
     return;
   }
@@ -3612,21 +3612,21 @@ function renderPricingTable(groupedData) {
     return;
   }
 
-  const formatMoney = amt => 'â‚±' + Number(amt).toLocaleString(undefined, {minimumFractionDigits: 2});
+  const formatMoney = amt => '₱' + Number(amt).toLocaleString(undefined, {minimumFractionDigits: 2});
 
-  // Render helper â€” shared by both the priority pass and the remainder loop
+  // Render helper — shared by both the priority pass and the remainder loop
   function renderRow(type, data) {
     const safeGroupId = type.replace(/[^a-zA-Z0-9]/g, '_');
 
     if (data.isLumpSum) {
       if (data.isInformational) {
-        // Informational breakdown â€” display-only, not counted in grand total, not saved
+        // Informational breakdown — display-only, not counted in grand total, not saved
         tbody.innerHTML += `
           <tr class="informational-row" data-type="${type}" data-item="N/A" data-exclude="true">
-            <td class="ps-5 text-muted fst-italic"><i class="text-muted small me-1">â†³</i> ${type}</td>
+            <td class="ps-5 text-muted fst-italic"><i class="text-muted small me-1">↳</i> ${type}</td>
             <td class="text-end text-muted">${formatMoney(data.amount)}</td>
-            <td class="text-center text-muted small">â€”</td>
-            <td class="text-center text-muted small">â€”</td>
+            <td class="text-center text-muted small">—</td>
+            <td class="text-center text-muted small">—</td>
             <td class="text-end pe-3 text-muted">${formatMoney(data.amount)}</td>
           </tr>
         `;
@@ -3654,11 +3654,11 @@ function renderPricingTable(groupedData) {
       <tr class="header-row bg-light" data-group="${safeGroupId}">
         <td class="ps-3 fw-bold text-secondary text-uppercase">${type}</td>
         <td class="text-end fw-bold text-secondary group-base-total">${formatMoney(data.amount)}</td>
-        <td class="text-center text-muted small">â€”</td>
+        <td class="text-center text-muted small">—</td>
         <td class="text-center">
           <input type="number" class="form-control form-control-sm text-center" placeholder="% All" min="0" step="0.1" oninput="applyGroupMarkup('${safeGroupId}', this.value)">
         </td>
-        <td class="text-end pe-3 fw-bold text-success group-final-total">â‚±0.00</td>
+        <td class="text-end pe-3 fw-bold text-success group-final-total">₱0.00</td>
       </tr>
     `;
 
@@ -3669,11 +3669,11 @@ function renderPricingTable(groupedData) {
       const lockedStyle = locked ? ' style="background:#f8fafc; color:#94a3b8; cursor:not-allowed;"' : '';
       tbody.innerHTML += `
         <tr class="line-item-row group-child-${safeGroupId}" data-type="${type}" data-item="${li.name}">
-          <td class="ps-5 text-dark"><i class="text-muted small me-1">â†³</i> ${li.name}</td>
+          <td class="ps-5 text-dark"><i class="text-muted small me-1">↳</i> ${li.name}</td>
           <td class="text-end base-amount" data-val="${li.amount}">${formatMoney(li.amount)}</td>
           <td class="text-center">
             <input type="number" class="form-control form-control-sm override-input text-center"
-                   placeholder="${locked ? 'â€”' : 'Override'}" value="${li.savedOverride}"${lockedAttr}${lockedStyle} oninput="calculatePricingTotal()">
+                   placeholder="${locked ? '—' : 'Override'}" value="${li.savedOverride}"${lockedAttr}${lockedStyle} oninput="calculatePricingTotal()">
           </td>
           <td class="text-center">
             <input type="number" class="form-control form-control-sm markup-input text-center"
@@ -3685,7 +3685,7 @@ function renderPricingTable(groupedData) {
     });
   }
 
-  // Pass 1 â€” render the three cost-summary rows at the top in the required order
+  // Pass 1 — render the three cost-summary rows at the top in the required order
   const topKeys = ["Construction Materials", "Payroll", "Materials + Payroll"];
   topKeys.forEach(key => {
     if (groupedData[key]) {
@@ -3694,7 +3694,7 @@ function renderPricingTable(groupedData) {
     }
   });
 
-  // Pass 2 â€” render all remaining categories
+  // Pass 2 — render all remaining categories
   for (const [type, data] of Object.entries(groupedData)) {
     renderRow(type, data);
   }
@@ -3719,10 +3719,10 @@ function applyGroupMarkup(groupId, value) {
 // Dynamic Math Calculator
 function calculatePricingTotal() {
   let grandTotal = 0;
-  const formatMoney = amt => 'â‚±' + Number(amt).toLocaleString(undefined, {minimumFractionDigits: 2});
+  const formatMoney = amt => '₱' + Number(amt).toLocaleString(undefined, {minimumFractionDigits: 2});
 
   // Step 1: Calculate every editable row independently (disabled inputs return their
-  // stored value normally, so the CGT row still processes â€” it just gets overwritten
+  // stored value normally, so the CGT row still processes — it just gets overwritten
   // in Step 2 with the correctly derived 6% figure).
   const itemRows = document.querySelectorAll('.lump-sum-row, .line-item-row');
   itemRows.forEach(row => {
@@ -3844,9 +3844,9 @@ function loadSuppliers() {
                 <td class="ps-4 fw-bold text-dark">${sup.name}</td>
                 <td>
                    <div class="d-flex flex-column">
-                      <span>ðŸ‘¤ ${sup.contact}</span>
-                      <a href="mailto:${sup.email}" class="text-primary text-decoration-none hover:underline">âœ‰ï¸ ${sup.email}</a>
-                      <span class="text-muted small">ðŸ“ž ${sup.phone || 'N/A'}</span>
+                      <span>👤 ${sup.contact}</span>
+                      <a href="mailto:${sup.email}" class="text-primary text-decoration-none hover:underline">✉️ ${sup.email}</a>
+                      <span class="text-muted small">📞 ${sup.phone || 'N/A'}</span>
                    </div>
                 </td>
                 <td><span class="badge bg-secondary">${sup.category || 'General'}</span></td>
@@ -3909,8 +3909,8 @@ function initIssuePayments() {
   const checklist      = document.getElementById('ipPoChecklist');
   const container      = document.getElementById('ip-terms-container');
 
-  projectFilter.innerHTML  = '<option value="">â€” All Projects â€”</option>';
-  supplierFilter.innerHTML = '<option value="">â€” Select a project first â€”</option>';
+  projectFilter.innerHTML  = '<option value="">— All Projects —</option>';
+  supplierFilter.innerHTML = '<option value="">— Select a project first —</option>';
   checklist.innerHTML      = '<span class="text-muted small">Select a supplier first...</span>';
   container.style.display  = 'none';
 
@@ -3918,7 +3918,7 @@ function initIssuePayments() {
     .withSuccessHandler(data => {
       issuePaymentPoData = data || [];
       const projects = [...new Set(data.map(p => p.project).filter(Boolean))].sort();
-      projectFilter.innerHTML = '<option value="">â€” All Projects â€”</option>' +
+      projectFilter.innerHTML = '<option value="">— All Projects —</option>' +
         projects.map(p => `<option value="${p}">${p}</option>`).join('');
       colorizeProjectSelect(projectFilter);
       whenProjectMapReady(function(){ setupProjectDropdownHighlight(projectFilter); });
@@ -3934,7 +3934,7 @@ function renderIpSupplierDropdown() {
   const supplierFilter = document.getElementById('ipSupplierFilter');
   const checklist      = document.getElementById('ipPoChecklist');
 
-  supplierFilter.innerHTML = '<option value="">â€” Select a project first â€”</option>';
+  supplierFilter.innerHTML = '<option value="">— Select a project first —</option>';
   checklist.innerHTML      = '<span class="text-muted small">Select a supplier first...</span>';
   document.getElementById('ip-terms-container').style.display = 'none';
   document.getElementById('ip-alert').style.display = 'none';
@@ -3948,7 +3948,7 @@ function renderIpSupplierDropdown() {
       .filter(Boolean)
   )].sort();
 
-  supplierFilter.innerHTML = '<option value="">â€” Select Supplier â€”</option>' +
+  supplierFilter.innerHTML = '<option value="">— Select Supplier —</option>' +
     suppliers.map(s => `<option value="${s}">${s}</option>`).join('');
 }
 
@@ -4017,7 +4017,7 @@ function loadIssuePaymentDetails() {
 }
 
 function renderPaymentTermsTable(data) {
-  // data is a flat array â€” each element is one payment term with poCode/supplier/mrfId/poTotal embedded
+  // data is a flat array — each element is one payment term with poCode/supplier/mrfId/poTotal embedded
   const tbody   = document.getElementById('ip-terms-body');
   const infoEl  = document.getElementById('ip-po-info');
   const saveBtn = document.getElementById('ip-save-btn');
@@ -4038,7 +4038,7 @@ function renderPaymentTermsTable(data) {
 
   // Summarise loaded POs in the info bar
   const uniquePos    = [...new Set(data.map(t => t.poCode))];
-  const supplierName = data[0].supplier || 'â€”';
+  const supplierName = data[0].supplier || '—';
   infoEl.innerHTML =
     uniquePos.map(pc => `<span class="badge bg-dark px-2 py-1" style="font-size:0.8rem;">${pc}</span>`).join(' ') +
     ` <span class="fw-bold text-dark">${supplierName}</span>` +
@@ -4047,7 +4047,7 @@ function renderPaymentTermsTable(data) {
   let hasUnpaid = false;
 
   tbody.innerHTML = data.map((term, idx) => {
-    // term.percentage is a decimal (0â€“1); term.poTotal is the total for this PO
+    // term.percentage is a decimal (0–1); term.poTotal is the total for this PO
     const invoicedAmt  = Number(term.poTotal) * Number(term.percentage);
     const displayPct   = Math.round(Number(term.percentage) * 100);
     const fmtInvoiced  = `&#8369;${invoicedAmt.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -4185,7 +4185,7 @@ function initHistoricalPricing() {
       cachedHistoricalItems = items || [];
     })
     .withFailureHandler(function(err) {
-      console.error('initHistoricalPricing: failed to load autocomplete items â€” ' + err.message);
+      console.error('initHistoricalPricing: failed to load autocomplete items — ' + err.message);
     })
     .getUniqueHistoricalItems();
 }
@@ -4234,7 +4234,7 @@ function selectHpSuggestion(value) {
 }
 
 // Wraps the matching portion of text in a styled <strong> tag for visual highlighting.
-// Reuses the existing escapeHtml() â€” safe against XSS even for item names with special chars.
+// Reuses the existing escapeHtml() — safe against XSS even for item names with special chars.
 function highlightHpMatch(text, query) {
   const idx = text.toLowerCase().indexOf(query.toLowerCase());
   if (idx === -1) return escapeHtml(text);
@@ -4279,7 +4279,7 @@ function searchHistoricalPrices() {
         tableBody.innerHTML = `
           <tr>
             <td colspan="6" class="text-center py-5 text-muted">
-              <div style="font-size:2rem; margin-bottom:0.5rem;">ðŸ”Ž</div>
+              <div style="font-size:2rem; margin-bottom:0.5rem;">🔎</div>
               No results found for <strong>${escapeHtml(query)}</strong>.
             </td>
           </tr>`;
@@ -4301,7 +4301,7 @@ function searchHistoricalPrices() {
           <td>${escapeHtml(r.supplier)}</td>
           <td>${escapeHtml(r.item)}</td>
           <td class="text-end pe-4 fw-bold text-success">
-            â‚±${Number(r.unitPrice).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₱${Number(r.unitPrice).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </td>
         </tr>`).join('');
 
@@ -4400,7 +4400,7 @@ function showToast(message, type) {
 }
 
 // =============================================================
-// BUILD BOQ MODULE  â€”  Native BOQ Generator
+// BUILD BOQ MODULE  —  Native BOQ Generator
 // =============================================================
 
 let _boqPhaseCount  = 0;
@@ -4408,18 +4408,18 @@ let _boqScopeCount  = 0;
 let _boqItemCount   = 0;
 let _boqDataLoaded  = false;
 let _boqFetchSeq    = 0;
-window.phaseScopeMap = {};   // { phaseName: [scope1, scope2, â€¦] }
+window.phaseScopeMap = {};   // { phaseName: [scope1, scope2, …] }
 window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
 
-// â”€â”€ AUTOCOMPLETE ENGINE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── AUTOCOMPLETE ENGINE ──────────────────────────────────────
 // One reusable <ul> appended to <body> with position:fixed.
 // Fixed positioning bypasses every overflow:hidden or z-index
 // stacking issue inside the card hierarchy.
 // All input events are handled via delegation on document so
 // the engine works with elements added to the DOM at any time.
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────
 (function () {
-  // â”€â”€ Singleton dropdown panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Singleton dropdown panel ─────────────────────────────
   const dd = document.createElement('ul');
   dd.id = 'boq-ac-dd';
   dd.style.cssText =
@@ -4433,7 +4433,7 @@ window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
   let _input = null;  // the input the dropdown is currently anchored to
   let _all   = [];    // full unfiltered option list for the active input
 
-  // â”€â”€ Strip numeric / alpha / Roman-numeral list prefixes â”€â”€
+  // ── Strip numeric / alpha / Roman-numeral list prefixes ──
   // Mirrors cleanBullets() so "I. GENERAL REQUIREMENTS" and
   // "GENERAL REQUIREMENTS" normalise to the same lookup key.
   // Applied to both database keys and user-typed values before
@@ -4446,7 +4446,7 @@ window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
       .trim();
   }
 
-  // â”€â”€ Resolve options for a given input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Resolve options for a given input ────────────────────
   function getItems(el) {
     const map = window.phaseScopeMap || {};
 
@@ -4481,14 +4481,14 @@ window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
     return [];
   }
 
-  // â”€â”€ Render list, filtered by query â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render list, filtered by query ───────────────────────
   function render(query) {
     const q = query.toLowerCase();
     const visible = q ? _all.filter(s => s.toLowerCase().includes(q)) : _all;
     if (visible.length === 0) {
       dd.innerHTML =
         '<li style="padding:8px 14px;color:#94a3b8;font-size:0.8rem;cursor:default;">' +
-        (query ? 'No matches â€” your entry will be saved as typed.' : 'No existing suggestions.') +
+        (query ? 'No matches — your entry will be saved as typed.' : 'No existing suggestions.') +
         '</li>';
       return;
     }
@@ -4502,7 +4502,7 @@ window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
     ).join('');
   }
 
-  // â”€â”€ Position directly below the active input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Position directly below the active input ─────────────
   function reposition() {
     if (!_input) return;
     const r = _input.getBoundingClientRect();
@@ -4511,7 +4511,7 @@ window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
     dd.style.width = Math.max(r.width, 200) + 'px';
   }
 
-  // â”€â”€ Open â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Open ─────────────────────────────────────────────────
   function open(el) {
     _input = el;
     _all   = getItems(el);
@@ -4520,14 +4520,14 @@ window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
     dd.style.display = 'block';
   }
 
-  // â”€â”€ Close â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Close ────────────────────────────────────────────────
   function close() {
     dd.style.display = 'none';
     _input = null;
   }
 
-  // â”€â”€ Select: mousedown fires before blur, so preventDefault
-  //    keeps the input focused while we set its value â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Select: mousedown fires before blur, so preventDefault
+  //    keeps the input focused while we set its value ────────
   dd.addEventListener('mousedown', e => {
     const li = e.target.closest('li[data-val]');
     if (!li || !_input) return;
@@ -4537,13 +4537,13 @@ window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
     close();
   });
 
-  // â”€â”€ Open on focus (covers both mouse-click and tab) â”€â”€â”€â”€â”€â”€
+  // ── Open on focus (covers both mouse-click and tab) ──────
   document.addEventListener('focusin', e => {
     if (e.target.matches('.boq-phase-name, .boq-scope-name')) open(e.target);
   });
 
-  // â”€â”€ Filter while typing; re-fetch scope list so a freshly
-  //    typed Phase value is picked up on the next keystroke â”€
+  // ── Filter while typing; re-fetch scope list so a freshly
+  //    typed Phase value is picked up on the next keystroke ─
   document.addEventListener('input', e => {
     if (!_input || e.target !== _input) return;
     if (!e.target.matches('.boq-phase-name, .boq-scope-name')) return;
@@ -4552,18 +4552,18 @@ window.materialsMap  = {};   // { itemNameLower: { name, unit, quotedCost } }
     reposition();
   });
 
-  // â”€â”€ Close when clicking outside the input + dropdown â”€â”€â”€â”€â”€
+  // ── Close when clicking outside the input + dropdown ─────
   document.addEventListener('mousedown', e => {
     if (dd.style.display === 'none') return;
     if (e.target !== _input && !dd.contains(e.target)) close();
   });
 
-  // â”€â”€ Close on Escape â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Close on Escape ───────────────────────────────────────
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && dd.style.display !== 'none') close();
   });
 
-  // â”€â”€ Track scroll/resize so the panel stays anchored â”€â”€â”€â”€â”€â”€
+  // ── Track scroll/resize so the panel stays anchored ──────
   document.addEventListener('scroll', reposition, true);
   window.addEventListener('resize', reposition);
 
@@ -4600,10 +4600,10 @@ function initBoqBuilder() {
     .withSuccessHandler(data => {
       if (seq !== _boqFetchSeq) return;
 
-      // â”€â”€ Phase / Scope map â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── Phase / Scope map ──────────────────────────────────────────
       window.phaseScopeMap = (data && data.phaseScopeMap) ? data.phaseScopeMap : {};
 
-      // â”€â”€ Materials master list â†’ keyed map + datalist â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── Materials master list → keyed map + datalist ───────────────
       const list = (data && Array.isArray(data.materialsList)) ? data.materialsList : [];
       list.forEach(m => {
         window.materialsMap[m.name.toLowerCase()] = m;
@@ -4642,7 +4642,7 @@ function addBoqPhase() {
     <div style="background: #1e293b; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-radius: 14px 14px 0 0;">
       <span style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); text-transform: uppercase; white-space: nowrap;">Phase</span>
       <input type="text" class="form-control form-control-sm boq-phase-name"
-        placeholder="e.g. Civil Works, Electricalâ€¦"
+        placeholder="e.g. Civil Works, Electrical…"
         style="max-width: 320px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
       <button class="btn btn-sm ms-auto" onclick="addBoqScope('${phaseId}')"
         style="border-radius: 8px; font-size: 0.78rem; padding: 4px 14px; background: rgba(248,180,0,0.15); border: 1px solid rgba(248,180,0,0.4); color: #f8b400; font-weight: 600; white-space: nowrap;">
@@ -4650,7 +4650,7 @@ function addBoqPhase() {
       </button>
       <button class="btn btn-sm" onclick="removeBoqPhase('${phaseId}')"
         style="border-radius: 8px; font-size: 0.78rem; padding: 4px 10px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; white-space: nowrap;">
-        âœ• Remove
+        ✕ Remove
       </button>
     </div>
     <div class="boq-scopes-container p-3" id="${phaseId}-scopes" style="background: #f8fafc; border-radius: 0 0 14px 14px;">
@@ -4692,7 +4692,7 @@ function addBoqScope(phaseId) {
     <div style="background: #f1f5f9; padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #e2e8f0; border-radius: 10px 10px 0 0;">
       <span style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.07em; color: #94a3b8; text-transform: uppercase; white-space: nowrap;">Scope</span>
       <input type="text" class="form-control form-control-sm boq-scope-name"
-        placeholder="e.g. Foundation, Wiringâ€¦"
+        placeholder="e.g. Foundation, Wiring…"
         style="max-width: 280px; border-radius: 8px; font-size: 0.83rem; font-weight: 600; color: #0f172a;">
       <button class="btn btn-sm ms-auto" onclick="addBoqItem('${scopeId}')"
         style="border-radius: 8px; font-size: 0.75rem; padding: 3px 12px; background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; font-weight: 600; white-space: nowrap;">
@@ -4700,7 +4700,7 @@ function addBoqScope(phaseId) {
       </button>
       <button class="btn btn-sm" onclick="removeBoqScope('${scopeId}')"
         style="border-radius: 8px; font-size: 0.75rem; padding: 3px 9px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #ef4444; white-space: nowrap;">
-        âœ•
+        ✕
       </button>
     </div>
     <table class="table align-middle mb-0" style="font-size: 0.82rem;">
@@ -4709,10 +4709,10 @@ function addBoqScope(phaseId) {
           <th style="padding: 8px 10px; width: 25%;">Item Name / Description</th>
           <th style="padding: 8px 8px; width: 8%;">UOM</th>
           <th style="padding: 8px 8px; width: 9%;">Quantity</th>
-          <th style="padding: 8px 8px; width: 11%;">Labor Cost (â‚±)</th>
-          <th style="padding: 8px 8px; width: 11%;">Material Cost (â‚±)</th>
-          <th style="padding: 8px 8px; width: 11%;">Total Cost (â‚±)</th>
-          <th style="padding: 8px 8px; width: 11%;">Quoted Cost (â‚±)</th>
+          <th style="padding: 8px 8px; width: 11%;">Labor Cost (₱)</th>
+          <th style="padding: 8px 8px; width: 11%;">Material Cost (₱)</th>
+          <th style="padding: 8px 8px; width: 11%;">Total Cost (₱)</th>
+          <th style="padding: 8px 8px; width: 11%;">Quoted Cost (₱)</th>
           <th style="padding: 8px 8px; width: 5%;"></th>
         </tr>
       </thead>
@@ -4761,12 +4761,12 @@ function addBoqItem(scopeId) {
     <td style="padding: 6px 10px;">
       <input type="text" class="form-control form-control-sm boq-item-name"
         list="boq-materials-datalist" autocomplete="off"
-        placeholder="Type or select itemâ€¦"
+        placeholder="Type or select item…"
         style="border-radius: 8px; font-size: 0.81rem;">
     </td>
     <td style="padding: 6px 7px;">
       <input type="text" class="form-control form-control-sm boq-item-unit"
-        placeholder="bags, pcsâ€¦"
+        placeholder="bags, pcs…"
         style="border-radius: 8px; font-size: 0.81rem;">
     </td>
     <td style="padding: 6px 7px;">
@@ -4786,17 +4786,17 @@ function addBoqItem(scopeId) {
     </td>
     <td style="padding: 6px 7px;">
       <input type="text" class="form-control form-control-sm boq-item-total"
-        placeholder="â€”" readonly
+        placeholder="—" readonly
         style="border-radius: 8px; font-size: 0.81rem; background: #f8fafc; cursor: default; font-weight: 600; color: #1d3461;">
     </td>
     <td style="padding: 6px 7px;">
       <input type="text" class="form-control form-control-sm boq-item-cost"
-        placeholder="â€”" readonly
+        placeholder="—" readonly
         style="border-radius: 8px; font-size: 0.81rem; background: #f8fafc; cursor: default; font-weight: 600; color: #92610f;">
     </td>
     <td style="padding: 6px 7px; text-align: center;">
       <button class="btn btn-sm btn-outline-danger" onclick="removeBoqItem('${itemId}')"
-        style="border-radius: 8px; padding: 3px 9px; font-size: 0.75rem; line-height: 1.4;">âœ•</button>
+        style="border-radius: 8px; padding: 3px 9px; font-size: 0.75rem; line-height: 1.4;">✕</button>
     </td>
   `;
   tbody.appendChild(tr);
@@ -4817,7 +4817,7 @@ function removeBoqItem(itemId) {
   }
 }
 
-// â”€â”€ Row math helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Row math helpers ─────────────────────────────────────────────────────────
 const NBOQ_MARKUP_RATE = 0.35; // 35% markup applied on top of Total Cost to derive Quoted Cost
 
 function calcNboqRowTotal(tr) {
@@ -4825,7 +4825,7 @@ function calcNboqRowTotal(tr) {
   const labor    = parseFloat(tr.querySelector('.boq-item-labor')?.value)    || 0;
   const material = parseFloat(tr.querySelector('.boq-item-material')?.value) || 0;
 
-  // Total Cost = (Labor Cost + Material Cost) Ã— Quantity
+  // Total Cost = (Labor Cost + Material Cost) × Quantity
   const totalCost = (labor + material) * qty;
   const totalEl   = tr.querySelector('.boq-item-total');
   if (totalEl) totalEl.value = (totalCost > 0) ? totalCost.toFixed(2) : '';
@@ -4842,14 +4842,14 @@ function calcNboqGrandTotal() {
     sum += parseFloat(el.value) || 0;
   });
   const el = document.getElementById('nboq-grand-total');
-  if (el) el.textContent = 'â‚±' + sum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (el) el.textContent = '₱' + sum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-// â”€â”€ Event delegation â€” auto-populate + live math â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Event delegation — auto-populate + live math ────────────────────────────
 // Runs once at module load; works for all dynamically added rows.
 (function attachNboqListeners() {
   document.addEventListener('input', function(e) {
-    // â”€â”€ Item Name: auto-fill UOM only from Materials map (cost is now computed, not looked up) â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Item Name: auto-fill UOM only from Materials map (cost is now computed, not looked up) ─────────
     if (e.target.classList.contains('boq-item-name')) {
       const val = e.target.value.trim();
       const mat = window.materialsMap[val.toLowerCase()];
@@ -4866,7 +4866,7 @@ function calcNboqGrandTotal() {
       calcNboqGrandTotal();
       return;
     }
-    // â”€â”€ Qty, Labor, Material: recalculate row total + grand total â”€â”€â”€â”€â”€
+    // ── Qty, Labor, Material: recalculate row total + grand total ─────
     if (e.target.classList.contains('boq-item-qty')      ||
         e.target.classList.contains('boq-item-labor')    ||
         e.target.classList.contains('boq-item-material')) {
@@ -4876,7 +4876,7 @@ function calcNboqGrandTotal() {
   });
 })();
 
-// â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Submit ───────────────────────────────────────────────────────────────────
 function submitNativeBoq() {
   // Validate project details
   const projectCode  = (document.getElementById('nboq-projectCode')?.value  || '').trim();
@@ -4888,7 +4888,7 @@ function submitNativeBoq() {
   if (!company)      { showToast('Please select a Company.',       'warning'); return; }
 
   if (!/^[A-Za-z0-9 ]+$/.test(projectCode)) {
-    showToast('Project Code may contain only letters, numbers, and spaces â€” no hyphens or symbols.', 'danger');
+    showToast('Project Code may contain only letters, numbers, and spaces — no hyphens or symbols.', 'danger');
     return;
   }
 
@@ -4967,7 +4967,7 @@ function submitNativeBoq() {
 
   const btn = document.getElementById('boq-submit-btn');
   btn.disabled = true;
-  btn.textContent = 'Submittingâ€¦';
+  btn.textContent = 'Submitting…';
 
   google.script.run
     .withSuccessHandler(res => {
@@ -4978,7 +4978,7 @@ function submitNativeBoq() {
       }
       btn.disabled = false;
       btn.textContent = 'Submit for Approval';
-      showToast('âœ… BOQ ' + res.submissionId + ' submitted for admin approval.', 'success');
+      showToast('✅ BOQ ' + res.submissionId + ' submitted for admin approval.', 'success');
       initBoqBuilder();
       loadMyBoqSubmissions();
     })
@@ -5010,19 +5010,19 @@ function renderMyBoqSubmissions(rows) {
     return '<span class="badge ' + (m[s] || 'bg-secondary') + '">' + s + '</span>';
   };
   tbody.innerHTML = rows.map(function(r) {
-    let action = '<span class="text-muted small">â€”</span>';
+    let action = '<span class="text-muted small">—</span>';
     if (r.status === 'Returned') {
       action = '<button class="btn btn-sm btn-warning fw-bold" onclick="editReturnedBoq(\'' + r.submissionId + '\')">Edit & Resubmit</button>';
     }
     const pdfCell = (r.status === 'Approved' && r.approvedPdfUrl)
       ? '<a href="' + r.approvedPdfUrl + '" target="_blank" class="btn btn-sm btn-outline-primary fw-bold py-0">View PDF</a>'
-      : '<span class="text-muted small">â€”</span>';
+      : '<span class="text-muted small">—</span>';
     return '<tr>' +
       '<td class="ps-4 fw-bold">' + r.submissionId + '</td>' +
       '<td>' + r.projectCode + '</td>' +
       '<td class="text-nowrap">' + r.date + '</td>' +
       '<td class="text-center">' + badge(r.status) + '</td>' +
-      '<td class="small text-muted">' + (r.remarks || 'â€”') + '</td>' +
+      '<td class="small text-muted">' + (r.remarks || '—') + '</td>' +
       '<td class="text-center">' + pdfCell + '</td>' +
       '<td class="text-center pe-3">' + action + '</td>' +
       '</tr>';
@@ -5109,14 +5109,14 @@ function loadPendingBoqApprovals() {
 function renderPendingBoqApprovals(rows) {
   const tbody = document.getElementById('boq-approvals-body');
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No pending BOQ submissions.</td></tr>'; return; }
-  const fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
+  const fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
   tbody.innerHTML = rows.map(function(r) {
     const sid = r.submissionId.replace(/'/g, "\\'");
     return '<tr id="boqapp-row-' + r.submissionId + '">' +
       '<td class="ps-4 fw-bold">' + r.submissionId + '</td>' +
       '<td>' + r.projectCode + '</td>' +
-      '<td>' + (r.customerName || 'â€”') + '</td>' +
-      '<td>' + (r.company || 'â€”') + '</td>' +
+      '<td>' + (r.customerName || '—') + '</td>' +
+      '<td>' + (r.company || '—') + '</td>' +
       '<td class="text-center">' + r.itemCount + '</td>' +
       '<td class="text-end fw-bold">' + fmt(r.grandTotal) + '</td>' +
       '<td class="small text-muted">' + r.submitter + '</td>' +
@@ -5130,7 +5130,7 @@ function renderPendingBoqApprovals(rows) {
 }
 
 function viewBoqPdf(submissionId, btn) {
-  btn.disabled = true; const old = btn.textContent; btn.textContent = 'â€¦';
+  btn.disabled = true; const old = btn.textContent; btn.textContent = '…';
   google.script.run
     .withSuccessHandler(function(url) {
       btn.disabled = false; btn.textContent = old;
@@ -5192,7 +5192,7 @@ function submitBoqReturn() {
     .processBoqApproval(submissionId, 'Return', remarks, userProfile.email);
 }
 
-// â”€â”€ Milestone Terms helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Milestone Terms helpers ──────────────────────────────────────────────────
 function formatThousands(el) {
   const raw = el.value.replace(/,/g, '');
   const dotIdx = raw.indexOf('.');
@@ -5229,7 +5229,7 @@ function addMilestoneRow(prefix) {
     </div>
     <div class="col-auto">
       <button type="button" class="btn btn-sm btn-outline-danger"
-        onclick="removeMilestoneRow(this)">âœ•</button>
+        onclick="removeMilestoneRow(this)">✕</button>
     </div>`;
   container.appendChild(row);
   calcMilestoneTotal(prefix);
@@ -5240,7 +5240,7 @@ function removeMilestoneRow(btn) {
   if (!row) return;
   const container = row.parentElement;
   row.remove();
-  // Determine prefix from container id (e.g. "boq-milestonesContainer" â†’ "boq")
+  // Determine prefix from container id (e.g. "boq-milestonesContainer" → "boq")
   const prefix = container.id.replace('-milestonesContainer', '');
   calcMilestoneTotal(prefix);
 }
@@ -5296,7 +5296,7 @@ function initProjectEngineer() {
   const select = document.getElementById('pe-project-select');
   if (!select) return;
 
-  select.innerHTML = '<option value="">â€” Select Project â€”</option>';
+  select.innerHTML = '<option value="">— Select Project —</option>';
   document.getElementById('pe-overall-pct').value = '';
   document.getElementById('pe-rtb-pct').value = '';
   document.getElementById('pe-project-details').style.display = 'none';
@@ -5322,16 +5322,16 @@ function initProjectEngineer() {
 function onPeProjectChange() {
   const projectCode = document.getElementById('pe-project-select').value;
   const detailsCard = document.getElementById('pe-project-details');
-  const fmt = function(n) { return 'â‚±' + (Number(n) || 0).toLocaleString(undefined, {minimumFractionDigits: 2}); };
+  const fmt = function(n) { return '₱' + (Number(n) || 0).toLocaleString(undefined, {minimumFractionDigits: 2}); };
 
   detailsCard.style.display = 'none';
   if (!projectCode) return;
 
   google.script.run
     .withSuccessHandler(function(data) {
-      document.getElementById('pe-detail-customer').textContent = data.customerName || 'â€”';
-      document.getElementById('pe-detail-company').textContent  = data.company      || 'â€”';
-      document.getElementById('pe-detail-quoted').textContent   = data.quotedCost   ? fmt(data.quotedCost) : 'â€”';
+      document.getElementById('pe-detail-customer').textContent = data.customerName || '—';
+      document.getElementById('pe-detail-company').textContent  = data.company      || '—';
+      document.getElementById('pe-detail-quoted').textContent   = data.quotedCost   ? fmt(data.quotedCost) : '—';
       detailsCard.style.display = '';
     })
     .withFailureHandler(function(err) {
@@ -5424,11 +5424,11 @@ function renderRTBApprovals(data) {
     tbody.innerHTML = '<tr><td colspan="8" class="text-center py-5 text-muted">No pending RTBs.</td></tr>';
     return;
   }
-  const fmt = function(n) { return 'â‚±' + (Number(n) || 0).toLocaleString(undefined, {minimumFractionDigits: 2}); };
+  const fmt = function(n) { return '₱' + (Number(n) || 0).toLocaleString(undefined, {minimumFractionDigits: 2}); };
   tbody.innerHTML = data.map(function(r) {
     const safeId = r.rtbId.replace(/'/g, "\\'");
     return '<tr id="rtb-row-' + r.rtbId + '">' +
-      '<td class="ps-4">' + (r.encoder || 'â€”') + '</td>' +
+      '<td class="ps-4">' + (r.encoder || '—') + '</td>' +
       '<td class="fw-bold">' + r.projectCode + '</td>' +
       '<td class="text-end">' + r.rtbPercent + '%</td>' +
       '<td class="text-end fw-bold text-success">' + fmt(r.amountToBill) + '</td>' +
@@ -5482,7 +5482,7 @@ function renderCollections(data) {
     tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">No approved RTBs awaiting collection.</td></tr>';
     return;
   }
-  const fmt = function(n) { return 'â‚±' + (Number(n) || 0).toLocaleString(undefined, {minimumFractionDigits: 2}); };
+  const fmt = function(n) { return '₱' + (Number(n) || 0).toLocaleString(undefined, {minimumFractionDigits: 2}); };
   tbody.innerHTML = data.map(function(r) {
     const safeId = r.rtbId.replace(/'/g, "\\'");
     return '<tr>' +
@@ -5555,9 +5555,9 @@ function saveCollection() {
 // =========================
 
 var _wpBoqLines  = [];   // BOQ lines for the currently-selected project
-var _wpBoqClaimed = {};  // key â†’ subcontractor name for claimed lines
+var _wpBoqClaimed = {};  // key → subcontractor name for claimed lines
 
-// â”€â”€ Strip list prefixes (Roman, alpha, numeric) â€” module-level copy
+// ── Strip list prefixes (Roman, alpha, numeric) — module-level copy
 function cleanBulletsWp_(text) {
   return (text || '').toString()
     .replace(/^(\d+[\.\)\-]?\s+)+/, '')
@@ -5566,7 +5566,7 @@ function cleanBulletsWp_(text) {
     .trim();
 }
 
-// â”€â”€ Subcontractor AP â€” Phase 3 full view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Subcontractor AP — Phase 3 full view ─────────────────────────────
 var _subApData = null;
 
 function initSubcontractorAP() {
@@ -5603,7 +5603,7 @@ function loadSubApData(filters) {
 
 function renderSubApKpis(kpi) {
   if (!kpi) return;
-  var fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
+  var fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
   function set(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
   set('kpi-open-sum',    fmt(kpi.open  ? kpi.open.sum  : 0));
   set('kpi-open-count',  (kpi.open  ? kpi.open.count  : 0) + ' milestones');
@@ -5617,7 +5617,7 @@ function renderSubApKpis(kpi) {
 function renderSubApMilestoneTable(rows) {
   var tbody = document.getElementById('sub-ap-mil-tbody');
   if (!tbody) return;
-  var fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
+  var fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
   if (!rows || !rows.length) {
     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">No milestones match the current filters.</td></tr>';
     return;
@@ -5629,7 +5629,7 @@ function renderSubApMilestoneTable(rows) {
     var badgeSty = r.status === 'Ready to Pay' ? ' style="background:#e8a820;color:#fff;"' : '';
     var badge = '<span class="badge ' + badgeCls + '"' + badgeSty + '>' + r.status + '</span>' +
       (r.statusNote ? '<br><small class="text-muted" style="font-size:.68rem;">' + r.statusNote + '</small>' : '');
-    var checkCell = r.checkId ? '<span class="small text-muted">' + r.checkId + '</span>' : '<span class="small text-muted fst-italic">â€”</span>';
+    var checkCell = r.checkId ? '<span class="small text-muted">' + r.checkId + '</span>' : '<span class="small text-muted fst-italic">—</span>';
     var actions = '';
     if (r.status !== 'Voided') {
       if (!r.readyToPay && r.status === 'Open') {
@@ -5644,9 +5644,9 @@ function renderSubApMilestoneTable(rows) {
     }
     actions += '<button class="btn" style="font-size:.7rem;padding:2px 7px;border-radius:5px;border:1px solid #94a3b8;background:transparent;color:#64748b;" onclick="generateWpPdf(\'' + safeWpId + '\',this)">PDF</button>';
     return '<tr>' +
-      '<td class="ps-3"><div class="fw-bold small">' + r.wpLabel + '</div><div class="text-muted" style="font-size:.72rem;">' + r.subName + ' Â· ' + r.wpId + '</div></td>' +
+      '<td class="ps-3"><div class="fw-bold small">' + r.wpLabel + '</div><div class="text-muted" style="font-size:.72rem;">' + r.subName + ' · ' + r.wpId + '</div></td>' +
       '<td class="small">' + r.project + '</td>' +
-      '<td class="small"><div>' + r.label + '</div><div class="text-muted" style="font-size:.72rem;">Seq ' + r.seq + ' Â· Target ' + r.targetPct + '%</div></td>' +
+      '<td class="small"><div>' + r.label + '</div><div class="text-muted" style="font-size:.72rem;">Seq ' + r.seq + ' · Target ' + r.targetPct + '%</div></td>' +
       '<td class="text-end small fw-bold">' + fmt(r.amount) + '</td>' +
       '<td class="text-center">' + badge + '</td>' +
       '<td class="small">' + checkCell + '</td>' +
@@ -5685,7 +5685,7 @@ function apMarkReady(milId, btn) {
 function renderSubApTable(wps) {
   const tbody = document.getElementById('sub-ap-tbody');
   if (!tbody) return;
-  const fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
+  const fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
   const canExpand = userProfile && userProfile.allowedTabs &&
     userProfile.allowedTabs.some(function(t) { return t.trim().toLowerCase() === 'subcontractor'; });
   if (!wps.length) {
@@ -5696,14 +5696,14 @@ function renderSubApTable(wps) {
     var safeId = wp.wpId.replace(/[^a-zA-Z0-9\-]/g, '');
     var expandBtn = canExpand
       ? '<button class="btn btn-outline-secondary" style="font-size:0.72rem;padding:2px 8px;border-radius:6px;" ' +
-        'id="sub-ap-expand-' + safeId + '" onclick="toggleWpDetails(\'' + safeId + '\')">Milestones â–¾</button>'
+        'id="sub-ap-expand-' + safeId + '" onclick="toggleWpDetails(\'' + safeId + '\')">Milestones ▾</button>'
       : '';
     return '<tr id="sub-ap-row-' + safeId + '">' +
         '<td class="ps-3 fw-bold small">' + wp.wpId + '</td>' +
         '<td class="small">' + wp.subName + '</td>' +
         '<td class="small">' + wp.project + '</td>' +
         '<td class="small">' + wp.label + '</td>' +
-        '<td class="small text-muted">' + (wp.basis || 'â€”') + '</td>' +
+        '<td class="small text-muted">' + (wp.basis || '—') + '</td>' +
         '<td class="text-end small fw-bold">' + fmt(wp.contractValue) + '</td>' +
         '<td class="text-center"><span class="badge ' + (wp.status === 'Open' ? 'bg-success' : 'bg-secondary') + '">' + wp.status + '</span></td>' +
         '<td class="text-center pe-3">' + expandBtn + '</td>' +
@@ -5716,7 +5716,7 @@ function renderSubApTable(wps) {
   }).join('');
 }
 
-// â”€â”€ Subcontractor CRUD Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Subcontractor CRUD Modal ─────────────────────────────────────────
 function openSubcontractorCrud() {
   loadSubcontractorList();
   new bootstrap.Modal(document.getElementById('subconCrudModal')).show();
@@ -5744,7 +5744,7 @@ function renderSubconList(subs) {
     return '<div class="d-flex align-items-center justify-content-between py-2 border-bottom ' + (s.active ? '' : 'opacity-50') + '">' +
       '<div>' +
         '<div class="fw-bold small">' + s.name + '</div>' +
-        '<div class="text-muted" style="font-size:0.75rem;">' + (s.tin ? 'TIN: ' + s.tin : '') + (s.contact ? (s.tin ? ' Â· ' : '') + s.contact : '') + '</div>' +
+        '<div class="text-muted" style="font-size:0.75rem;">' + (s.tin ? 'TIN: ' + s.tin : '') + (s.contact ? (s.tin ? ' · ' : '') + s.contact : '') + '</div>' +
       '</div>' +
       '<button type="button" class="btn btn-sm ' + (s.active ? 'btn-outline-danger' : 'btn-outline-success') + '" ' +
         'onclick="doToggleSubActive(\'' + s.subId + '\',' + s.active + ')" style="font-size:0.75rem; border-radius:6px;">' +
@@ -5803,15 +5803,15 @@ function submitNewSubcontractor() {
     .saveSubcontractor({ name: name, tin: tin, contact: contact }, userProfile.email);
 }
 
-// â”€â”€ Assign Work Package â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Assign Work Package ──────────────────────────────────────────────
 function initAssignWp() {
   _wpBoqLines  = [];
   _wpBoqClaimed = {};
 
   var projSel = document.getElementById('wp-project');
   var subSel  = document.getElementById('wp-sub');
-  projSel.innerHTML = '<option value="">â€” Select Project â€”</option>';
-  subSel.innerHTML  = '<option value="">â€” Select Subcontractor â€”</option>';
+  projSel.innerHTML = '<option value="">— Select Project —</option>';
+  subSel.innerHTML  = '<option value="">— Select Subcontractor —</option>';
 
   document.getElementById('wp-basis').value            = '';
   document.getElementById('wp-label').value            = '';
@@ -5824,7 +5824,7 @@ function initAssignWp() {
   document.getElementById('wp-milestonesContainer').innerHTML = '';
   document.getElementById('wp-milestoneTotal').textContent    = 'Total Payment: 0%';
   document.getElementById('wp-milestoneTotal').className      = 'badge bg-secondary';
-  document.getElementById('wp-milestoneAmtTotal').textContent = 'Total: â‚±0.00';
+  document.getElementById('wp-milestoneAmtTotal').textContent = 'Total: ₱0.00';
   document.getElementById('wp-form-alert').style.display      = 'none';
   document.getElementById('wp-quick-add-sub').style.display   = 'none';
 
@@ -5902,9 +5902,9 @@ function renderWpBoqPicker() {
   }
 
   var basis = document.getElementById('wp-basis').value;
-  var fmt   = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
+  var fmt   = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
 
-  // Group: phase â†’ scope â†’ lines (preserve insertion order for phases)
+  // Group: phase → scope → lines (preserve insertion order for phases)
   var grouped    = {};
   var phaseOrder = [];
   _wpBoqLines.forEach(function(line) {
@@ -5992,7 +5992,7 @@ function updateWpBoqRunningTotal() {
     if (!line) return;
     total += basis === 'labor' ? line.costLabor : basis === 'material' ? line.costMaterial : line.costTotal;
   });
-  var fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
+  var fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
   var el  = document.getElementById('wp-boq-running-total');
   el.textContent = checked.length ? 'Selected BOQ total (' + (basis || 'total') + '): ' + fmt(total) : '';
 }
@@ -6004,7 +6004,7 @@ function _onWpItemCheck(cb, si, pi) {
   _updateWpPhaseCbState(pi);
 }
 
-// â”€â”€ Search filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Search filter ────────────────────────────────────────────────────
 function filterWpBoqPicker() {
   var searchEl = document.getElementById('wp-boq-search');
   var term     = searchEl ? searchEl.value.trim().toLowerCase() : '';
@@ -6032,7 +6032,7 @@ function filterWpBoqPicker() {
   });
 }
 
-// â”€â”€ Phase-level select all â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Phase-level select all ────────────────────────────────────────────
 function toggleWpPhaseAll(pi) {
   // Acts on ALL available items in the phase regardless of search filter
   var itemCbs = document.querySelectorAll(
@@ -6070,7 +6070,7 @@ function _updateWpPhaseCbState(pi) {
   }
 }
 
-// â”€â”€ Scope-level select all â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Scope-level select all ───────────────────────────────────────────
 function toggleWpScopeAll(si) {
   // Acts on ALL available items in the scope regardless of search filter
   var itemCbs = document.querySelectorAll(
@@ -6108,7 +6108,7 @@ function _updateWpScopeCbState(si) {
   }
 }
 
-// â”€â”€ WP Milestone Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── WP Milestone Widget ──────────────────────────────────────────────
 function addWpMilestoneRow() {
   var container = document.getElementById('wp-milestonesContainer');
   var row = document.createElement('div');
@@ -6125,10 +6125,10 @@ function addWpMilestoneRow() {
         '<input type="number" class="form-control form-control-sm wp-mil-payment" placeholder="%" min="0.01" max="100" step="any" oninput="clampPct(this); calcWpMilestoneTotal()">' +
       '</div>' +
       '<div class="col-3">' +
-        '<input type="text" class="form-control form-control-sm wp-mil-amount" placeholder="â‚±0.00" readonly style="background:#f8fafc; color:#1d3461; font-weight:700; font-size:0.78rem;">' +
+        '<input type="text" class="form-control form-control-sm wp-mil-amount" placeholder="₱0.00" readonly style="background:#f8fafc; color:#1d3461; font-weight:700; font-size:0.78rem;">' +
       '</div>' +
       '<div class="col-auto">' +
-        '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeWpMilestoneRow(this)">âœ•</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeWpMilestoneRow(this)">✕</button>' +
       '</div>' +
     '</div>';
   container.appendChild(row);
@@ -6152,7 +6152,7 @@ function calcWpMilestoneTotal() {
 
   var rawCv         = (document.getElementById('wp-contract-value').value || '').replace(/,/g, '');
   var contractValue = parseFloat(rawCv) || 0;
-  var fmt           = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
+  var fmt           = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
 
   var totalPct = 0;
   var totalAmt = 0;
@@ -6172,7 +6172,7 @@ function calcWpMilestoneTotal() {
   amtEl.textContent = 'Total: ' + fmt(totalAmt);
 }
 
-// â”€â”€ Quick-add sub inside Assign WP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Quick-add sub inside Assign WP ───────────────────────────────────
 function toggleWpQuickAddSub() {
   var panel = document.getElementById('wp-quick-add-sub');
   var isHidden = panel.style.display === 'none';
@@ -6226,7 +6226,7 @@ function submitWpQuickAddSub() {
     .saveSubcontractor({ name: name, tin: tin, contact: contact }, userProfile.email);
 }
 
-// â”€â”€ Submit Work Package â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Submit Work Package ──────────────────────────────────────────────
 async function submitWorkPackage() {
   var btn     = document.getElementById('wp-submit-btn');
   var alertEl = document.getElementById('wp-form-alert');
@@ -6316,7 +6316,7 @@ async function submitWorkPackage() {
 }
 
 // =========================
-// SUBCONTRACTOR MODULE â€” PHASE 2: REPORTS & FLAGGING
+// SUBCONTRACTOR MODULE — PHASE 2: REPORTS & FLAGGING
 // =========================
 
 var _rptAllReports = [];
@@ -6327,7 +6327,7 @@ function isAdminUser_() {
     String(userProfile.role).trim().toLowerCase() === 'admin');
 }
 
-// â”€â”€ Subcontractor AP: expand milestones per WP row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Subcontractor AP: expand milestones per WP row ─────────────────
 
 function toggleWpDetails(wpId) {
   var milRow    = document.getElementById('sub-ap-milrow-' + wpId);
@@ -6335,7 +6335,7 @@ function toggleWpDetails(wpId) {
   if (!milRow) return;
   var nowHidden = milRow.style.display === 'none';
   milRow.style.display = nowHidden ? '' : 'none';
-  if (btn) btn.textContent = nowHidden ? 'Milestones â–´' : 'Milestones â–¾';
+  if (btn) btn.textContent = nowHidden ? 'Milestones ▴' : 'Milestones ▾';
   if (nowHidden) {
     var detailDiv = document.getElementById('sub-ap-mildetail-' + wpId);
     if (detailDiv && !detailDiv.dataset.loaded) {
@@ -6353,7 +6353,7 @@ function loadWpMilestonesDetail_(wpId, detailDiv) {
         detailDiv.innerHTML = '<p class="text-muted small mb-0">No milestones defined.</p>';
         return;
       }
-      var fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
+      var fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined, {minimumFractionDigits:2}); };
       var canMark = userProfile && userProfile.allowedTabs &&
         userProfile.allowedTabs.some(function(t) { return t.trim().toLowerCase() === 'subcontractor'; });
       var rows = mils.map(function(m) {
@@ -6405,7 +6405,7 @@ function doMarkMilestoneReady(milId, btn) {
     .markMilestoneReady(milId, userProfile.email);
 }
 
-// â”€â”€ Subcontractor Reports section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Subcontractor Reports section ──────────────────────────────────
 
 function initSubconReports() {
   var tbody = document.getElementById('rpt-table-body');
@@ -6447,7 +6447,7 @@ function renderRptTable(reports) {
   tbody.innerHTML = reports.map(function(r) {
     var photosCell = r.photosUrl
       ? '<a href="' + r.photosUrl.split(', ')[0] + '" target="_blank" class="badge bg-secondary text-decoration-none">View</a>'
-      : '<span class="text-muted">â€”</span>';
+      : '<span class="text-muted">—</span>';
     var termDisplay = r.paymentTerm ? r.paymentTerm : '<span class="text-muted fst-italic">General</span>';
     return '<tr>' +
       '<td class="ps-3 small" style="white-space:nowrap;">' + r.date + '</td>' +
@@ -6491,11 +6491,11 @@ function filterRptTable() {
   renderRptTable(filtered);
 }
 
-// â”€â”€ New Report modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── New Report modal ────────────────────────────────────────────────
 
 function openNewSubconReport() {
-  document.getElementById('rpt-project').innerHTML   = '<option value="">â€” Select Project â€”</option>';
-  document.getElementById('rpt-wp').innerHTML        = '<option value="">â€” Select Work Package â€”</option>';
+  document.getElementById('rpt-project').innerHTML   = '<option value="">— Select Project —</option>';
+  document.getElementById('rpt-wp').innerHTML        = '<option value="">— Select Work Package —</option>';
   document.getElementById('rpt-wp').disabled         = true;
   document.getElementById('rpt-term').innerHTML      = '<option value="">General work package progress</option>';
   document.getElementById('rpt-term').disabled       = true;
@@ -6518,7 +6518,7 @@ function openNewSubconReport() {
     google.script.run
       .withSuccessHandler(function(result) {
         _rptProjects = result.projects || [];
-        projSel.innerHTML = '<option value="">â€” Select Project â€”</option>';
+        projSel.innerHTML = '<option value="">— Select Project —</option>';
         _rptProjects.forEach(function(p) {
           var opt = document.createElement('option');
           opt.value = opt.textContent = p;
@@ -6536,7 +6536,7 @@ function onRptModalProjectChange() {
   var project = document.getElementById('rpt-project').value;
   var wpSel   = document.getElementById('rpt-wp');
   var termSel = document.getElementById('rpt-term');
-  wpSel.innerHTML  = '<option value="">â€” Select Work Package â€”</option>';
+  wpSel.innerHTML  = '<option value="">— Select Work Package —</option>';
   wpSel.disabled   = true;
   termSel.innerHTML = '<option value="">General work package progress</option>';
   termSel.disabled = true;
@@ -6544,7 +6544,7 @@ function onRptModalProjectChange() {
   wpSel.innerHTML = '<option value="">Loading...</option>';
   google.script.run
     .withSuccessHandler(function(wps) {
-      wpSel.innerHTML = '<option value="">â€” Select Work Package â€”</option>';
+      wpSel.innerHTML = '<option value="">— Select Work Package —</option>';
       (wps || []).forEach(function(wp) {
         var opt = document.createElement('option');
         opt.value = wp.wpId; opt.textContent = wp.label;
@@ -6569,7 +6569,7 @@ function onRptModalWpChange() {
       (mils || []).forEach(function(m) {
         var opt = document.createElement('option');
         opt.value = m.milId;
-        opt.textContent = 'Seq ' + m.seq + ' â€” ' + m.label;
+        opt.textContent = 'Seq ' + m.seq + ' — ' + m.label;
         termSel.appendChild(opt);
       });
     })
@@ -6631,10 +6631,10 @@ async function submitNewSubconReport() {
 }
 
 // =========================
-// SUBCONTRACTOR MODULE â€” PHASE 3
+// SUBCONTRACTOR MODULE — PHASE 3
 // =========================
 
-// â”€â”€ Refinement B: linked slider + number input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Refinement B: linked slider + number input ────────────────────
 function syncRptPct(val) {
   val = Math.max(0, Math.min(100, parseFloat(val) || 0));
   var s = document.getElementById('rpt-percent');
@@ -6643,7 +6643,7 @@ function syncRptPct(val) {
   if (n) n.value = val;
 }
 
-// â”€â”€ Link Check modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Link Check modal ─────────────────────────────────────────────────
 function openLinkCheckModal(milId, subId, wpId, amtFmt) {
   var infoEl    = document.getElementById('link-check-modal-info');
   var tableWrap = document.getElementById('link-check-table-wrap');
@@ -6704,7 +6704,7 @@ function apUnlinkCheck(milId, btn) {
 }
 
 function generateWpPdf(wpId, btn) {
-  btn.disabled = true; btn.textContent = 'â€¦';
+  btn.disabled = true; btn.textContent = '…';
   google.script.run
     .withSuccessHandler(function(url) {
       btn.disabled = false; btn.textContent = 'PDF';
@@ -6717,7 +6717,7 @@ function generateWpPdf(wpId, btn) {
     .generateWorkPackagePdf(wpId);
 }
 
-// â”€â”€ Budget vs Actual â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Budget vs Actual ─────────────────────────────────────────────────
 var _budgetData = null;
 
 function initSubconBudget() {
@@ -6743,7 +6743,7 @@ function initSubconBudget() {
 
 function renderBudgetKpis(kpi) {
   if (!kpi) return;
-  var fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2}); };
+  var fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2}); };
   function set(id, val, color) { var el = document.getElementById(id); if (el) { el.textContent = val; if (color) el.style.color = color; } }
   set('bkpi-boq',      fmt(kpi.boq));
   set('bkpi-contract', fmt(kpi.contract));
@@ -6754,7 +6754,7 @@ function renderBudgetKpis(kpi) {
 function renderBudgetTable(rows) {
   var tbody = document.getElementById('budget-tbody');
   if (!tbody) return;
-  var fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2}); };
+  var fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2}); };
   if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-5 text-muted">No work packages found.</td></tr>'; return; }
   tbody.innerHTML = rows.map(function(r) {
     var varStyle = r.variance < 0 ? 'color:#dc3545;font-weight:700;' : 'color:#16a34a;font-weight:700;';
@@ -6762,7 +6762,7 @@ function renderBudgetTable(rows) {
       '<td class="ps-3"><div class="fw-bold small">' + r.label + '</div><div class="text-muted" style="font-size:.72rem;">' + r.wpId + '</div></td>' +
       '<td class="small">' + r.project + '</td>' +
       '<td class="small">' + r.subName + '</td>' +
-      '<td class="small text-muted">' + (r.basis || 'â€”') + '</td>' +
+      '<td class="small text-muted">' + (r.basis || '—') + '</td>' +
       '<td class="text-end small">' + fmt(r.boqBudget) + '</td>' +
       '<td class="text-end small fw-bold">' + fmt(r.contractValue) + '</td>' +
       '<td class="text-end small" style="color:#16a34a;">' + fmt(r.paid) + '</td>' +
@@ -6797,7 +6797,7 @@ function exportBudgetCsv() {
   URL.revokeObjectURL(url);
 }
 
-// â”€â”€ Subcontractor Payables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Subcontractor Payables ────────────────────────────────────────────
 function initSubconPayables() {
   var tbody = document.getElementById('subcon-payables-tbody');
   if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span>Loading...</td></tr>';
@@ -6810,7 +6810,7 @@ function initSubconPayables() {
 function renderSubconPayables(rows) {
   var tbody = document.getElementById('subcon-payables-tbody');
   if (!tbody) return;
-  var fmt = function(n) { return 'â‚±' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2}); };
+  var fmt = function(n) { return '₱' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2}); };
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">No milestones ready to pay.</td></tr>'; return; }
   tbody.innerHTML = rows.map(function(r) {
     var safeId = r.milId.replace(/[^a-zA-Z0-9\-]/g,'');

@@ -7,7 +7,7 @@
      DESIGN TOKENS
      ================================================================ */
   :root {
-    /* Brand â€” extracted from Vegastar Realty Corporation logo */
+    /* Brand — extracted from Vegastar Realty Corporation logo */
     --navy:          #1d3461;               /* logo navy (roof peaks, "VEGA") */
     --navy-mid:      #2a4a85;               /* lighter navy for gradients */
     --gold:          #e8a820;               /* logo gold (center chevron, "STAR") */
@@ -108,7 +108,7 @@
   }
 
   /* ================================================================
-     TOP NAVIGATION â€” Glassmorphism
+     TOP NAVIGATION — Glassmorphism
      ================================================================ */
   .top-nav {
     background: rgba(255,255,255,.78);
@@ -127,7 +127,7 @@
 
   .logo-section { display: flex; align-items: center; gap: 10px; }
 
-  /* Logo container â€” transparent, no gradient background */
+  /* Logo container — transparent, no gradient background */
   .logo-icon {
     width: auto;
     height: 34px;
@@ -344,7 +344,7 @@
   }
 
   /* ================================================================
-     FORMS â€” Apple-style
+     FORMS — Apple-style
      ================================================================ */
   .form-label {
     font-size: .72rem;
@@ -395,7 +395,7 @@
   .form-control[type="file"]::-webkit-file-upload-button:hover { background: var(--navy-mid); }
 
   /* ================================================================
-     BUTTONS â€” Pill-shaped, gold primary
+     BUTTONS — Pill-shaped, gold primary
      ================================================================ */
   .btn {
     border-radius: var(--r-pill);
@@ -516,7 +516,7 @@
   .btn-link:hover { color: var(--danger) !important; }
 
   /* ================================================================
-     TABLES â€” Premium, breathable
+     TABLES — Premium, breathable
      ================================================================ */
   .table-responsive {
     border-radius: var(--r-xl);
@@ -594,7 +594,7 @@
   .badge.bg-danger.text-white  { background: var(--danger) !important; color: #fff !important; border: none; }
 
   /* ================================================================
-     NAV TABS â€” Pill Segmented Control
+     NAV TABS — Pill Segmented Control
      ================================================================ */
   .nav-tabs {
     border-bottom: none;
@@ -636,7 +636,7 @@
   }
 
   /* ================================================================
-     MODALS â€” Rounded glass
+     MODALS — Rounded glass
      ================================================================ */
   .modal-content {
     border: 1px solid var(--glass-border) !important;
@@ -885,7 +885,7 @@
   }
 
   /* ================================================================
-     COMPUTE COST â€” GRAND TOTAL BADGE
+     COMPUTE COST — GRAND TOTAL BADGE
      ================================================================ */
   #section-compute-cost .border-success {
     border: 1px solid rgba(232,168,32,.3) !important;
@@ -921,7 +921,7 @@
   }
 
   /* ================================================================
-     LOGIN PAGE â€” Premium Split-Panel
+     LOGIN PAGE — Premium Split-Panel
      ================================================================ */
   .lp-auth-overlay {
     position: fixed; inset: 0; z-index: 9999;
@@ -991,7 +991,7 @@
 
   .lp-brand-inner { position: relative; z-index: 1; max-width: 360px; }
 
-  /* Logo on branding panel â€” transparent, no gradient shell */
+  /* Logo on branding panel — transparent, no gradient shell */
   .lp-logo {
     width: 200px;
     height: auto;
@@ -1011,7 +1011,7 @@
     display: block;
   }
 
-  /* Auth-loading overlay logo â€” smaller variant */
+  /* Auth-loading overlay logo — smaller variant */
   .lp-logo-sm {
     width: 180px !important;
     height: auto !important;
@@ -1092,7 +1092,7 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Mobile form panel logo â€” hidden on desktop, shown on small screens */
+  /* Mobile form panel logo — hidden on desktop, shown on small screens */
   .lp-form-logo-sm {
     display: none;
     width: 180px;
@@ -1245,7 +1245,7 @@
   }
 
   /* ================================================================
-     EXPENSE LOG â€” Project dropdown company highlight (closed box)
+     EXPENSE LOG — Project dropdown company highlight (closed box)
      ================================================================ */
   #expenseProjectSelect.company-highlight-ct {
     background-color: rgba(37, 99, 235, 0.14) !important;
@@ -1267,7 +1267,7 @@
   }
 
   /* ================================================================
-     PROJECT DROPDOWNS (APP-WIDE) â€” company highlight, closed box
+     PROJECT DROPDOWNS (APP-WIDE) — company highlight, closed box
      Generic classes reused across multiple sections (distinct from
      Expense Log's dedicated #expenseProjectSelect rules above).
      ================================================================ */
@@ -1291,7 +1291,7 @@
   }
 
   /* ================================================================
-     MATERIAL REQUEST â€” Phase accordion header
+     MATERIAL REQUEST — Phase accordion header
      Uses higher specificity + !important to override the global
      .card-header background/color rule, which must remain untouched.
      ================================================================ */

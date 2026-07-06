@@ -41,7 +41,7 @@
 
 <div id="auth-denied" class="lp-auth-overlay" style="display:none;">
   <div class="lp-auth-card">
-    <div style="font-size: 3.5rem; margin-bottom: 0.75rem; line-height: 1;">ðŸ›‘</div>
+    <div style="font-size: 3.5rem; margin-bottom: 0.75rem; line-height: 1;">🛑</div>
     <h2 class="lp-auth-title" style="color: #dc2626;">Access Denied</h2>
     <p id="denied-message" style="color: #64748b; font-size: 0.875rem; margin-top: 0.5rem; text-align: center; font-family: var(--body-font); max-width: 260px; line-height: 1.6;">You are not authorized to access this portal.</p>
   </div>
@@ -56,18 +56,18 @@
       <h1 class="lp-brand-name">Vegastar</h1>
       <p class="lp-brand-tagline">Enterprise Resource Portal</p>
       <div class="lp-brand-divider"></div>
-      <p class="lp-brand-desc">A centralized platform for construction project management â€” from BOQ ingestion to payment tracking, all in one place.</p>
+      <p class="lp-brand-desc">A centralized platform for construction project management — from BOQ ingestion to payment tracking, all in one place.</p>
       <div class="lp-brand-features">
         <div class="lp-feature-item">
-          <span class="lp-feature-icon">ðŸ“‹</span>
+          <span class="lp-feature-icon">📋</span>
           <span>BOQ &amp; Material Management</span>
         </div>
         <div class="lp-feature-item">
-          <span class="lp-feature-icon">ðŸ“¦</span>
+          <span class="lp-feature-icon">📦</span>
           <span>Purchase Orders &amp; RFQs</span>
         </div>
         <div class="lp-feature-item">
-          <span class="lp-feature-icon">ðŸ’³</span>
+          <span class="lp-feature-icon">💳</span>
           <span>Accounting &amp; Payments</span>
         </div>
       </div>
@@ -120,21 +120,21 @@
 
 <div id="reset-screen" class="lp-auth-overlay" style="display:none !important;">
   <div class="lp-auth-card lp-reset-card">
-    <div style="font-size: 2.75rem; line-height: 1; margin-bottom: 0.85rem;">ðŸ”</div>
+    <div style="font-size: 2.75rem; line-height: 1; margin-bottom: 0.85rem;">🔐</div>
     <h3 class="lp-auth-title">Set New Password</h3>
     <p style="color: #64748b; font-size: 0.875rem; margin: 0.5rem 0 1.5rem; text-align: center; font-family: var(--body-font); line-height: 1.6;">Create a new secure password for your account</p>
     <div id="reset-alert" class="alert alert-danger py-2" style="display:none; font-size: 0.85rem; width: 100%;"></div>
     <div class="lp-field" style="width: 100%;">
       <label class="lp-label" for="newPassword">New Password</label>
-      <input type="password" id="newPassword" class="lp-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+      <input type="password" id="newPassword" class="lp-input" placeholder="••••••••">
     </div>
     <div class="lp-field" style="width: 100%;">
       <label class="lp-label" for="confirmPassword">Confirm Password</label>
-      <input type="password" id="confirmPassword" class="lp-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+      <input type="password" id="confirmPassword" class="lp-input" placeholder="••••••••">
     </div>
     <button id="resetSubmitBtn" class="lp-btn-login" style="margin-top: 0.25rem;" onclick="submitNewPassword()">Update Password</button>
     <div style="text-align: center; margin-top: 1.25rem;">
-      <a href="javascript:void(0)" onclick="window.top.location.href=window.top.location.href.split('?')[0];" class="lp-link-forgot">â† Back to Login</a>
+      <a href="javascript:void(0)" onclick="window.top.location.href=window.top.location.href.split('?')[0];" class="lp-link-forgot">← Back to Login</a>
     </div>
   </div>
 </div>
@@ -148,7 +148,7 @@
        <table class="table table-bordered table-sm align-middle">
          <thead class="table-light"><tr><th>Item</th><th>Unit</th><th>App. Qty</th><th>Price/Amount</th><th>Line Total</th></tr></thead>
          <tbody id="suki-item-body"></tbody>
-         <tfoot class="fw-bold"><tr><th colspan="4" class="text-end">Grand Total:</th><th id="suki-grand-total">â‚±0.00</th></tr></tfoot>
+         <tfoot class="fw-bold"><tr><th colspan="4" class="text-end">Grand Total:</th><th id="suki-grand-total">₱0.00</th></tr></tfoot>
        </table>
     </div>
     <button id="sukiSubmitBtn" class="btn btn-primary w-100 fw-bold py-2 mt-3" onclick="submitSuki()">Send Pricing</button>
@@ -174,7 +174,7 @@
       </div>
       <a id="nav-expense" data-permission="expense" onclick="showSection('expense')">Expense Log</a>
 
-      <!-- Group wrapper has no data-permission â€” JS collapses it when all children are hidden -->
+      <!-- Group wrapper has no data-permission — JS collapses it when all children are hidden -->
       <div class="dropdown" id="nav-group-site-engineer" style="display:none;">
         <a class="dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Site Engineer</a>
         <ul class="dropdown-menu">
@@ -246,7 +246,7 @@
         <div class="col-lg-4">
           <div class="card shadow-sm border-0 h-100 bg-white">
             <div class="card-header bg-white border-bottom py-3">
-              <h6 class="mb-0 fw-bold text-primary">âž• Register New Supplier</h6>
+              <h6 class="mb-0 fw-bold text-primary">➕ Register New Supplier</h6>
             </div>
             <div class="card-body p-4">
               <div id="supplier-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
@@ -324,7 +324,7 @@
 
       <div class="card shadow-sm border-0 mb-4" id="boq-approvals-card" style="display:none;">
         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-          <h6 class="mb-0 fw-bold">ðŸ“¥ Pending BOQ Approvals</h6>
+          <h6 class="mb-0 fw-bold">📥 Pending BOQ Approvals</h6>
           <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="loadPendingBoqApprovals()">&#8635; Refresh</button>
         </div>
         <div class="card-body p-0">
@@ -354,7 +354,7 @@
         <div class="col-md-6">
           <label class="form-label fw-bold small text-muted">Select Project to Modify</label>
           <select class="form-select" id="boqAdjustProjectSelect" onchange="loadBoqAdjustItems()">
-            <option value="">â€” Select Project â€”</option>
+            <option value="">— Select Project —</option>
           </select>
         </div>
       </div>
@@ -390,7 +390,7 @@
           <div class="col-lg-4">
             <div class="card shadow-sm border-0 h-100 bg-light">
               <div class="card-body p-4">
-                <h6 class="fw-bold mb-3 text-success">âž• Add New Item</h6>
+                <h6 class="fw-bold mb-3 text-success">➕ Add New Item</h6>
                 <div id="boq-add-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
                 
                 <div class="mb-2">
@@ -414,11 +414,11 @@
                 <div class="row g-2 mb-3">
                   <div class="col-6">
                     <label class="form-label small fw-bold text-muted">Materials Cost</label>
-                    <input type="number" id="addBoqMat" class="form-control form-control-sm" placeholder="â‚±0.00">
+                    <input type="number" id="addBoqMat" class="form-control form-control-sm" placeholder="₱0.00">
                   </div>
                   <div class="col-6">
                     <label class="form-label small fw-bold text-muted">Labor Cost</label>
-                    <input type="number" id="addBoqLab" class="form-control form-control-sm" placeholder="â‚±0.00">
+                    <input type="number" id="addBoqLab" class="form-control form-control-sm" placeholder="₱0.00">
                   </div>
                 </div>
                 <div class="mb-3">
@@ -452,12 +452,12 @@
               <div class="col-6">
                 <label class="form-label small fw-bold text-muted">New Materials Cost</label>
                 <input type="number" id="adjNewMat" class="form-control form-control-sm text-danger fw-bold" placeholder="0.00">
-                <div class="small text-muted mt-1" id="adjOldMatDisplay">Old: â‚±0.00</div>
+                <div class="small text-muted mt-1" id="adjOldMatDisplay">Old: ₱0.00</div>
               </div>
               <div class="col-6">
                 <label class="form-label small fw-bold text-muted">New Labor Cost</label>
                 <input type="number" id="adjNewLab" class="form-control form-control-sm text-danger fw-bold" placeholder="0.00">
-                <div class="small text-muted mt-1" id="adjOldLabDisplay">Old: â‚±0.00</div>
+                <div class="small text-muted mt-1" id="adjOldLabDisplay">Old: ₱0.00</div>
               </div>
             </div>
             
@@ -485,12 +485,12 @@
         <div class="col-md-5">
           <label class="form-label fw-bold text-muted small">Select Project to Simulate <span>*</span></label>
           <select id="pricing-project-select" class="form-select" onchange="loadPricingData()">
-            <option value="">â€” Select project â€”</option>
+            <option value="">— Select project —</option>
           </select>
         </div>
         <div class="col-md-7 text-end">
            <h4 class="mb-0 text-success fw-bold p-3 border border-success rounded bg-light d-inline-block">
-             Grand Total: <span id="pricing-grand-total">â‚±0.00</span>
+             Grand Total: <span id="pricing-grand-total">₱0.00</span>
            </h4>
         </div>
       </div>
@@ -501,7 +501,7 @@
             <tr>
               <th class="ps-3">Expense Category / Line Item</th>
               <th class="text-end">Expense Amount</th>
-              <th class="text-center" style="width: 130px;">Override (â‚±)</th>
+              <th class="text-center" style="width: 130px;">Override (₱)</th>
               <th class="text-center" style="width: 130px;">Markup (%)</th>
               <th class="text-end pe-3">Final Cost</th>
             </tr>
@@ -610,7 +610,7 @@
               <input type="text" id="replenishProject" class="form-control bg-light" readonly>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-bold small text-muted">Amount (â‚±) <span>*</span></label>
+              <label class="form-label fw-bold small text-muted">Amount (₱) <span>*</span></label>
               <input type="number" id="replenishAmount" class="form-control" placeholder="0.00" step="0.01">
             </div>
             <div class="mb-3">
@@ -636,7 +636,7 @@
       <div class="tab-content" id="mrfTabContent">
         <div class="tab-pane fade" id="returnable" role="tabpanel">
           <div class="alert alert-info mt-3" style="font-size: 0.85rem;">
-            <strong>â„¹ï¸ What are Returnable Items?</strong> These are items rented or leased from hardware suppliers and construction depots (e.g., scaffolding, heavy equipment, power tools). They are <strong>not</strong> included in the BOQ since they are tools/machines, but they still require approval and receiving documentation.
+            <strong>ℹ️ What are Returnable Items?</strong> These are items rented or leased from hardware suppliers and construction depots (e.g., scaffolding, heavy equipment, power tools). They are <strong>not</strong> included in the BOQ since they are tools/machines, but they still require approval and receiving documentation.
           </div>
           
           <div class="card shadow-sm border-0 mb-4 bg-light">
@@ -644,7 +644,7 @@
               <div class="row g-2 mb-3">
                 <div class="col-md-6">
                   <label class="form-label small fw-bold">Select Project <span>*</span></label>
-                  <select class="form-select form-select-sm" id="retProjectSelect"><option value="">â€” Loading â€”</option></select>
+                  <select class="form-select form-select-sm" id="retProjectSelect"><option value="">— Loading —</option></select>
                 </div>
               </div>
               <div class="table-responsive">
@@ -683,7 +683,7 @@
             <div class="row mb-4 mt-2">
               <div class="col-md-3">
                 <label class="form-label fw-bold">Project <span>*</span></label>
-                <select class="form-select" id="projectSelect" onchange="onMrfProjectChange()"><option value="">â€” Select project â€”</option></select>
+                <select class="form-select" id="projectSelect" onchange="onMrfProjectChange()"><option value="">— Select project —</option></select>
               </div>
               <div class="col-md-3">
                 <label class="form-label fw-bold">Find Item <span class="text-muted fw-normal small">(Jumps to Phase &amp; Scope)</span></label>
@@ -693,13 +693,13 @@
               <div class="col-md-3">
                 <label class="form-label fw-bold">Phase Filter <span class="text-muted fw-normal small">(Narrows view only)</span></label>
                 <select class="form-select" id="mrfPhaseFilter" onchange="onMrfPhaseFilterChange()" disabled>
-                  <option value="">â€” All Phases â€”</option>
+                  <option value="">— All Phases —</option>
                 </select>
               </div>
               <div class="col-md-3">
                 <label class="form-label fw-bold">Scope Filter <span class="text-muted fw-normal small">(Narrows view only)</span></label>
                 <select class="form-select" id="mrfScopeFilter" onchange="onMrfScopeFilterChange()" disabled>
-                  <option value="">â€” All Scopes â€”</option>
+                  <option value="">— All Scopes —</option>
                 </select>
               </div>
             </div>
@@ -711,7 +711,7 @@
             <button id="mrfSubmitBtn" class="btn btn-primary mt-3" onclick="submitData()" style="display:none;">Submit Request</button>
           </div>
           <div id="success-view" style="display:none;">
-            <div class="success-check">âœ…</div>
+            <div class="success-check">✅</div>
             <h3>Request Submitted!</h3>
             <button class="btn btn-outline-primary" onclick="resetMRF()">Submit Another Request</button>
           </div>
@@ -735,7 +735,7 @@
           <div class="row g-3 mb-4">
             <div class="col-md-3">
               <label class="form-label fw-bold text-muted small">Project Name <span>*</span></label>
-              <select class="form-select" id="paymentProjectSelect"><option value="">â€” Loading â€”</option></select>
+              <select class="form-select" id="paymentProjectSelect"><option value="">— Loading —</option></select>
             </div>
             <div class="col-md-2">
               <label class="form-label fw-bold text-muted small">Number of Checks</label>
@@ -746,7 +746,7 @@
               <input type="date" id="paymentDate" class="form-control">
             </div>
             <div class="col-md-2">
-              <label class="form-label fw-bold text-muted small">Default Amount (â‚±) <span>*</span></label>
+              <label class="form-label fw-bold text-muted small">Default Amount (₱) <span>*</span></label>
               <input type="number" id="paymentAmount" class="form-control" placeholder="0.00">
             </div>
             <div class="col-md-2 d-flex align-items-end">
@@ -763,7 +763,7 @@
                   <th>Check / Payment Date</th>
                   <th>Bank</th>
                   <th>Check Number</th>
-                  <th>Amount (â‚±)</th>
+                  <th>Amount (₱)</th>
                   <th style="width:50px;"></th>
                 </tr>
               </thead>
@@ -816,10 +816,10 @@
           <div class="row mb-4 align-items-end">
             <div class="col-md-6">
               <label class="form-label fw-bold">Select Project <span>*</span></label>
-              <select class="form-select" id="expenseProjectSelect" onchange="loadExpenseItems(); applyExpenseProjectHighlight();"><option value="">â€” Select project â€”</option></select>
+              <select class="form-select" id="expenseProjectSelect" onchange="loadExpenseItems(); applyExpenseProjectHighlight();"><option value="">— Select project —</option></select>
             </div>
             <div class="col-md-6 text-md-end" id="expense-manage-projects-wrap" style="display:none;">
-              <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" onclick="openManageExpenseProjectsModal()">âš™ï¸ Manage Project List</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" onclick="openManageExpenseProjectsModal()">⚙️ Manage Project List</button>
             </div>
           </div>
           
@@ -828,25 +828,25 @@
               <div class="col-md-3">
                 <div class="p-3 border rounded bg-light shadow-sm h-100">
                   <div class="small text-muted fw-bold">PROJECT TOTAL BUDGET</div>
-                  <div class="h5 mb-0 fw-bold" id="exp-summary-budget">â‚±0.00</div>
+                  <div class="h5 mb-0 fw-bold" id="exp-summary-budget">₱0.00</div>
                 </div>
               </div>
               <div class="col-md-3">
                 <div class="p-3 border rounded bg-light shadow-sm h-100">
                   <div class="small text-muted fw-bold text-info">MATERIAL REQ UTILIZED</div>
-                  <div class="h5 mb-0 text-info fw-bold" id="exp-summary-mrf">â‚±0.00</div>
+                  <div class="h5 mb-0 text-info fw-bold" id="exp-summary-mrf">₱0.00</div>
                 </div>
               </div>
               <div class="col-md-3">
                 <div class="p-3 border rounded bg-light shadow-sm h-100">
                   <div class="small text-muted fw-bold text-success">REMAINING BUDGET</div>
-                  <div class="h5 mb-0 text-success fw-bold" id="exp-summary-rem">â‚±0.00</div>
+                  <div class="h5 mb-0 text-success fw-bold" id="exp-summary-rem">₱0.00</div>
                 </div>
               </div>
               <div class="col-md-3">
                 <div class="p-3 border rounded bg-light shadow-sm h-100">
                   <div class="small text-muted fw-bold text-danger">MANUAL EXPENSES</div>
-                  <div class="h5 mb-0 text-danger fw-bold" id="exp-summary-manual">â‚±0.00</div>
+                  <div class="h5 mb-0 text-danger fw-bold" id="exp-summary-manual">₱0.00</div>
                 </div>
               </div>
             </div>
@@ -858,7 +858,7 @@
                   <tr>
                     <th>Expense Type</th>
                     <th>Particular (Item Name)</th>
-                    <th style="width: 180px;">Total Amount (â‚±)</th>
+                    <th style="width: 180px;">Total Amount (₱)</th>
                     <th class="text-center" style="width: 100px;">Action</th>
                   </tr>
                 </thead>
@@ -891,7 +891,7 @@
                             <th>Project</th>
                             <th>Expense Type</th>
                             <th>Particular</th>
-                            <th class="text-end">Total Amount (â‚±)</th>
+                            <th class="text-end">Total Amount (₱)</th>
                             <th>Encoder</th>
                           </tr>
                         </thead>
@@ -917,7 +917,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body p-4">
-            <p class="text-muted small mb-3">Uncheck a project to hide it from the Expense Log dropdown. This only affects the Expense Log â€” the project still appears everywhere else in the system.</p>
+            <p class="text-muted small mb-3">Uncheck a project to hide it from the Expense Log dropdown. This only affects the Expense Log — the project still appears everywhere else in the system.</p>
             <div id="manage-expense-projects-alert" class="alert py-2 mb-3" style="display:none; font-size:0.85rem;"></div>
             <div id="manage-expense-projects-list" style="max-height: 400px; overflow-y: auto;">
               <p class="text-muted small py-3 text-center">Loading...</p>
@@ -971,7 +971,7 @@
           <div class="col-md-12">
             <label class="form-label fw-bold small text-muted">Assign Company <span class="text-danger">*</span></label>
             <select id="assignCompany" class="form-select">
-              <option value="">â€” Select Company â€”</option>
+              <option value="">— Select Company —</option>
               <option value="Krone Konstruct">Krone Konstruct</option>
               <option value="Vegastar">Vegastar</option>
               <option value="CT">CT</option>
@@ -981,7 +981,7 @@
 
         <div class="mb-4 text-start">
           <button class="btn btn-sm btn-outline-secondary fw-bold w-100" type="button" data-bs-toggle="collapse" data-bs-target="#optionalCustomerFields" aria-expanded="false">
-            âž• Add Optional Customer Info (Contact, Location, etc.)
+            ➕ Add Optional Customer Info (Contact, Location, etc.)
           </button>
           <div class="collapse mt-3" id="optionalCustomerFields">
             <div class="card card-body bg-light border-0 p-3">
@@ -1018,13 +1018,13 @@
         <div class="mb-4 text-start">
           <button class="btn btn-sm btn-outline-secondary fw-bold w-100" type="button"
             data-bs-toggle="collapse" data-bs-target="#boqMilestoneCollapse" aria-expanded="false">
-            âž• Add Quoted Cost to Client and Milestone Terms
+            ➕ Add Quoted Cost to Client and Milestone Terms
           </button>
           <div class="collapse mt-3" id="boqMilestoneCollapse">
             <div class="card card-body bg-light border-0 p-3">
               <div class="mb-3">
                 <label class="form-label fw-bold small text-muted">
-                  Quoted Cost to Client (â‚±) <span class="text-danger">*</span>
+                  Quoted Cost to Client (₱) <span class="text-danger">*</span>
                 </label>
                 <input type="text" inputmode="decimal" id="boq-quotedCost" class="form-control form-control-sm"
                   placeholder="e.g. 5,000,000" oninput="formatThousands(this)">
@@ -1079,7 +1079,7 @@
               <div class="col-md-6">
                   <label class="form-label small fw-bold text-muted">Filter by Project</label>
                   <select id="rfqProjectFilter" class="form-select form-select-sm" onchange="filterRFQs()">
-                      <option value="">â€” All Projects â€”</option>
+                      <option value="">— All Projects —</option>
                   </select>
               </div>
               <div class="col-md-6">
@@ -1114,7 +1114,7 @@
       <div class="card shadow-sm border-0">
         <div class="card-body p-4">
 
-          <!-- Two-panel selection row â€” equal height, properly gapped -->
+          <!-- Two-panel selection row — equal height, properly gapped -->
           <div class="row g-4 mb-4 align-items-stretch">
 
             <!-- Left panel: MRF selector -->
@@ -1122,10 +1122,10 @@
               <div class="p-3 rounded-3 h-100 d-flex flex-column gap-2" style="background: rgba(248,250,252,.75); border: 1px solid var(--border-solid);">
                 <label class="form-label small fw-bold text-muted mb-0">Select MRF Awaiting Quotes</label>
                 <select id="bidProjectFilter" class="form-select form-select-sm" onchange="updateBidMrfDropdown()">
-                  <option value="">â€” Select Project â€”</option>
+                  <option value="">— Select Project —</option>
                 </select>
                 <select id="mrfSelectDropdown" class="form-select" onchange="filterBids()">
-                  <option value="">â€” Select MRF â€”</option>
+                  <option value="">— Select MRF —</option>
                 </select>
               </div>
             </div>
@@ -1153,7 +1153,7 @@
                   <div class="input-group input-group-sm mb-2 term-row">
                     <input type="text" class="form-control term-desc" list="termOptions" placeholder="Select or type term...">
                     <input type="number" class="form-control term-pct" placeholder="%" style="max-width: 80px;" oninput="calcTermTotal()">
-                    <button class="btn btn-outline-danger" onclick="this.parentElement.remove(); calcTermTotal();" tabindex="-1">âœ•</button>
+                    <button class="btn btn-outline-danger" onclick="this.parentElement.remove(); calcTermTotal();" tabindex="-1">✕</button>
                   </div>
                 </div>
 
@@ -1172,7 +1172,7 @@
               <div id="bidSupplierNameFeedback" class="small mt-1" style="display:none;"></div>
             </div>
             <div class="col-md-4">
-              <label class="form-label small fw-bold text-muted mb-1">DELIVERY FEE (â‚±)</label>
+              <label class="form-label small fw-bold text-muted mb-1">DELIVERY FEE (₱)</label>
               <input type="number" id="deliveryFeeInput" class="form-control" placeholder="0.00">
             </div>
           </div>
@@ -1213,7 +1213,7 @@
               <div class="row mb-2">
                   <div class="col-md-6">
                       <select id="canvasProjectFilter" class="form-select form-select-sm" onchange="updateCanvasMrfDropdown()">
-                          <option value="">â€” All Projects â€”</option>
+                          <option value="">— All Projects —</option>
                       </select>
                   </div>
                   <div class="col-md-6">
@@ -1223,7 +1223,7 @@
                       </select>
                   </div>
               </div>
-              <select id="canvasMrfSelect" class="form-select" onchange="loadCanvasPivot()"><option value="">â€” Select MRF â€”</option></select>
+              <select id="canvasMrfSelect" class="form-select" onchange="loadCanvasPivot()"><option value="">— Select MRF —</option></select>
             </div>
           </div>
           <div class="table-responsive" id="canvasContainer">
@@ -1242,7 +1242,7 @@
             <div class="col-md-4">
               <label class="form-label small fw-bold text-muted">Filter by Status</label>
               <select id="poStatusFilter" class="form-select" onchange="filterPOs()">
-                <option value="">â€” All Statuses â€”</option>
+                <option value="">— All Statuses —</option>
                 <option value="Draft">Draft</option>
                 <option value="Sent">Sent (Pending Delivery)</option>
                 <option value="Partial delivery">Partial delivery</option>
@@ -1253,7 +1253,7 @@
             <div class="col-md-4">
               <label class="form-label small fw-bold text-muted">Filter by Project</label>
               <select id="poProjectFilter" class="form-select" onchange="filterPOs()">
-                <option value="">â€” All Projects â€”</option>
+                <option value="">— All Projects —</option>
               </select>
             </div>
           </div>
@@ -1288,11 +1288,11 @@
           <div class="row mb-3">
             <div class="col-md-4">
                <label class="form-label small fw-bold text-muted">Project Code</label>
-               <select id="receivingProjectSelect" class="form-select" onchange="updateReceivingPoDropdown()"><option value="">â€” Select Project â€”</option></select>
+               <select id="receivingProjectSelect" class="form-select" onchange="updateReceivingPoDropdown()"><option value="">— Select Project —</option></select>
             </div>
             <div class="col-md-4">
                <label class="form-label small fw-bold text-muted">PO Number</label>
-               <select id="receivingPoSelect" class="form-select" onchange="renderReceivingTable()"><option value="">â€” Select PO â€”</option></select>
+               <select id="receivingPoSelect" class="form-select" onchange="renderReceivingTable()"><option value="">— Select PO —</option></select>
             </div>
             <div class="col-md-4">
                <label class="form-label small fw-bold text-muted">Delivery Document #</label>
@@ -1371,7 +1371,7 @@
           <div class="row g-3 mb-3">
             <div class="col-md-6">
               <label class="form-label fw-bold text-muted small">Project <span>*</span></label>
-              <select class="form-select" id="pcProjectSelect"><option value="">â€” Loading â€”</option></select>
+              <select class="form-select" id="pcProjectSelect"><option value="">— Loading —</option></select>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-bold text-muted small">Type of Expense <span>*</span></label>
@@ -1391,7 +1391,7 @@
               <input type="text" id="pcParticulars" class="form-control" placeholder="Describe the expense (e.g., Gas, Hardware supplies)">
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-bold text-muted small">Amount (â‚±) <span>*</span></label>
+              <label class="form-label fw-bold text-muted small">Amount (₱) <span>*</span></label>
               <input type="number" id="pcAmount" class="form-control" placeholder="0.00" step="0.01">
             </div>
           </div>
@@ -1416,18 +1416,18 @@
         <div class="card-body p-4">
           <div id="ip-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
 
-          <!-- Filters Row: Project â†’ Supplier â†’ PO Checklist -->
+          <!-- Filters Row: Project → Supplier → PO Checklist -->
           <div class="row g-3 mb-4 align-items-start">
             <div class="col-md-3">
               <label class="form-label small fw-bold text-muted">Filter by Project</label>
               <select id="ipProjectFilter" class="form-select form-select-sm" onchange="renderIpSupplierDropdown()">
-                <option value="">â€” All Projects â€”</option>
+                <option value="">— All Projects —</option>
               </select>
             </div>
             <div class="col-md-3">
               <label class="form-label small fw-bold text-muted">Filter by Supplier</label>
               <select id="ipSupplierFilter" class="form-select form-select-sm" onchange="renderIpPoChecklist()">
-                <option value="">â€” Select a project first â€”</option>
+                <option value="">— Select a project first —</option>
               </select>
             </div>
             <div class="col-md-5">
@@ -1556,7 +1556,7 @@
               <tbody id="hp-table-body">
                 <tr>
                   <td colspan="6" class="text-center py-5 text-muted">
-                    <div style="font-size:2rem; margin-bottom:0.5rem;">ðŸ”</div>
+                    <div style="font-size:2rem; margin-bottom:0.5rem;">🔍</div>
                     Enter an item name above and click <strong>Search</strong> to begin.
                   </td>
                 </tr>
@@ -1600,7 +1600,7 @@
                   <th class="ps-4" style="width: 110px;">Date</th>
                   <th>Project</th>
                   <th>Particular</th>
-                  <th class="text-end" style="width: 160px;">Original Expense (â‚±)</th>
+                  <th class="text-end" style="width: 160px;">Original Expense (₱)</th>
                   <th class="text-center" style="width: 180px;">Actual Refund Amount</th>
                   <th class="text-center" style="width: 130px;">Action</th>
                 </tr>
@@ -1638,7 +1638,7 @@
           <div class="col-md-12">
             <label class="form-label fw-bold small text-muted">Assign Company <span class="text-danger">*</span></label>
             <select id="nboq-assignCompany" class="form-select">
-              <option value="">â€” Select Company â€”</option>
+              <option value="">— Select Company —</option>
               <option value="Krone Konstruct">Krone Konstruct</option>
               <option value="Vegastar">Vegastar</option>
               <option value="CT">CT</option>
@@ -1648,7 +1648,7 @@
 
         <div class="mb-0">
           <button class="btn btn-sm btn-outline-secondary fw-bold w-100" type="button" data-bs-toggle="collapse" data-bs-target="#nboqOptionalFields" aria-expanded="false">
-            âž• Add Optional Customer Info (Contact, Location, etc.)
+            ➕ Add Optional Customer Info (Contact, Location, etc.)
           </button>
           <div class="collapse mt-3" id="nboqOptionalFields">
             <div class="card card-body bg-light border-0 p-3">
@@ -1684,13 +1684,13 @@
         <div class="mt-3">
           <button class="btn btn-sm btn-outline-secondary fw-bold w-100" type="button"
             data-bs-toggle="collapse" data-bs-target="#nboqMilestoneCollapse" aria-expanded="false">
-            âž• Add Quoted Cost to Client and Milestone Terms
+            ➕ Add Quoted Cost to Client and Milestone Terms
           </button>
           <div class="collapse mt-3" id="nboqMilestoneCollapse">
             <div class="card card-body bg-light border-0 p-3">
               <div class="mb-3">
                 <label class="form-label fw-bold small text-muted">
-                  Quoted Cost to Client (â‚±) <span class="text-danger">*</span>
+                  Quoted Cost to Client (₱) <span class="text-danger">*</span>
                 </label>
                 <input type="text" inputmode="decimal" id="nboq-quotedCost" class="form-control form-control-sm"
                   placeholder="e.g. 5,000,000" oninput="formatThousands(this)">
@@ -1740,7 +1740,7 @@
             </button>
             <div class="d-flex align-items-center gap-3 flex-wrap">
               <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Grand Total:</div>
-              <div id="nboq-grand-total" style="font-family: var(--font-title); font-size: 1.35rem; font-weight: 800; color: var(--navy);">â‚±0.00</div>
+              <div id="nboq-grand-total" style="font-family: var(--font-title); font-size: 1.35rem; font-weight: 800; color: var(--navy);">₱0.00</div>
               <button class="btn btn-sm fw-bold" onclick="submitNativeBoq()" id="boq-submit-btn"
                 style="background: linear-gradient(135deg, var(--gold), var(--gold-hover)); border: none; color: #fff; border-radius: 10px; padding: 8px 24px; font-size: 0.85rem; box-shadow: 0 4px 12px var(--gold-glow);">
                 Submit for Approval
@@ -1751,7 +1751,7 @@
 
       </div>
 
-      <!-- Hidden datalist â€” populated by initBoqBuilder() from Materials Database -->
+      <!-- Hidden datalist — populated by initBoqBuilder() from Materials Database -->
       <datalist id="boq-materials-datalist"></datalist>
 
       <div class="card shadow-sm border-0 mt-4" id="my-boq-submissions-card">
@@ -1788,35 +1788,35 @@
     <div id="section-project-engineer" class="content-section">
       <h2 class="page-title">Project Progress &amp; RTB</h2>
 
-      <!-- Project selector â€” full width, large touch target -->
+      <!-- Project selector — full width, large touch target -->
       <div class="mb-3">
         <label class="form-label fw-bold text-muted small">Select Project <span class="text-danger">*</span></label>
         <select class="form-select form-select-lg" id="pe-project-select" onchange="onPeProjectChange()">
-          <option value="">â€” Select Project â€”</option>
+          <option value="">— Select Project —</option>
         </select>
       </div>
 
-      <!-- Project Details card â€” hidden until a project is chosen -->
+      <!-- Project Details card — hidden until a project is chosen -->
       <div id="pe-project-details" class="card border-0 mb-4 rounded-3" style="display:none; background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%); color:#fff;">
         <div class="card-body p-3">
           <div class="row g-2">
             <div class="col-6">
               <div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.5); letter-spacing:.05em;">Customer</div>
-              <div class="fw-bold" id="pe-detail-customer" style="font-size:0.9rem;">â€”</div>
+              <div class="fw-bold" id="pe-detail-customer" style="font-size:0.9rem;">—</div>
             </div>
             <div class="col-6">
               <div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.5); letter-spacing:.05em;">Company</div>
-              <div class="fw-bold" id="pe-detail-company" style="font-size:0.9rem;">â€”</div>
+              <div class="fw-bold" id="pe-detail-company" style="font-size:0.9rem;">—</div>
             </div>
             <div class="col-12 mt-1">
               <div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.5); letter-spacing:.05em;">Contract Price</div>
-              <div class="fw-bold" id="pe-detail-quoted" style="font-size:1.2rem; color:#f8b400;">â€”</div>
+              <div class="fw-bold" id="pe-detail-quoted" style="font-size:1.2rem; color:#f8b400;">—</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Tabs â€” full-width pill control -->
+      <!-- Tabs — full-width pill control -->
       <ul class="nav nav-tabs d-flex" id="peTabs" role="tablist" style="width:100%;">
         <li class="nav-item flex-fill" role="presentation">
           <button class="nav-link active w-100 text-center" id="pe-tab-progress" data-bs-toggle="tab" data-bs-target="#pe-panel-progress" type="button" role="tab">
@@ -1940,7 +1940,7 @@
           <div class="modal-body p-4">
             <div id="collection-modal-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
             <div class="mb-3">
-              <label class="form-label fw-bold small text-muted">Amount Collected (â‚±) <span class="text-danger">*</span></label>
+              <label class="form-label fw-bold small text-muted">Amount Collected (₱) <span class="text-danger">*</span></label>
               <input type="number" id="col-amount" class="form-control" placeholder="0.00" step="0.01" min="0">
             </div>
             <div class="mb-3">
@@ -1968,7 +1968,7 @@
 
     <!-- ===== SUBCONTRACTOR AP SECTION ===== -->
     <div id="section-subcontractor-ap" class="content-section">
-      <h2 class="page-title">Subcontractor AP â€” Outstanding &amp; History</h2>
+      <h2 class="page-title">Subcontractor AP — Outstanding &amp; History</h2>
       <div class="d-flex justify-content-end mb-3">
         <button class="btn btn-sm fw-bold px-3" style="background:#e8a820;color:#fff;border:none;border-radius:8px;" onclick="openSubcontractorCrud()">Subcontractors</button>
       </div>
@@ -1978,21 +1978,21 @@
         <div class="col-6 col-md-3">
           <div class="card border-0 shadow-sm p-3 text-center">
             <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Open</div>
-            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="kpi-open-sum">â‚±0</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="kpi-open-sum">₱0</div>
             <div class="small text-muted" id="kpi-open-count">0 milestones</div>
           </div>
         </div>
         <div class="col-6 col-md-3">
           <div class="card border-0 shadow-sm p-3 text-center">
             <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Ready to Pay</div>
-            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#e8a820;" id="kpi-ready-sum">â‚±0</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#e8a820;" id="kpi-ready-sum">₱0</div>
             <div class="small text-muted" id="kpi-ready-count">0 milestones</div>
           </div>
         </div>
         <div class="col-6 col-md-3">
           <div class="card border-0 shadow-sm p-3 text-center">
             <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Paid</div>
-            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#16a34a;" id="kpi-paid-sum">â‚±0</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#16a34a;" id="kpi-paid-sum">₱0</div>
             <div class="small text-muted" id="kpi-paid-count">0 milestones</div>
           </div>
         </div>
@@ -2075,7 +2075,7 @@
           <div class="mb-3">
             <label class="form-label fw-bold small text-muted">Project <span class="text-danger">*</span></label>
             <select id="wp-project" class="form-select" onchange="onWpProjectChange()">
-              <option value="">â€” Select Project â€”</option>
+              <option value="">— Select Project —</option>
             </select>
           </div>
 
@@ -2084,9 +2084,9 @@
             <label class="form-label fw-bold small text-muted">Subcontractor <span class="text-danger">*</span></label>
             <div class="d-flex gap-2">
               <select id="wp-sub" class="form-select flex-grow-1">
-                <option value="">â€” Select Subcontractor â€”</option>
+                <option value="">— Select Subcontractor —</option>
               </select>
-              <button type="button" class="btn btn-outline-secondary btn-sm px-3 flex-shrink-0" onclick="toggleWpQuickAddSub()" style="border-radius:8px;">ï¼‹ New</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm px-3 flex-shrink-0" onclick="toggleWpQuickAddSub()" style="border-radius:8px;">＋ New</button>
             </div>
           </div>
 
@@ -2111,7 +2111,7 @@
           <div class="mb-3">
             <label class="form-label fw-bold small text-muted">Budget Basis</label>
             <select id="wp-basis" class="form-select" onchange="onWpBasisChange()">
-              <option value="">â€” None â€”</option>
+              <option value="">— None —</option>
               <option value="labor">Labor only</option>
               <option value="material">Materials only</option>
               <option value="total">Materials + Labor / Total</option>
@@ -2122,7 +2122,7 @@
           <div class="mb-3" id="wp-boq-picker-wrap" style="display:none;">
             <label class="form-label fw-bold small text-muted">BOQ Lines to Assign</label>
             <input type="text" id="wp-boq-search" class="form-control form-control-sm mb-2"
-              placeholder="Search items, scopes, phasesâ€¦" oninput="filterWpBoqPicker()">
+              placeholder="Search items, scopes, phases…" oninput="filterWpBoqPicker()">
             <div id="wp-boq-picker-body"></div>
             <div class="mt-2 small fw-bold" id="wp-boq-running-total" style="color:#1d3461;"></div>
           </div>
@@ -2130,12 +2130,12 @@
           <!-- 5. Label -->
           <div class="mb-3">
             <label class="form-label fw-bold small text-muted">Work Package Label <span class="text-danger">*</span></label>
-            <input type="text" id="wp-label" class="form-control" placeholder="e.g. Structural Works â€“ Phase 1">
+            <input type="text" id="wp-label" class="form-control" placeholder="e.g. Structural Works – Phase 1">
           </div>
 
           <!-- 6. Contract Value -->
           <div class="mb-3">
-            <label class="form-label fw-bold small text-muted">Contract Value (â‚±) <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold small text-muted">Contract Value (₱) <span class="text-danger">*</span></label>
             <input type="text" inputmode="decimal" id="wp-contract-value" class="form-control"
               placeholder="e.g. 500,000" oninput="formatThousands(this); recomputeWpMilestoneAmounts()">
           </div>
@@ -2153,14 +2153,14 @@
               <div class="col">Label</div>
               <div class="col-2">Target %</div>
               <div class="col-2">Pay %</div>
-              <div class="col-3">Amount (â‚±)</div>
+              <div class="col-3">Amount (₱)</div>
               <div class="col-auto" style="width:42px;"></div>
             </div>
             <div id="wp-milestonesContainer"></div>
             <div class="d-flex align-items-center gap-3 mt-2 flex-wrap">
               <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;" onclick="addWpMilestoneRow()">+ Add Milestone</button>
               <span id="wp-milestoneTotal" class="badge bg-secondary">Total Payment: 0%</span>
-              <span id="wp-milestoneAmtTotal" class="small fw-bold" style="color:#1d3461;">Total: â‚±0.00</span>
+              <span id="wp-milestoneAmtTotal" class="small fw-bold" style="color:#1d3461;">Total: ₱0.00</span>
             </div>
           </div>
 
@@ -2243,14 +2243,14 @@
             <div class="mb-3">
               <label class="form-label fw-bold small text-muted">Project <span class="text-danger">*</span></label>
               <select id="rpt-project" class="form-select" onchange="onRptModalProjectChange()">
-                <option value="">â€” Select Project â€”</option>
+                <option value="">— Select Project —</option>
               </select>
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold small text-muted">Work Package <span class="text-danger">*</span></label>
               <select id="rpt-wp" class="form-select" disabled onchange="onRptModalWpChange()">
-                <option value="">â€” Select Work Package â€”</option>
+                <option value="">— Select Work Package —</option>
               </select>
             </div>
 
@@ -2302,26 +2302,26 @@
         <div class="col-6 col-md-3">
           <div class="card border-0 shadow-sm p-3 text-center">
             <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">BOQ Budget</div>
-            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="bkpi-boq">â‚±0</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="bkpi-boq">₱0</div>
           </div>
         </div>
         <div class="col-6 col-md-3">
           <div class="card border-0 shadow-sm p-3 text-center">
             <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Contract Committed</div>
-            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="bkpi-contract">â‚±0</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="bkpi-contract">₱0</div>
           </div>
         </div>
         <div class="col-6 col-md-3">
           <div class="card border-0 shadow-sm p-3 text-center">
             <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Paid</div>
-            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#16a34a;" id="bkpi-paid">â‚±0</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#16a34a;" id="bkpi-paid">₱0</div>
           </div>
         </div>
         <div class="col-6 col-md-3">
           <div class="card border-0 shadow-sm p-3 text-center">
             <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Variance</div>
-            <div class="fw-bold mt-1" style="font-size:1.2rem;" id="bkpi-variance">â‚±0</div>
-            <div class="small text-muted">BOQ âˆ’ Contract</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;" id="bkpi-variance">₱0</div>
+            <div class="small text-muted">BOQ − Contract</div>
           </div>
         </div>
       </div>
@@ -2366,7 +2366,7 @@
     <!-- ===== SUBCONTRACTOR PAYABLES SECTION ===== -->
     <div id="section-subcon-payables" class="content-section">
       <h2 class="page-title">Subcontractor Payables</h2>
-      <p class="text-center text-muted mb-4" style="margin-top:-1.5rem;font-size:0.9rem;">Milestones ready to pay â€” settlement queue</p>
+      <p class="text-center text-muted mb-4" style="margin-top:-1.5rem;font-size:0.9rem;">Milestones ready to pay — settlement queue</p>
       <div class="card shadow-sm border-0">
         <div class="card-body p-0">
           <div class="table-responsive">
