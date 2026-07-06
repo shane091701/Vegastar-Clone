@@ -16,7 +16,7 @@ source, ports the frontend, prepares the database, and runs the tests.
 1. Install Ruby 3.3 + DevKit: `winget install RubyInstallerTeam.RubyWithDevKit.3.3`
 2. `gem install rails -v "~> 8.0"`
 3. Postgres running on localhost. Credentials via `PGUSER` / `PGPASSWORD`
-   (defaults `postgres`/`postgres` — see `config/database.yml`)
+   (defaults baked into `config/database.yml` for this machine)
 4. `bundle install`
 5. `bin/rails active_storage:install && bin/rails db:prepare db:seed`
 6. `bin/rails server` → http://localhost:3000
