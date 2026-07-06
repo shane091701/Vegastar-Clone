@@ -74,7 +74,7 @@ class Api::SubcontractorsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_match(/already assigned/, JSON.parse(response.body)["error"])
 
-    create_sub rescue nil
+    # SUB-00001 still exists from create_wp above
     post "/api/saveWorkPackage", params: { args: [{
       "project" => "PRJ2", "subId" => "SUB-00001", "label" => "Bad", "basis" => "labor",
       "contractValue" => 500,

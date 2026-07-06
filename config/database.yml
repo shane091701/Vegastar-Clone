@@ -5,6 +5,9 @@ default: &default
   username: <%= ENV.fetch("PGUSER", "postgres") %>
   password: <%= ENV.fetch("PGPASSWORD", "postgres") %>
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # Avoid Windows libpq negotiation drops ("server closed the connection unexpectedly")
+  gssencmode: disable
+  sslmode: disable
 
 development:
   <<: *default

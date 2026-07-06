@@ -38,14 +38,14 @@ class BoqPdfBuilder
           mat = it["materialCost"].to_f
           tot = it["totalCost"].to_f.nonzero? || (lab + mat) * qty
           grand_total += tot
-          body << "<tr>" \
-            %(<td style="border:1px solid #ddd;padding:6px 8px;">#{h(it["name"])}</td>) \
-            %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:center;">#{h(it["unit"])}</td>) \
-            %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:center;">#{fmt_qty(qty)}</td>) \
-            %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:right;">#{fmt(lab)}</td>) \
-            %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:right;">#{fmt(mat)}</td>) \
-            %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:right;font-weight:600;">#{fmt(tot)}</td>) \
-            "</tr>"
+          body << "<tr>"
+          body << %(<td style="border:1px solid #ddd;padding:6px 8px;">#{h(it["name"])}</td>)
+          body << %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:center;">#{h(it["unit"])}</td>)
+          body << %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:center;">#{fmt_qty(qty)}</td>)
+          body << %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:right;">#{fmt(lab)}</td>)
+          body << %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:right;">#{fmt(mat)}</td>)
+          body << %(<td style="border:1px solid #ddd;padding:6px 8px;text-align:right;font-weight:600;">#{fmt(tot)}</td>)
+          body << "</tr>"
         end
       end
     end
