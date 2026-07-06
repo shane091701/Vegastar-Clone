@@ -1,0 +1,2 @@
+class OutLedgerEntry < ApplicationRecord
+end

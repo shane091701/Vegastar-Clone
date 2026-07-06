@@ -1,0 +1,2463 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+    
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <%= csrf_meta_tags %>
+  <%= stylesheet_link_tag "portal" %>
+  
+  <script>
+    const CLIENT_NAME = "Vegastar";
+    const RESET_TOKEN = "<%= j params[:resetToken].to_s %>";
+    const SUKI_PO = "<%= j params[:sukiPo].to_s %>";
+  </script>
+
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: { extend: { colors: { alpha: { gold: '#f8b400', navy: '#0f172a' } } } }
+    }
+  </script>
+
+</head>
+<body>
+
+<div id="auth-loading" class="lp-auth-overlay" style="display:none;">
+  <div class="lp-auth-card">
+    <div class="lp-logo lp-logo-sm"><img src="https://i.imgur.com/dhbq2a5.png" alt="Vegastar Logo"></div>
+    <h3 class="lp-auth-title">Vegastar</h3>
+    <div class="lp-auth-spinner">
+      <svg class="lp-spin-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="lp-spin-track" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+        <path class="lp-spin-fill" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Authenticating...
+    </div>
+  </div>
+</div>
+
+<div id="auth-denied" class="lp-auth-overlay" style="display:none;">
+  <div class="lp-auth-card">
+    <div style="font-size: 3.5rem; margin-bottom: 0.75rem; line-height: 1;">ðŸ›‘</div>
+    <h2 class="lp-auth-title" style="color: #dc2626;">Access Denied</h2>
+    <p id="denied-message" style="color: #64748b; font-size: 0.875rem; margin-top: 0.5rem; text-align: center; font-family: var(--body-font); max-width: 260px; line-height: 1.6;">You are not authorized to access this portal.</p>
+  </div>
+</div>
+
+<div id="login-screen" class="lp-root" style="display:flex !important;">
+
+  <!-- Left: Branding Panel -->
+  <div class="lp-brand">
+    <div class="lp-brand-inner">
+      <div class="lp-logo"><img src="https://i.imgur.com/dhbq2a5.png" alt="Vegastar Logo"></div>
+      <h1 class="lp-brand-name">Vegastar</h1>
+      <p class="lp-brand-tagline">Enterprise Resource Portal</p>
+      <div class="lp-brand-divider"></div>
+      <p class="lp-brand-desc">A centralized platform for construction project management â€” from BOQ ingestion to payment tracking, all in one place.</p>
+      <div class="lp-brand-features">
+        <div class="lp-feature-item">
+          <span class="lp-feature-icon">ðŸ“‹</span>
+          <span>BOQ &amp; Material Management</span>
+        </div>
+        <div class="lp-feature-item">
+          <span class="lp-feature-icon">ðŸ“¦</span>
+          <span>Purchase Orders &amp; RFQs</span>
+        </div>
+        <div class="lp-feature-item">
+          <span class="lp-feature-icon">ðŸ’³</span>
+          <span>Accounting &amp; Payments</span>
+        </div>
+      </div>
+    </div>
+    <div class="lp-deco-circle lp-deco-1"></div>
+    <div class="lp-deco-circle lp-deco-2"></div>
+  </div>
+
+  <!-- Right: Form Panel -->
+  <div class="lp-form-panel">
+    <div class="lp-form-inner">
+
+      <div class="lp-form-header">
+        <div class="lp-form-logo-sm"><img src="https://i.imgur.com/dhbq2a5.png" alt="Vegastar Logo"></div>
+        <h2 class="lp-form-title">Welcome back</h2>
+        <p class="lp-form-subtitle">Sign in to your account to continue</p>
+      </div>
+
+      <div id="login-alert" class="toast-notification" style="display:none;" role="alert"></div>
+
+      <div class="lp-field">
+        <label class="lp-label" for="loginEmail">Email Address</label>
+        <input type="email" id="loginEmail" class="lp-input" placeholder="you@vegastar.com" required>
+      </div>
+
+      <div class="lp-field">
+        <div class="lp-label-row">
+          <label class="lp-label" for="loginPassword">Password</label>
+          <a href="#" class="lp-link-forgot" onclick="forgotPassword(); return false;">Forgot password?</a>
+        </div>
+        <div class="lp-input-wrap">
+          <input type="password" id="loginPassword" class="lp-input" placeholder="Enter your password" required>
+          <button type="button" class="lp-eye-btn" onclick="var i=this.previousElementSibling; i.type=i.type==='password'?'text':'password';" title="Toggle password visibility" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button id="loginBtn" onclick="attemptLogin()" class="lp-btn-login">
+        Sign In
+      </button>
+
+      <p class="lp-security-note">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Secured with enterprise-grade authentication
+      </p>
+    </div>
+  </div>
+</div>
+
+<div id="reset-screen" class="lp-auth-overlay" style="display:none !important;">
+  <div class="lp-auth-card lp-reset-card">
+    <div style="font-size: 2.75rem; line-height: 1; margin-bottom: 0.85rem;">ðŸ”</div>
+    <h3 class="lp-auth-title">Set New Password</h3>
+    <p style="color: #64748b; font-size: 0.875rem; margin: 0.5rem 0 1.5rem; text-align: center; font-family: var(--body-font); line-height: 1.6;">Create a new secure password for your account</p>
+    <div id="reset-alert" class="alert alert-danger py-2" style="display:none; font-size: 0.85rem; width: 100%;"></div>
+    <div class="lp-field" style="width: 100%;">
+      <label class="lp-label" for="newPassword">New Password</label>
+      <input type="password" id="newPassword" class="lp-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+    </div>
+    <div class="lp-field" style="width: 100%;">
+      <label class="lp-label" for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" class="lp-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+    </div>
+    <button id="resetSubmitBtn" class="lp-btn-login" style="margin-top: 0.25rem;" onclick="submitNewPassword()">Update Password</button>
+    <div style="text-align: center; margin-top: 1.25rem;">
+      <a href="javascript:void(0)" onclick="window.top.location.href=window.top.location.href.split('?')[0];" class="lp-link-forgot">â† Back to Login</a>
+    </div>
+  </div>
+</div>
+
+<div id="supplier-screen" class="d-flex justify-content-center align-items-center" style="display:none !important; min-height:100vh; padding: 20px;">
+  <div class="card shadow-sm p-4" style="width: 100%; max-width: 800px; border-radius: 12px; border: none;">
+    <h3 class="fw-bold text-dark text-center">Supplier Pricing Entry</h3>
+    <p class="text-muted text-center" id="suki-po-subtitle">PO Number: Loading...</p>
+    
+    <div class="table-responsive mt-3">
+       <table class="table table-bordered table-sm align-middle">
+         <thead class="table-light"><tr><th>Item</th><th>Unit</th><th>App. Qty</th><th>Price/Amount</th><th>Line Total</th></tr></thead>
+         <tbody id="suki-item-body"></tbody>
+         <tfoot class="fw-bold"><tr><th colspan="4" class="text-end">Grand Total:</th><th id="suki-grand-total">â‚±0.00</th></tr></tfoot>
+       </table>
+    </div>
+    <button id="sukiSubmitBtn" class="btn btn-primary w-100 fw-bold py-2 mt-3" onclick="submitSuki()">Send Pricing</button>
+  </div>
+</div>
+
+
+<div id="app-content" style="display:none;">
+  
+  <div class="top-nav">
+    <div class="logo-section">
+      <div class="logo-icon"><img src="https://i.imgur.com/dhbq2a5.png" alt="Vegastar Logo"></div>
+      <div class="logo-text">Vegastar</div>
+    </div>
+    
+    <div class="nav-links d-flex align-items-center">
+      <div class="dropdown" id="nav-group-boq" style="display:none;">
+        <a class="dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">BOQ Ingestor</a>
+        <ul class="dropdown-menu">
+          <li data-permission="boq"><a class="dropdown-item" id="nav-boq" onclick="showSection('boq')">Upload Excel File</a></li>
+          <li data-permission="boq"><a class="dropdown-item" id="nav-build-boq" onclick="showSection('build-boq')">Build BOQ</a></li>
+        </ul>
+      </div>
+      <a id="nav-expense" data-permission="expense" onclick="showSection('expense')">Expense Log</a>
+
+      <!-- Group wrapper has no data-permission â€” JS collapses it when all children are hidden -->
+      <div class="dropdown" id="nav-group-site-engineer" style="display:none;">
+        <a class="dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Site Engineer</a>
+        <ul class="dropdown-menu">
+          <li data-permission="site engineer"><a class="dropdown-item" id="nav-material" onclick="showSection('material')">Material Request</a></li>
+          <li data-permission="site engineer"><a class="dropdown-item" id="nav-receiving" onclick="showSection('receiving')">Receiving</a></li>
+          <!-- Petty Cash is accessible via full site-engineer role OR the narrower record-petty-cash permission -->
+          <li data-permission="site engineer|record petty cash"><a class="dropdown-item" id="nav-petty-cash" onclick="showSection('petty-cash')">Request Reimbursement</a></li>
+        </ul>
+      </div>
+
+      <div class="dropdown" id="nav-group-project-engineer" style="display:none;">
+        <a class="dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Project Engineer</a>
+        <ul class="dropdown-menu">
+          <li data-permission="project engineer|admin"><a class="dropdown-item" id="nav-project-engineer" onclick="showSection('project-engineer')">Project Progress &amp; RTB</a></li>
+        </ul>
+      </div>
+
+      <div class="dropdown" id="nav-group-subcontractor" style="display:none;">
+        <a class="dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Subcontractor</a>
+        <ul class="dropdown-menu">
+          <li data-permission="subcontractor"><a class="dropdown-item" id="nav-subcontractor-ap" onclick="showSection('subcontractor-ap')">Subcontractor AP</a></li>
+          <li data-permission="subcontractor"><a class="dropdown-item" id="nav-assign-wp" onclick="showSection('assign-wp')">Assign Work Package</a></li>
+          <li data-permission="subcontractor reports|subcontractor"><a class="dropdown-item" id="nav-subcontractor-reports" onclick="showSection('subcontractor-reports')">Subcontractor Reports</a></li>
+          <li data-permission="subcontractor"><a class="dropdown-item" id="nav-subcontract-budget" onclick="showSection('subcontract-budget')">Budget vs Actual</a></li>
+        </ul>
+      </div>
+
+      <div class="dropdown" id="nav-group-material-requests" style="display:none;">
+        <a class="dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Procurement</a>
+        <ul class="dropdown-menu">
+          <li data-permission="material requests"><a class="dropdown-item" id="nav-approvals" onclick="showSection('approvals')">Approvals Queue</a></li>
+          <li data-permission="material requests"><a class="dropdown-item" id="nav-rfq" onclick="showSection('rfq')">RFQs</a></li>
+          <li data-permission="material requests"><a class="dropdown-item" id="nav-bid-tab" onclick="showSection('bid-tab')">Encode Quotes</a></li>
+          <li data-permission="material requests"><a class="dropdown-item" id="nav-canvas" onclick="showSection('canvas')">Canvas & Award</a></li>
+          <li data-permission="material requests"><a class="dropdown-item" id="nav-purchase-orders" onclick="showSection('purchase-orders')">Purchase Orders</a></li>
+          <li data-permission="material requests"><a class="dropdown-item" id="nav-historical-pricing" onclick="showSection('historical-pricing')">Historical Pricing</a></li>
+        </ul>
+      </div>
+
+      <div class="dropdown" id="nav-group-payments" style="display:none;">
+        <a class="dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Accounting</a>
+        <ul class="dropdown-menu">
+          <li data-permission="payments"><a class="dropdown-item" id="nav-payments" onclick="showSection('payments')">Bulk Payments</a></li>
+          <li data-permission="payments"><a class="dropdown-item" id="nav-checks" onclick="showSection('checks')">Pending Checks</a></li>
+          <li data-permission="petty cash ledger"><a class="dropdown-item" id="nav-pc-ledger" onclick="showSection('pc-ledger')">Reimbursement Ledger</a></li>
+          <li data-permission="boq-adjust"><a class="dropdown-item" id="nav-boq-adjust" onclick="showSection('boq-adjust')">BOQ Adjustments</a></li>
+          <li data-permission="compute project cost"><a class="dropdown-item" id="nav-compute-cost" onclick="showSection('compute-cost')">Compute Cost</a></li>
+          <li data-permission="supplier data"><a class="dropdown-item" id="nav-supplier-data" onclick="showSection('supplier-data')">Supplier Data</a></li>
+          <li data-permission="issue payments"><a class="dropdown-item" id="nav-issue-payments" onclick="showSection('issue-payments')">Issue Payments</a></li>
+          <li data-permission="refundable expenses"><a class="dropdown-item" id="nav-refundable-expenses" onclick="showSection('refundable-expenses')">Refundable Expenses</a></li>
+          <li data-permission="payments|admin"><a class="dropdown-item" id="nav-collections" onclick="showSection('collections')">Project Payment Collection</a></li>
+          <li data-permission="payments|subcontractor"><a class="dropdown-item" id="nav-subcon-payables" onclick="showSection('subcon-payables')">Subcontractor Payables</a></li>
+        </ul>
+      </div>
+      <a id="nav-rtb-approvals" data-permission="rtb-approvals" onclick="showSection('rtb-approvals')">RTB Approvals</a>
+    </div> <div class="user-profile">
+      <span id="user-display-name">Loading...</span>
+      <button onclick="logout()" class="btn btn-sm btn-outline-danger ms-2" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">Log Out</button>
+    </div>
+  </div>
+
+
+  <div class="main-container">
+
+    <div id="section-supplier-data" class="content-section">
+      <h2 class="page-title">Supplier Database</h2>
+      
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="card shadow-sm border-0 h-100 bg-white">
+            <div class="card-header bg-white border-bottom py-3">
+              <h6 class="mb-0 fw-bold text-primary">âž• Register New Supplier</h6>
+            </div>
+            <div class="card-body p-4">
+              <div id="supplier-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
+              
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-muted">Company / Supplier Name <span>*</span></label>
+                <input type="text" id="supName" class="form-control form-control-sm" placeholder="e.g. Hardware Corp">
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-muted">Contact Person <span>*</span></label>
+                <input type="text" id="supContact" class="form-control form-control-sm" placeholder="e.g. Juan Dela Cruz">
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-muted">Email Address <span>*</span> (Used for POs)</label>
+                <input type="email" id="supEmail" class="form-control form-control-sm" placeholder="juandelacruz@gmail.com">
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label small fw-bold text-muted">Phone Number</label>
+                  <input type="text" id="supPhone" class="form-control form-control-sm" placeholder="09XX XXX XXXX">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-bold text-muted">TIN</label>
+                  <input type="text" id="supTin" class="form-control form-control-sm" placeholder="XXX-XXX-XXX-XXX">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-muted">Category / Specialty</label>
+                <input type="text" id="supCategory" class="form-control form-control-sm" placeholder="e.g. Electrical, Rental">
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-muted">Business Address</label>
+                <input type="text" id="supAddress" class="form-control form-control-sm" placeholder="Complete address">
+              </div>
+              <div class="mb-4">
+                <label class="form-label small fw-bold text-muted">Bank Details</label>
+                <textarea id="supBank" class="form-control form-control-sm" rows="2" placeholder="Bank Name, Account Name, Account No."></textarea>
+              </div>
+              
+              <button id="supSubmitBtn" class="btn btn-primary w-100 fw-bold py-2" onclick="submitSupplier()">Save Supplier</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="card shadow-sm border-0 h-100 bg-white">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 fw-bold">Supplier Directory</h6>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                  <thead class="table-light text-muted sticky-top" style="font-size: 0.75rem; text-transform: uppercase;">
+                    <tr>
+                      <th class="ps-4">Company Name</th>
+                      <th>Contact Details</th>
+                      <th>Category</th>
+                      <th>TIN</th>
+                    </tr>
+                  </thead>
+                  <tbody id="supplierTableBody">
+                    <tr><td colspan="4" class="text-center py-4 text-muted">Loading suppliers...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="section-boq-adjust" class="content-section">
+      <h2 class="page-title">BOQ Adjustments & Additions</h2>
+
+      <div class="card shadow-sm border-0 mb-4" id="boq-approvals-card" style="display:none;">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-bold">ðŸ“¥ Pending BOQ Approvals</h6>
+          <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="loadPendingBoqApprovals()">&#8635; Refresh</button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">
+              <thead class="table-light text-muted" style="font-size:0.72rem;text-transform:uppercase;">
+                <tr>
+                  <th class="ps-4">Submission</th>
+                  <th>Project</th>
+                  <th>Customer</th>
+                  <th>Company</th>
+                  <th class="text-center">Items</th>
+                  <th class="text-end">Grand Total</th>
+                  <th>Submitter</th>
+                  <th class="text-center pe-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="boq-approvals-body">
+                <tr><td colspan="8" class="text-center py-4 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-muted">Select Project to Modify</label>
+          <select class="form-select" id="boqAdjustProjectSelect" onchange="loadBoqAdjustItems()">
+            <option value="">â€” Select Project â€”</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="boq-adjust-workspace" style="display:none;">
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">Current BOQ Items (Select to Reduce/Adjust)</h6>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                  <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                    <thead class="table-light text-muted sticky-top" style="font-size: 0.75rem; text-transform: uppercase;">
+                      <tr>
+                        <th class="ps-3">Phase / Item</th>
+                        <th>Unit</th>
+                        <th class="text-end">Mat Cost</th>
+                        <th class="text-end">Lab Cost</th>
+                        <th class="text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="boqAdjustTableBody">
+                      <tr><td colspan="5" class="text-center py-4 text-muted">Loading items...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100 bg-light">
+              <div class="card-body p-4">
+                <h6 class="fw-bold mb-3 text-success">âž• Add New Item</h6>
+                <div id="boq-add-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
+                
+                <div class="mb-2">
+                  <label class="form-label small fw-bold text-muted">Phase</label>
+                  <input type="text" id="addBoqPhase" class="form-control form-control-sm" placeholder="e.g. I. GENERAL REQUIREMENTS">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small fw-bold text-muted">Item Description</label>
+                  <input type="text" id="addBoqDesc" class="form-control form-control-sm" placeholder="Item name...">
+                </div>
+                <div class="row g-2 mb-2">
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">Unit</label>
+                    <input type="text" id="addBoqUnit" class="form-control form-control-sm" placeholder="e.g. sq.m, lot">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">Quantity</label>
+                    <input type="number" id="addBoqQty" class="form-control form-control-sm" placeholder="0">
+                  </div>
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">Materials Cost</label>
+                    <input type="number" id="addBoqMat" class="form-control form-control-sm" placeholder="â‚±0.00">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">Labor Cost</label>
+                    <input type="number" id="addBoqLab" class="form-control form-control-sm" placeholder="â‚±0.00">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-muted">Reason for Addition</label>
+                  <textarea id="addBoqReason" class="form-control form-control-sm" rows="2" placeholder="Explain why this item is being added..."></textarea>
+                </div>
+                <button id="addBoqBtn" class="btn btn-success btn-sm w-100 fw-bold" onclick="submitAddBoqItem()">Save New Item</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="adjustBoqModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-warning bg-opacity-25">
+            <h5 class="modal-title fw-bold">Reduce / Adjust BOQ Item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div id="adjust-boq-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
+            
+            <input type="hidden" id="adjRowIndex">
+            
+            <p class="fw-bold text-dark mb-1" id="adjItemName">Item Name</p>
+            <p class="small text-muted mb-4" id="adjPhaseName">Phase Name</p>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold text-muted">New Materials Cost</label>
+                <input type="number" id="adjNewMat" class="form-control form-control-sm text-danger fw-bold" placeholder="0.00">
+                <div class="small text-muted mt-1" id="adjOldMatDisplay">Old: â‚±0.00</div>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold text-muted">New Labor Cost</label>
+                <input type="number" id="adjNewLab" class="form-control form-control-sm text-danger fw-bold" placeholder="0.00">
+                <div class="small text-muted mt-1" id="adjOldLabDisplay">Old: â‚±0.00</div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted">Reason for Adjustment <span>*</span></label>
+              <textarea id="adjReason" class="form-control form-control-sm" rows="2" placeholder="e.g. Value engineering, scope reduction, error correction..."></textarea>
+            </div>
+            <p class="small text-muted fst-italic mt-2 mb-0">Note: To zero-out an item, set costs to 0.</p>
+          </div>
+          <div class="modal-footer border-top-0 pt-0">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-warning btn-sm fw-bold px-4" id="adjSubmitBtn" onclick="submitAdjustBoqItem()">Apply Adjustment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div id="section-compute-cost" class="content-section">
+  <h2 class="page-title">Compute Project Cost</h2>
+  
+  <div class="card shadow-sm border-0 mb-4 bg-white">
+    <div class="card-body p-4">
+      
+      <div class="row g-3 mb-4 align-items-center">
+        <div class="col-md-5">
+          <label class="form-label fw-bold text-muted small">Select Project to Simulate <span>*</span></label>
+          <select id="pricing-project-select" class="form-select" onchange="loadPricingData()">
+            <option value="">â€” Select project â€”</option>
+          </select>
+        </div>
+        <div class="col-md-7 text-end">
+           <h4 class="mb-0 text-success fw-bold p-3 border border-success rounded bg-light d-inline-block">
+             Grand Total: <span id="pricing-grand-total">â‚±0.00</span>
+           </h4>
+        </div>
+      </div>
+
+<div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-muted" style="font-size: 0.75rem; text-transform: uppercase;">
+            <tr>
+              <th class="ps-3">Expense Category / Line Item</th>
+              <th class="text-end">Expense Amount</th>
+              <th class="text-center" style="width: 130px;">Override (â‚±)</th>
+              <th class="text-center" style="width: 130px;">Markup (%)</th>
+              <th class="text-end pe-3">Final Cost</th>
+            </tr>
+          </thead>
+          <tbody id="pricing-table-body">
+            <tr><td colspan="5" class="text-center py-4 text-muted">Select a project to load data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button id="save-pricing-btn" class="btn btn-primary fw-bold px-5 py-2 mt-4" style="display: none;" onclick="savePricing()">Save Simulation</button>
+
+    </div>
+  </div>
+</div>
+
+
+    <div id="section-pc-ledger" class="content-section">
+      <h2 class="page-title">Reimbursement Ledger (Abono)</h2>
+
+      <div class="card shadow-sm border-0 mb-4 bg-white">
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Project</label>
+              <select id="ledgerFilterProject" class="form-select form-select-sm" onchange="filterPCLedger()"><option value="All">All</option></select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small fw-bold">From</label>
+              <input type="date" id="ledgerFilterFrom" class="form-control form-control-sm" onchange="filterPCLedger()">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small fw-bold">To</label>
+              <input type="date" id="ledgerFilterTo" class="form-control form-control-sm" onchange="filterPCLedger()">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small fw-bold">Type</label>
+              <select id="ledgerFilterType" class="form-select form-select-sm" onchange="filterPCLedger()"><option value="All">All</option></select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Submitter</label>
+              <select id="ledgerFilterSubmitter" class="form-select form-select-sm" onchange="filterPCLedger()"><option value="All">All</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card shadow-sm border-0 mb-4 bg-white">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="mb-0 fw-bold">Amount Owed (Accounts Payable)</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light text-muted" style="font-size: 0.75rem; text-transform: uppercase;">
+                <tr>
+                  <th class="ps-4">Project</th>
+                  <th>Amount Owed</th>
+                  <th class="text-end pe-4">Action</th>
+                </tr>
+              </thead>
+              <tbody id="pcBalanceTableBody">
+                <tr><td colspan="3" class="text-center py-4">Loading balances...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card shadow-sm border-0 bg-white">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="mb-0 fw-bold">Transactions</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light text-muted" style="font-size: 0.75rem; text-transform: uppercase;">
+                <tr>
+                  <th class="ps-4">Date</th>
+                  <th>Type</th>
+                  <th>Project</th>
+                  <th>Submitter</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Attachment</th>
+                </tr>
+              </thead>
+              <tbody id="pcTransactionsTableBody">
+                <tr><td colspan="7" class="text-center py-4">Loading transactions...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="replenishModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Settle Reimbursement</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="replenish-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Project</label>
+              <input type="text" id="replenishProject" class="form-control bg-light" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Amount (â‚±) <span>*</span></label>
+              <input type="number" id="replenishAmount" class="form-control" placeholder="0.00" step="0.01">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Attach Deposit Slip <span>*</span></label>
+              <input type="file" id="replenishFile" class="form-control" accept="image/*,.pdf">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary fw-bold" id="replenishSubmitBtn" onclick="submitReplenishment()">Settle Debt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-material" class="content-section active">
+      <h2 class="page-title">Material Request</h2>
+      <ul class="nav nav-tabs" id="mrfTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#new" type="button">New Request</button></li>
+        <li class="nav-item"><button class="nav-link" id="returnable-tab" data-bs-toggle="tab" data-bs-target="#returnable" type="button" onclick="loadReturnableItems()">Add Returnable Items</button></li>
+        <li class="nav-item"><button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" onclick="loadHistory()">My Requests</button></li>
+      </ul>
+      <div class="tab-content" id="mrfTabContent">
+        <div class="tab-pane fade" id="returnable" role="tabpanel">
+          <div class="alert alert-info mt-3" style="font-size: 0.85rem;">
+            <strong>â„¹ï¸ What are Returnable Items?</strong> These are items rented or leased from hardware suppliers and construction depots (e.g., scaffolding, heavy equipment, power tools). They are <strong>not</strong> included in the BOQ since they are tools/machines, but they still require approval and receiving documentation.
+          </div>
+          
+          <div class="card shadow-sm border-0 mb-4 bg-light">
+            <div class="card-body">
+              <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold">Select Project <span>*</span></label>
+                  <select class="form-select form-select-sm" id="retProjectSelect"><option value="">â€” Loading â€”</option></select>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle mb-2">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Tool / Machine Name <span>*</span></th>
+                      <th style="width: 150px;">Quantity <span>*</span></th>
+                      <th style="width: 80px;" class="text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="retItemsBody"></tbody>
+                </table>
+              </div>
+              <button class="btn btn-outline-secondary btn-sm fw-bold mb-3" onclick="addReturnableRow()">+ Add Another Tool</button>
+              <div>
+                <button class="btn btn-primary btn-sm fw-bold px-4" id="retSubmitBtn" onclick="submitReturnableItems()">Submit Request</button>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="fw-bold mb-2">Summary of Requested Returnable Items</h6>
+          <div class="table-responsive">
+            <table class="table table-striped table-sm align-middle">
+              <thead class="table-light">
+                <tr><th>Date</th><th>Project</th><th>Item Name</th><th class="text-center">Qty</th><th>Requester</th><th>Status</th></tr>
+              </thead>
+              <tbody id="retTableBody">
+                <tr><td colspan="6" class="text-center py-3 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="tab-pane fade show active" id="new" role="tabpanel">
+          <div id="mrf-form-view">
+            <div class="row mb-4 mt-2">
+              <div class="col-md-3">
+                <label class="form-label fw-bold">Project <span>*</span></label>
+                <select class="form-select" id="projectSelect" onchange="onMrfProjectChange()"><option value="">â€” Select project â€”</option></select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-bold">Find Item <span class="text-muted fw-normal small">(Jumps to Phase &amp; Scope)</span></label>
+                <input type="text" id="mrfItemSearch" class="form-control" list="mrfItemSearchList" placeholder="Type to search..." onchange="onMrfSearchChange()" disabled>
+                <datalist id="mrfItemSearchList"></datalist>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-bold">Phase Filter <span class="text-muted fw-normal small">(Narrows view only)</span></label>
+                <select class="form-select" id="mrfPhaseFilter" onchange="onMrfPhaseFilterChange()" disabled>
+                  <option value="">â€” All Phases â€”</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-bold">Scope Filter <span class="text-muted fw-normal small">(Narrows view only)</span></label>
+                <select class="form-select" id="mrfScopeFilter" onchange="onMrfScopeFilterChange()" disabled>
+                  <option value="">â€” All Scopes â€”</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="mrf-phases-container">
+              <div id="mrf-no-project-msg" class="text-center py-5 text-muted">Select a project to view available phases and items.</div>
+            </div>
+
+            <button id="mrfSubmitBtn" class="btn btn-primary mt-3" onclick="submitData()" style="display:none;">Submit Request</button>
+          </div>
+          <div id="success-view" style="display:none;">
+            <div class="success-check">âœ…</div>
+            <h3>Request Submitted!</h3>
+            <button class="btn btn-outline-primary" onclick="resetMRF()">Submit Another Request</button>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="history" role="tabpanel">
+          <p class="text-muted small mt-2 mb-2">Click a request to expand and see its individual items.</p>
+          <div class="table-responsive mt-2">
+            <table class="table table-sm mb-0">
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div> 
+    </div> 
+
+    <div id="section-payments" class="content-section">
+      <h2 class="page-title">Bulk Payment Entry</h2>
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <div id="payment-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <label class="form-label fw-bold text-muted small">Project Name <span>*</span></label>
+              <select class="form-select" id="paymentProjectSelect"><option value="">â€” Loading â€”</option></select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-bold text-muted small">Number of Checks</label>
+              <input type="number" id="bulkCount" class="form-control" value="1" min="1">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold text-muted small">First Check Date <span>*</span></label>
+              <input type="date" id="paymentDate" class="form-control">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-bold text-muted small">Default Amount (â‚±) <span>*</span></label>
+              <input type="number" id="paymentAmount" class="form-control" placeholder="0.00">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-outline-primary w-100 fw-bold" onclick="generateBulkRows()">Generate Rows</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Project</th>
+                  <th>Check / Payment Date</th>
+                  <th>Bank</th>
+                  <th>Check Number</th>
+                  <th>Amount (â‚±)</th>
+                  <th style="width:50px;"></th>
+                </tr>
+              </thead>
+              <tbody id="bulkPaymentBody"></tbody>
+            </table>
+          </div>
+          <button id="paymentSubmitBtn" class="btn btn-primary fw-bold px-5 py-2 mt-3" onclick="submitBulkPayments()" style="display:none;">Save All Payments</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-checks" class="content-section">
+      <h2 class="page-title">Pending Checks</h2>
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <span class="fw-bold">Outstanding Monitoring</span>
+          <div class="d-flex gap-2">
+            <select id="pendingCheckProjectFilter" class="form-select form-select-sm" style="width: 180px;" onchange="filterPendingChecks()">
+              <option value="">All Projects</option>
+            </select>
+            <button class="btn btn-success btn-sm fw-bold" onclick="processDepositedChecks()">Mark Selected as Deposited</button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+              <thead class="table-light text-muted" style="font-size: 0.75rem; text-transform: uppercase;">
+                <tr>
+                  <th style="width: 40px;" class="text-center"><input type="checkbox" id="checkSelectAll" onclick="toggleAllChecks(this)"></th>
+                  <th>Project Name</th>
+                  <th>Due Date</th>
+                  <th>Bank</th>
+                  <th>Check #</th>
+                  <th class="text-end">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="pendingChecksTableBody">
+                <tr><td colspan="6" class="text-center py-4 text-muted">Loading pending checks...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-expense" class="content-section">
+      <h2 class="page-title">Expense Log</h2>
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+          <div class="row mb-4 align-items-end">
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Select Project <span>*</span></label>
+              <select class="form-select" id="expenseProjectSelect" onchange="loadExpenseItems(); applyExpenseProjectHighlight();"><option value="">â€” Select project â€”</option></select>
+            </div>
+            <div class="col-md-6 text-md-end" id="expense-manage-projects-wrap" style="display:none;">
+              <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" onclick="openManageExpenseProjectsModal()">âš™ï¸ Manage Project List</button>
+            </div>
+          </div>
+          
+          <div id="expense-workspace" style="display:none;">
+            <div class="row g-3 mb-4 text-center">
+              <div class="col-md-3">
+                <div class="p-3 border rounded bg-light shadow-sm h-100">
+                  <div class="small text-muted fw-bold">PROJECT TOTAL BUDGET</div>
+                  <div class="h5 mb-0 fw-bold" id="exp-summary-budget">â‚±0.00</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="p-3 border rounded bg-light shadow-sm h-100">
+                  <div class="small text-muted fw-bold text-info">MATERIAL REQ UTILIZED</div>
+                  <div class="h5 mb-0 text-info fw-bold" id="exp-summary-mrf">â‚±0.00</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="p-3 border rounded bg-light shadow-sm h-100">
+                  <div class="small text-muted fw-bold text-success">REMAINING BUDGET</div>
+                  <div class="h5 mb-0 text-success fw-bold" id="exp-summary-rem">â‚±0.00</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="p-3 border rounded bg-light shadow-sm h-100">
+                  <div class="small text-muted fw-bold text-danger">MANUAL EXPENSES</div>
+                  <div class="h5 mb-0 text-danger fw-bold" id="exp-summary-manual">â‚±0.00</div>
+                </div>
+              </div>
+            </div>
+
+            <h5 class="fw-bold mb-3">Add New Expenses</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Expense Type</th>
+                    <th>Particular (Item Name)</th>
+                    <th style="width: 180px;">Total Amount (â‚±)</th>
+                    <th class="text-center" style="width: 100px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="expenseItemBody"></tbody>
+              </table>
+              <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="addExpenseRow()">+ Add Another Row</button>
+            </div>
+            <hr>
+            <button id="expenseSubmitBtn" class="btn btn-primary fw-bold px-5 py-2 mt-2" onclick="submitExpense()">Save Expenses</button>
+
+            <div class="mt-4">
+              <button id="btn-show-recent-expenses" class="btn btn-outline-secondary mt-4" onclick="toggleRecentExpenses()">Show recent Expense Log</button>
+              <div id="recent-expenses-container" class="mt-4" style="display:none;">
+                <div class="card shadow-sm border-0">
+                  <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h6 class="mb-0 fw-bold">My Recent Expense Submissions</h6>
+                    <div class="d-flex align-items-center gap-2">
+                      <label for="recentExpenseTypeFilter" class="form-label small fw-bold text-muted mb-0">Filter by Type</label>
+                      <select id="recentExpenseTypeFilter" class="form-select form-select-sm" style="width: 180px;" onchange="filterRecentExpenses()">
+                        <option value="All">All Types</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                        <thead class="table-light text-muted sticky-top" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">
+                          <tr>
+                            <th class="ps-3">Date</th>
+                            <th>Project</th>
+                            <th>Expense Type</th>
+                            <th>Particular</th>
+                            <th class="text-end">Total Amount (â‚±)</th>
+                            <th>Encoder</th>
+                          </tr>
+                        </thead>
+                        <tbody id="recent-expenses-body">
+                          <tr><td colspan="6" class="text-center py-4 text-muted">Click the button above to load your recent submissions.</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="manageExpenseProjectsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Manage Expense Log Project List</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <p class="text-muted small mb-3">Uncheck a project to hide it from the Expense Log dropdown. This only affects the Expense Log â€” the project still appears everywhere else in the system.</p>
+            <div id="manage-expense-projects-alert" class="alert py-2 mb-3" style="display:none; font-size:0.85rem;"></div>
+            <div id="manage-expense-projects-list" style="max-height: 400px; overflow-y: auto;">
+              <p class="text-muted small py-3 text-center">Loading...</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="boqReturnModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Return BOQ for Revision</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <input type="hidden" id="boq-return-subid">
+            <div id="boq-return-alert" class="alert py-2 mb-3" style="display:none; font-size:0.85rem;"></div>
+            <label class="form-label small fw-bold text-muted">Remarks for the submitter <span class="text-danger">*</span></label>
+            <textarea id="boq-return-remarks" class="form-control" rows="3" placeholder="Explain what needs to be changed..."></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-warning fw-bold px-4" id="boq-return-submit-btn" onclick="submitBoqReturn()">Return with Remarks</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-boq" class="content-section">
+      <h2 class="page-title">BOQ <span class="text-highlight">Smart Ingestor</span></h2>
+      <div class="upload-card" style="max-width: 650px; margin: 0 auto;">
+        <h5 class="fw-bold mb-3 border-bottom pb-2">1. Project & Client Details</h5>
+        
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold small text-muted">Project Code <span class="text-danger">*</span></label>
+            <input type="text" id="projectCode" class="form-control" placeholder="e.g. PRJ-101">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold small text-muted">Customer Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="customerName" class="form-control" placeholder="e.g. Juan Dela Cruz">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-12">
+            <label class="form-label fw-bold small text-muted">Assign Company <span class="text-danger">*</span></label>
+            <select id="assignCompany" class="form-select">
+              <option value="">â€” Select Company â€”</option>
+              <option value="Krone Konstruct">Krone Konstruct</option>
+              <option value="Vegastar">Vegastar</option>
+              <option value="CT">CT</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4 text-start">
+          <button class="btn btn-sm btn-outline-secondary fw-bold w-100" type="button" data-bs-toggle="collapse" data-bs-target="#optionalCustomerFields" aria-expanded="false">
+            âž• Add Optional Customer Info (Contact, Location, etc.)
+          </button>
+          <div class="collapse mt-3" id="optionalCustomerFields">
+            <div class="card card-body bg-light border-0 p-3">
+              <div class="row g-2 text-start">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted">Phone Number</label>
+                  <input type="text" id="customerPhone" class="form-control form-control-sm" placeholder="09XX XXX XXXX">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted">Email Address</label>
+                  <input type="email" id="customerEmail" class="form-control form-control-sm" placeholder="email@example.com">
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label fw-bold small text-muted">Site / Project Location</label>
+                  <input type="text" id="customerSite" class="form-control form-control-sm" placeholder="Complete site address">
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label fw-bold small text-muted">Billing Address</label>
+                  <input type="text" id="customerBilling" class="form-control form-control-sm" placeholder="If different from site location">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted">Birthday</label>
+                  <input type="date" id="customerBirthday" class="form-control form-control-sm">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted">TIN</label>
+                  <input type="text" id="customerTin" class="form-control form-control-sm" placeholder="XXX-XXX-XXX-XXX">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 text-start">
+          <button class="btn btn-sm btn-outline-secondary fw-bold w-100" type="button"
+            data-bs-toggle="collapse" data-bs-target="#boqMilestoneCollapse" aria-expanded="false">
+            âž• Add Quoted Cost to Client and Milestone Terms
+          </button>
+          <div class="collapse mt-3" id="boqMilestoneCollapse">
+            <div class="card card-body bg-light border-0 p-3">
+              <div class="mb-3">
+                <label class="form-label fw-bold small text-muted">
+                  Quoted Cost to Client (â‚±) <span class="text-danger">*</span>
+                </label>
+                <input type="text" inputmode="decimal" id="boq-quotedCost" class="form-control form-control-sm"
+                  placeholder="e.g. 5,000,000" oninput="formatThousands(this)">
+              </div>
+              <div class="mb-2">
+                <label class="form-label fw-bold small text-muted d-block mb-1">Milestone Terms</label>
+                <div class="row g-2 mb-1" style="font-size:0.75rem; color:#6c757d; font-weight:600;">
+                  <div class="col">% of Completion</div>
+                  <div class="col">% of Payment</div>
+                  <div class="col-auto" style="width:46px;"></div>
+                </div>
+                <div id="boq-milestonesContainer"></div>
+                <div class="d-flex align-items-center gap-3 mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-primary fw-bold"
+                    onclick="addMilestoneRow('boq')">+ Add Milestone</button>
+                  <span id="boq-milestoneTotal" class="badge bg-secondary">Total Payment: 0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h5 class="fw-bold mb-3 border-bottom pb-2 text-start">2. BOQ Document</h5>
+        <div class="mb-4 text-start">
+          <label class="form-label fw-bold small text-muted">Select BOQ Excel File <span class="text-danger">*</span></label>
+          <input type="file" id="fileInput" class="form-control" accept=".xlsx, .xls">
+        </div>
+
+        <button id="uploadBtn" class="btn btn-primary btn-lg w-100 fw-bold" onclick="startUpload()">
+          <span id="loader" class="spinner-border spinner-border-sm me-2" style="display:none;"></span>
+          <span id="btnText">UPLOAD & CONSOLIDATE</span>
+        </button>
+        <div class="progress mt-4" id="progressContainer" style="display:none;"><div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div></div>
+        <div id="status" class="mt-3 text-center fw-bold"></div>
+      </div>
+    </div>
+
+    <div id="section-approvals" class="content-section">
+      <h2 class="page-title">Approval Queue</h2>
+      <div class="row g-2 mb-4">
+        <div class="col-md-3"><select id="approvalProjectFilter" class="form-select form-select-sm" onchange="updateApprovalPhaseFilter()"><option value="">All Projects</option></select></div>
+        <div class="col-md-3"><select id="approvalPhaseFilter" class="form-select form-select-sm" onchange="applyApprovalFilters()"><option value="">Filter by phase...</option></select></div>
+      </div>
+      <div id="approvalQueueContainer"></div>
+    </div>
+
+    <div id="section-rfq" class="content-section">
+      <h2 class="page-title">Request for Quotations (RFQs)</h2>
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4"> 
+          <div class="row mb-3">
+              <div class="col-md-6">
+                  <label class="form-label small fw-bold text-muted">Filter by Project</label>
+                  <select id="rfqProjectFilter" class="form-select form-select-sm" onchange="filterRFQs()">
+                      <option value="">â€” All Projects â€”</option>
+                  </select>
+              </div>
+              <div class="col-md-6">
+                  <label class="form-label small fw-bold text-muted">Filter by Status</label>
+                  <select id="rfqStatusFilter" class="form-select form-select-sm" onchange="filterRFQs()">
+                      <option value="Active">Pending Bidding</option>
+                      <option value="Finished">Bidding Finished</option>
+                      <option value="All">Show All</option>
+                  </select>
+              </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+              <thead class="table-light">
+                <tr style="text-transform: uppercase; font-size: 0.8rem;">
+                  <th>MRF ID</th><th>Created By</th><th>Project</th><th>Date Approved</th><th>Document</th>
+                </tr>
+              </thead>
+              <tbody id="rfqTableBody">
+                <tr><td colspan="5" class="text-center py-4 text-muted">Loading RFQs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <div id="section-bid-tab" class="content-section">
+      <h2 class="page-title">Encode Supplier Quotes</h2>
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+
+          <!-- Two-panel selection row â€” equal height, properly gapped -->
+          <div class="row g-4 mb-4 align-items-stretch">
+
+            <!-- Left panel: MRF selector -->
+            <div class="col-lg-5 col-md-6">
+              <div class="p-3 rounded-3 h-100 d-flex flex-column gap-2" style="background: rgba(248,250,252,.75); border: 1px solid var(--border-solid);">
+                <label class="form-label small fw-bold text-muted mb-0">Select MRF Awaiting Quotes</label>
+                <select id="bidProjectFilter" class="form-select form-select-sm" onchange="updateBidMrfDropdown()">
+                  <option value="">â€” Select Project â€”</option>
+                </select>
+                <select id="mrfSelectDropdown" class="form-select" onchange="filterBids()">
+                  <option value="">â€” Select MRF â€”</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Right panel: Payment Terms -->
+            <div class="col-lg-7 col-md-6">
+              <div class="p-3 rounded-3 h-100 d-flex flex-column" style="background: rgba(248,250,252,.75); border: 1px solid var(--border-solid);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="form-label small fw-bold text-muted mb-0">Payment Terms</label>
+                  <span id="termTotalBadge" class="badge bg-secondary">Total: 0%</span>
+                </div>
+
+                <datalist id="termOptions">
+                  <option value="Upon purchase"></option>
+                  <option value="Upon delivery"></option>
+                  <option value="0 days (Due upon receipt)"></option>
+                  <option value="15 days"></option>
+                  <option value="30 days"></option>
+                  <option value="45 days"></option>
+                  <option value="60 days"></option>
+                  <option value="90 days"></option>
+                </datalist>
+
+                <div id="paymentTermsContainer" class="flex-grow-1">
+                  <div class="input-group input-group-sm mb-2 term-row">
+                    <input type="text" class="form-control term-desc" list="termOptions" placeholder="Select or type term...">
+                    <input type="number" class="form-control term-pct" placeholder="%" style="max-width: 80px;" oninput="calcTermTotal()">
+                    <button class="btn btn-outline-danger" onclick="this.parentElement.remove(); calcTermTotal();" tabindex="-1">âœ•</button>
+                  </div>
+                </div>
+
+                <button class="btn btn-sm btn-outline-secondary w-100 mt-auto fw-bold" onclick="addPaymentTermRow()">+ Add Payment Term</button>
+              </div>
+            </div>
+
+          </div><!-- /row -->
+
+          <!-- Supplier Name & Delivery Fee Input Row -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-8">
+              <label class="form-label small fw-bold text-muted mb-1">SUPPLIER NAME <span class="text-danger">*</span></label>
+              <input type="text" id="supplierNameInput" class="form-control" list="bidSupplierDatalist" placeholder="Type to search suppliers..." autocomplete="off" onblur="validateBidSupplierInput()">
+              <datalist id="bidSupplierDatalist"></datalist>
+              <div id="bidSupplierNameFeedback" class="small mt-1" style="display:none;"></div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-muted mb-1">DELIVERY FEE (â‚±)</label>
+              <input type="number" id="deliveryFeeInput" class="form-control" placeholder="0.00">
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr class="small fw-bold text-muted text-uppercase" style="font-size: 0.8rem;">
+                  <th style="width: 40%;">Item</th>
+                  <th style="width: 15%;">Approved Quantity</th>
+                  <th style="width: 25%;">Brand</th>
+                  <th style="width: 20%; text-align: right;">Quoted Amount</th>
+                </tr>
+              </thead>
+              <tbody id="bidTableBody" style="font-size: 0.9rem;">
+                <tr><td colspan="4" class="text-center text-muted py-4">Select an MRF to encode bids</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Save Quotes Button -->
+          <div class="d-flex justify-content-end mt-4">
+            <button class="btn btn-warning fw-bold px-4 rounded-pill text-white" onclick="submitQuotes(document.getElementById('mrfSelectDropdown').value)" style="background-color: var(--gold, #DAA520); border: none;">Save Quotes</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="section-canvas" class="content-section">
+      <h2 class="page-title">Canvassing & Awarding</h2>
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Select MRF to Canvas</label>
+              <div class="row mb-2">
+                  <div class="col-md-6">
+                      <select id="canvasProjectFilter" class="form-select form-select-sm" onchange="updateCanvasMrfDropdown()">
+                          <option value="">â€” All Projects â€”</option>
+                      </select>
+                  </div>
+                  <div class="col-md-6">
+                      <select id="canvasStatusFilter" class="form-select form-select-sm" onchange="updateCanvasMrfDropdown()">
+                          <option value="Active">Pending Bidding</option>
+                          <option value="All">Show All (Including Finished)</option>
+                      </select>
+                  </div>
+              </div>
+              <select id="canvasMrfSelect" class="form-select" onchange="loadCanvasPivot()"><option value="">â€” Select MRF â€”</option></select>
+            </div>
+          </div>
+          <div class="table-responsive" id="canvasContainer">
+             <div class="text-muted text-center py-4">Select an MRF to view canvass sheet</div>
+          </div>
+          <button id="canvasSubmitBtn" class="btn btn-success fw-bold px-5 py-2 mt-3" style="display:none;" onclick="submitCanvasWinners()">Finalize & Generate POs</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-purchase-orders" class="content-section">
+      <h2 class="page-title">Purchase Orders</h2>
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-muted">Filter by Status</label>
+              <select id="poStatusFilter" class="form-select" onchange="filterPOs()">
+                <option value="">â€” All Statuses â€”</option>
+                <option value="Draft">Draft</option>
+                <option value="Sent">Sent (Pending Delivery)</option>
+                <option value="Partial delivery">Partial delivery</option>
+                <option value="Received all">Received all</option>
+                <option value="Voided">Voided</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-muted">Filter by Project</label>
+              <select id="poProjectFilter" class="form-select" onchange="filterPOs()">
+                <option value="">â€” All Projects â€”</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle" style="font-size: 0.85rem;">
+              <thead class="table-light text-muted" style="font-size: 0.75rem; text-transform: uppercase;">
+                <tr>
+                  <th>PO #</th>
+                  <th>Supplier</th>
+                  <th>Project</th>
+                  <th>Phase</th>
+                  <th>Total Amount</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th>PDF Copy</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="poTableBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-receiving" class="content-section">
+      <h2 class="page-title">Receiving</h2>
+      
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <div class="row mb-3">
+            <div class="col-md-4">
+               <label class="form-label small fw-bold text-muted">Project Code</label>
+               <select id="receivingProjectSelect" class="form-select" onchange="updateReceivingPoDropdown()"><option value="">â€” Select Project â€”</option></select>
+            </div>
+            <div class="col-md-4">
+               <label class="form-label small fw-bold text-muted">PO Number</label>
+               <select id="receivingPoSelect" class="form-select" onchange="renderReceivingTable()"><option value="">â€” Select PO â€”</option></select>
+            </div>
+            <div class="col-md-4">
+               <label class="form-label small fw-bold text-muted">Delivery Document #</label>
+               <input type="text" id="receivingDocNum" class="form-control" placeholder="e.g. DR-12345">
+            </div>
+          </div>
+          
+          <div class="row mb-4">
+            <div class="col-md-6">
+               <label class="form-label small fw-bold text-muted">Delivery Receipt Photo/File (Optional)</label>
+               <input type="file" id="receivingReceiptFile" class="form-control form-control-sm" accept="image/*,.pdf">
+            </div>
+            <div class="col-md-6">
+               <label class="form-label small fw-bold text-muted">Item Condition Photos (Optional)</label>
+               <input type="file" id="receivingPhotoFile" class="form-control form-control-sm" accept="image/*,.pdf">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light text-nowrap">
+                <tr><th>Item Name</th><th class="text-center">PO Qty</th><th class="text-center">Remaining</th><th style="width: 120px;">Rcvd Qty</th><th style="min-width: 150px;">Remarks</th></tr>
+              </thead>
+              <tbody id="receivingTableBody">
+                <tr><td colspan="5" class="text-center text-muted">Select a PO to receive items</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <button class="btn btn-success fw-bold px-4 py-2 mt-3" onclick="submitReceiving(this)">Confirm Delivery</button>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h6 class="mb-0 fw-bold">Recent Deliveries</h6>
+          <div class="d-flex align-items-center gap-2">
+            <label for="receivingHistoryPoFilter" class="form-label small fw-bold text-muted mb-0">Filter by PO</label>
+            <select id="receivingHistoryPoFilter" class="form-select form-select-sm" style="width: 200px;" onchange="filterReceivingHistory()">
+              <option value="All">All POs</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+              <thead class="table-light text-muted" style="font-size: 0.75rem; text-transform: uppercase;">
+                <tr>
+                  <th class="ps-4">Date</th>
+                  <th>PO #</th>
+                  <th>Doc #</th>
+                  <th>Item</th>
+                  <th class="text-center">Qty</th>
+                  <th>Receiver</th>
+                  <th>Remarks</th>
+                  <th>Attachments</th>
+                </tr>
+              </thead>
+              <tbody id="receivingHistoryBody">
+                <tr><td colspan="8" class="text-center py-4 text-muted">Loading history...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer bg-white text-center border-top-0 py-3" id="receivingHistoryFooter" style="display:none;">
+          <button id="showMoreReceivingBtn" class="btn btn-sm btn-outline-secondary fw-bold px-4" onclick="toggleReceivingHistory()">Show All</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-petty-cash" class="content-section">
+      <h2 class="page-title">Request Reimbursement (Abono)</h2>
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <div id="pc-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
+          
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-muted small">Project <span>*</span></label>
+              <select class="form-select" id="pcProjectSelect"><option value="">â€” Loading â€”</option></select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-muted small">Type of Expense <span>*</span></label>
+              <input type="text" id="pcExpenseType" class="form-control" list="expenseOptions" placeholder="Select or type new expense...">
+              <datalist id="expenseOptions">
+                <option value="Materials"></option>
+                <option value="Food"></option>
+                <option value="Gas"></option>
+                <option value="Others"></option>
+              </datalist>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-muted small">Particulars <span>*</span></label>
+              <input type="text" id="pcParticulars" class="form-control" placeholder="Describe the expense (e.g., Gas, Hardware supplies)">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-muted small">Amount (â‚±) <span>*</span></label>
+              <input type="number" id="pcAmount" class="form-control" placeholder="0.00" step="0.01">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-12">
+              <label class="form-label fw-bold text-muted small">Attach Receipt Photo <span>*</span></label>
+              <input type="file" id="pcReceiptFile" class="form-control" accept="image/*,.pdf">
+            </div>
+          </div>
+
+          <button id="pcSubmitBtn" class="btn btn-primary fw-bold px-5 py-2" onclick="submitPettyCash()">Submit Record</button>
+        </div>
+      </div> 
+    </div>
+
+    <!-- ===== ISSUE PAYMENTS SECTION ===== -->
+    <div id="section-issue-payments" class="content-section">
+      <h2 class="page-title">Issue Payments</h2>
+
+      <div class="card shadow-sm border-0 mb-4 bg-white">
+        <div class="card-body p-4">
+          <div id="ip-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
+
+          <!-- Filters Row: Project â†’ Supplier â†’ PO Checklist -->
+          <div class="row g-3 mb-4 align-items-start">
+            <div class="col-md-3">
+              <label class="form-label small fw-bold text-muted">Filter by Project</label>
+              <select id="ipProjectFilter" class="form-select form-select-sm" onchange="renderIpSupplierDropdown()">
+                <option value="">â€” All Projects â€”</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold text-muted">Filter by Supplier</label>
+              <select id="ipSupplierFilter" class="form-select form-select-sm" onchange="renderIpPoChecklist()">
+                <option value="">â€” Select a project first â€”</option>
+              </select>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label small fw-bold text-muted">Select Purchase Orders <span class="text-danger">*</span></label>
+              <div id="ipPoChecklist" class="form-control" style="height: 100px; overflow-y: auto; font-size: 0.85rem;">
+                <span class="text-muted small">Select a supplier first...</span>
+              </div>
+              <button class="btn btn-sm btn-primary fw-bold mt-2" onclick="loadIssuePaymentDetails()">
+                Load Terms for Selected POs
+              </button>
+            </div>
+          </div>
+
+          <!-- Payment Terms Panel (shown after POs are loaded) -->
+          <div id="ip-terms-container" style="display:none;">
+
+            <!-- PO Summary Badge Row -->
+            <div class="d-flex align-items-center gap-3 p-3 mb-3 rounded" style="background: #f0f9ff; border: 1px solid #bae6fd;">
+              <div id="ip-po-info" class="d-flex align-items-center gap-2 flex-wrap"></div>
+            </div>
+
+            <!-- Bulk Apply Row -->
+            <div class="row g-2 mb-3 align-items-end p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+              <div class="col-auto d-flex align-items-end pb-1">
+                <span class="fw-bold small text-muted text-uppercase" style="letter-spacing:.04em;">Bulk Apply:</span>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted mb-1">Due Date</label>
+                <input type="date" id="ip-bulk-date" class="form-control form-control-sm">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted mb-1">Bank</label>
+                <input type="text" id="ip-bulk-bank" class="form-control form-control-sm" placeholder="e.g. BDO">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted mb-1">Check #</label>
+                <input type="text" id="ip-bulk-check" class="form-control form-control-sm" placeholder="Check number">
+              </div>
+              <div class="col-auto">
+                <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="applyBulkPaymentDetails()">Apply to All Rows</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle mb-0" style="font-size: 0.88rem;">
+                <thead style="background: #0f172a; color: #fff; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em;">
+                  <tr>
+                    <th class="ps-3" style="width: 9%;">PO #</th>
+                    <th style="width: 18%;">Payment Term</th>
+                    <th class="text-center" style="width: 5%;">%</th>
+                    <th class="text-end" style="width: 12%;">Invoiced Amount</th>
+                    <th class="text-center" style="width: 12%;">Payment Due Date</th>
+                    <th class="text-center" style="width: 11%;">Bank</th>
+                    <th class="text-center" style="width: 14%;">Check Number</th>
+                    <th class="text-center" style="width: 13%;">Payment Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="ip-terms-body">
+                  <tr><td colspan="8" class="text-center py-4 text-muted">Select POs above and click "Load Terms".</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3">
+              <button id="ip-save-btn" class="btn btn-success fw-bold px-5 py-2" style="display:none; border-radius: 10px;" onclick="saveIssuePayments()">
+                Save Payments
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END ISSUE PAYMENTS SECTION ===== -->
+
+    <!-- ===== HISTORICAL PRICING SECTION ===== -->
+    <div id="section-historical-pricing" class="content-section">
+      <h2 class="page-title">Historical Pricing</h2>
+
+      <div class="card shadow-sm border-0 mb-4" style="overflow: visible; position: relative; z-index: 50;">
+        <div class="card-body p-4" style="overflow: visible;">
+          <p class="text-muted small mb-3">Search across all Purchase Orders to find historical unit prices for any item. Results are sorted newest first.</p>
+          <div class="row g-2 align-items-end" style="overflow: visible;">
+            <div class="col-md-8 col-lg-6" style="overflow: visible;">
+              <label class="form-label small fw-bold text-muted">Item Description</label>
+              <div style="position: relative;">
+                <input type="text" id="hp-search-input" class="form-control"
+                       placeholder='e.g. "Cement", "Partition Walls", "Steel Bar"'
+                       onkeydown="if(event.key==='Enter') searchHistoricalPrices()"
+                       oninput="onHpSearchInput(this.value)"
+                       autocomplete="off">
+                <ul id="hp-search-suggestions"
+                    class="dropdown-menu w-100 shadow-sm"
+                    style="display:none; position:absolute; top:100%; left:0; width:100%; max-height:250px; overflow-y:auto; z-index:1050; margin-top:2px; border-radius:10px; padding:4px 0;">
+                </ul>
+              </div>
+            </div>
+            <div class="col-auto">
+              <button id="hp-search-btn" class="btn btn-primary fw-bold px-4" onclick="searchHistoricalPrices()">
+                Search
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="hp-alert" class="alert py-2 mb-3" style="display:none; font-size:0.85rem;"></div>
+
+      <div class="card shadow-sm border-0" style="position: relative; z-index: 1;">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-bold">Search Results</h6>
+          <span id="hp-result-count" class="badge bg-secondary" style="display:none;"></span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">
+              <thead class="table-light text-muted sticky-top" style="font-size:0.75rem; text-transform:uppercase;">
+                <tr>
+                  <th class="ps-4">Date</th>
+                  <th>Project</th>
+                  <th>PO Number</th>
+                  <th>Supplier</th>
+                  <th>Item Description</th>
+                  <th class="text-end pe-4">Unit Price</th>
+                </tr>
+              </thead>
+              <tbody id="hp-table-body">
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-muted">
+                    <div style="font-size:2rem; margin-bottom:0.5rem;">ðŸ”</div>
+                    Enter an item name above and click <strong>Search</strong> to begin.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END HISTORICAL PRICING SECTION ===== -->
+
+    <!-- ===== REFUNDABLE EXPENSES SECTION ===== -->
+    <div id="section-refundable-expenses" class="content-section">
+      <h2 class="page-title">Refundable Expenses</h2>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0 fw-bold">Pending Refunds</h6>
+            <p class="mb-0 text-muted small mt-1">Items below were flagged as refundable at the time of submission. Enter the actual refund received and click <strong>Credit Back</strong>.</p>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="loadRefundables()">&#8635; Refresh</button>
+        </div>
+        <div class="card-header bg-white border-bottom py-2">
+          <div class="row g-2 align-items-center">
+            <div class="col-auto">
+              <label class="form-label small fw-bold text-muted mb-0">Filter by Project</label>
+            </div>
+            <div class="col-md-4">
+              <select id="filter-refund-project" class="form-select form-select-sm" onchange="filterRefundsByProject()">
+                <option value="all">All Projects</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+              <thead style="background: #0f172a; color: #fff; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em;">
+                <tr>
+                  <th class="ps-4" style="width: 110px;">Date</th>
+                  <th>Project</th>
+                  <th>Particular</th>
+                  <th class="text-end" style="width: 160px;">Original Expense (â‚±)</th>
+                  <th class="text-center" style="width: 180px;">Actual Refund Amount</th>
+                  <th class="text-center" style="width: 130px;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="refundable-table-body">
+                <tr><td colspan="6" class="text-center py-5 text-muted">Loading pending refunds...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END REFUNDABLE EXPENSES SECTION ===== -->
+
+    <!-- ===== BUILD BOQ SECTION ===== -->
+    <div id="section-build-boq" class="content-section">
+      <h2 class="page-title">Native <span class="text-highlight">BOQ Generator</span></h2>
+
+      <!-- 1. Project & Client Details (mirrors Excel Ingestor layout) -->
+      <div class="upload-card mb-4" style="max-width: 780px; margin: 0 auto 1.5rem;">
+        <h5 class="fw-bold mb-3 border-bottom pb-2">1. Project &amp; Client Details</h5>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold small text-muted">Project Code <span class="text-danger">*</span></label>
+            <input type="text" id="nboq-projectCode" class="form-control" placeholder="e.g. PRJ-101">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold small text-muted">Customer Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="nboq-customerName" class="form-control" placeholder="e.g. Juan Dela Cruz">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-12">
+            <label class="form-label fw-bold small text-muted">Assign Company <span class="text-danger">*</span></label>
+            <select id="nboq-assignCompany" class="form-select">
+              <option value="">â€” Select Company â€”</option>
+              <option value="Krone Konstruct">Krone Konstruct</option>
+              <option value="Vegastar">Vegastar</option>
+              <option value="CT">CT</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <button class="btn btn-sm btn-outline-secondary fw-bold w-100" type="button" data-bs-toggle="collapse" data-bs-target="#nboqOptionalFields" aria-expanded="false">
+            âž• Add Optional Customer Info (Contact, Location, etc.)
+          </button>
+          <div class="collapse mt-3" id="nboqOptionalFields">
+            <div class="card card-body bg-light border-0 p-3">
+              <div class="row g-2 text-start">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted">Phone Number</label>
+                  <input type="text" id="nboq-phone" class="form-control form-control-sm" placeholder="09XX XXX XXXX">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted">Email Address</label>
+                  <input type="email" id="nboq-email" class="form-control form-control-sm" placeholder="email@example.com">
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label fw-bold small text-muted">Site / Project Location</label>
+                  <input type="text" id="nboq-site" class="form-control form-control-sm" placeholder="Complete site address">
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label fw-bold small text-muted">Billing Address</label>
+                  <input type="text" id="nboq-billing" class="form-control form-control-sm" placeholder="If different from site location">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted">Birthday</label>
+                  <input type="date" id="nboq-birthday" class="form-control form-control-sm">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted">TIN</label>
+                  <input type="text" id="nboq-tin" class="form-control form-control-sm" placeholder="XXX-XXX-XXX-XXX">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3">
+          <button class="btn btn-sm btn-outline-secondary fw-bold w-100" type="button"
+            data-bs-toggle="collapse" data-bs-target="#nboqMilestoneCollapse" aria-expanded="false">
+            âž• Add Quoted Cost to Client and Milestone Terms
+          </button>
+          <div class="collapse mt-3" id="nboqMilestoneCollapse">
+            <div class="card card-body bg-light border-0 p-3">
+              <div class="mb-3">
+                <label class="form-label fw-bold small text-muted">
+                  Quoted Cost to Client (â‚±) <span class="text-danger">*</span>
+                </label>
+                <input type="text" inputmode="decimal" id="nboq-quotedCost" class="form-control form-control-sm"
+                  placeholder="e.g. 5,000,000" oninput="formatThousands(this)">
+              </div>
+              <div class="mb-2">
+                <label class="form-label fw-bold small text-muted d-block mb-1">Milestone Terms</label>
+                <div class="row g-2 mb-1" style="font-size:0.75rem; color:#6c757d; font-weight:600;">
+                  <div class="col">% of Completion</div>
+                  <div class="col">% of Payment</div>
+                  <div class="col-auto" style="width:46px;"></div>
+                </div>
+                <div id="nboq-milestonesContainer"></div>
+                <div class="d-flex align-items-center gap-3 mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-primary fw-bold"
+                    onclick="addMilestoneRow('nboq')">+ Add Milestone</button>
+                  <span id="nboq-milestoneTotal" class="badge bg-secondary">Total Payment: 0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. BOQ Builder -->
+      <div class="card border-0 shadow-sm" style="border-radius: 18px; border: 1px solid var(--glass-border) !important; box-shadow: var(--glass-shadow) !important; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px);">
+
+        <!-- Card Header -->
+        <div class="card-header border-0 py-3 px-4" style="background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%); border-radius: 18px 18px 0 0;">
+          <div style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-bottom: 4px;">2. Budget Builder</div>
+          <div style="font-size: 1.05rem; font-weight: 700; color: #ffffff;">Add Phases, Scopes &amp; Line Items</div>
+        </div>
+
+        <!-- Workspace -->
+        <div class="card-body px-4 pt-3 pb-2" id="boq-builder-workspace">
+          <div id="boq-phases-container">
+            <div id="boq-no-phase-msg" class="text-center py-5 text-muted" style="font-size: 0.88rem;">
+              Click <strong>+ Add Phase</strong> below to begin building your budget.
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="card-footer bg-transparent border-top py-3 px-4" style="border-radius: 0 0 18px 18px;">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <button class="btn btn-sm btn-outline-secondary fw-semibold" onclick="addBoqPhase()" style="border-radius: 10px; font-size: 0.82rem; padding: 7px 18px;">
+              + Add Phase
+            </button>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Grand Total:</div>
+              <div id="nboq-grand-total" style="font-family: var(--font-title); font-size: 1.35rem; font-weight: 800; color: var(--navy);">â‚±0.00</div>
+              <button class="btn btn-sm fw-bold" onclick="submitNativeBoq()" id="boq-submit-btn"
+                style="background: linear-gradient(135deg, var(--gold), var(--gold-hover)); border: none; color: #fff; border-radius: 10px; padding: 8px 24px; font-size: 0.85rem; box-shadow: 0 4px 12px var(--gold-glow);">
+                Submit for Approval
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Hidden datalist â€” populated by initBoqBuilder() from Materials Database -->
+      <datalist id="boq-materials-datalist"></datalist>
+
+      <div class="card shadow-sm border-0 mt-4" id="my-boq-submissions-card">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-bold">My BOQ Submissions</h6>
+          <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="loadMyBoqSubmissions()">&#8635; Refresh</button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">
+              <thead class="table-light text-muted" style="font-size:0.72rem;text-transform:uppercase;">
+                <tr>
+                  <th class="ps-4">Submission</th>
+                  <th>Project</th>
+                  <th>Date</th>
+                  <th class="text-center">Status</th>
+                  <th>Admin Remarks</th>
+                  <th class="text-center">PDF</th>
+                  <th class="text-center pe-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="my-boq-submissions-body">
+                <tr><td colspan="7" class="text-center py-4 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END BUILD BOQ SECTION ===== -->
+
+
+    <!-- ===== PROJECT ENGINEER SECTION ===== -->
+    <div id="section-project-engineer" class="content-section">
+      <h2 class="page-title">Project Progress &amp; RTB</h2>
+
+      <!-- Project selector â€” full width, large touch target -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-muted small">Select Project <span class="text-danger">*</span></label>
+        <select class="form-select form-select-lg" id="pe-project-select" onchange="onPeProjectChange()">
+          <option value="">â€” Select Project â€”</option>
+        </select>
+      </div>
+
+      <!-- Project Details card â€” hidden until a project is chosen -->
+      <div id="pe-project-details" class="card border-0 mb-4 rounded-3" style="display:none; background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%); color:#fff;">
+        <div class="card-body p-3">
+          <div class="row g-2">
+            <div class="col-6">
+              <div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.5); letter-spacing:.05em;">Customer</div>
+              <div class="fw-bold" id="pe-detail-customer" style="font-size:0.9rem;">â€”</div>
+            </div>
+            <div class="col-6">
+              <div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.5); letter-spacing:.05em;">Company</div>
+              <div class="fw-bold" id="pe-detail-company" style="font-size:0.9rem;">â€”</div>
+            </div>
+            <div class="col-12 mt-1">
+              <div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.5); letter-spacing:.05em;">Contract Price</div>
+              <div class="fw-bold" id="pe-detail-quoted" style="font-size:1.2rem; color:#f8b400;">â€”</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs â€” full-width pill control -->
+      <ul class="nav nav-tabs d-flex" id="peTabs" role="tablist" style="width:100%;">
+        <li class="nav-item flex-fill" role="presentation">
+          <button class="nav-link active w-100 text-center" id="pe-tab-progress" data-bs-toggle="tab" data-bs-target="#pe-panel-progress" type="button" role="tab">
+            Progress Update
+          </button>
+        </li>
+        <li class="nav-item flex-fill" role="presentation">
+          <button class="nav-link w-100 text-center" id="pe-tab-rtb" data-bs-toggle="tab" data-bs-target="#pe-panel-rtb" type="button" role="tab">
+            Request to Bill
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- Tab 1: Progress Update -->
+        <div class="tab-pane fade show active" id="pe-panel-progress" role="tabpanel">
+          <div class="card border-0 mt-3 shadow-sm" style="border-radius:12px;">
+            <div class="card-body p-4">
+              <div class="mb-4">
+                <label class="form-label fw-bold text-muted small">Overall % Accomplished <span class="text-danger">*</span></label>
+                <input type="number" id="pe-overall-pct" class="form-control form-control-lg" placeholder="e.g. 45" min="1" max="100" step="any" style="font-size:1.1rem;">
+              </div>
+              <div class="d-grid">
+                <button id="pe-progress-btn" class="btn btn-primary fw-bold py-3" style="font-size:1rem; border-radius:10px;" onclick="submitProgressReport()">
+                  Submit Progress
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Request to Bill -->
+        <div class="tab-pane fade" id="pe-panel-rtb" role="tabpanel">
+          <div class="card border-0 mt-3 shadow-sm" style="border-radius:12px;">
+            <div class="card-body p-4">
+              <div class="mb-4">
+                <label class="form-label fw-bold text-muted small">% to Bill <span class="text-danger">*</span></label>
+                <input type="number" id="pe-rtb-pct" class="form-control form-control-lg" placeholder="e.g. 30" min="1" max="100" step="any" style="font-size:1.1rem;">
+                <div class="form-text mt-2">This will create a pending RTB for admin approval.</div>
+              </div>
+              <div class="d-grid">
+                <button id="pe-rtb-btn" class="btn fw-bold py-3" style="font-size:1rem; border-radius:10px; background:#e8a820; border:none; color:#fff;" onclick="submitRTBReport()">
+                  Submit RTB
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /tab-content -->
+    </div>
+    <!-- ===== END PROJECT ENGINEER SECTION ===== -->
+
+
+    <!-- ===== RTB APPROVALS SECTION ===== -->
+    <div id="section-rtb-approvals" class="content-section">
+      <h2 class="page-title">RTB Approvals</h2>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+              <thead style="background:#0f172a; color:#fff; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em;">
+                <tr>
+                  <th class="ps-4">Encoder</th>
+                  <th>Project Code</th>
+                  <th class="text-end">% to Bill</th>
+                  <th class="text-end">Amount to Bill</th>
+                  <th class="text-end">Last % Progress</th>
+                  <th class="text-end">Total Expenses</th>
+                  <th class="text-end">Quoted Cost</th>
+                  <th class="text-center pe-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rtb-approvals-body">
+                <tr><td colspan="8" class="text-center py-4 text-muted">Loading pending RTBs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END RTB APPROVALS SECTION ===== -->
+
+
+    <!-- ===== PROJECT PAYMENT COLLECTION SECTION ===== -->
+    <div id="section-collections" class="content-section">
+      <h2 class="page-title">Project Payment Collection</h2>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+              <thead class="table-light text-muted" style="font-size: 0.75rem; text-transform: uppercase;">
+                <tr>
+                  <th class="ps-4">RTB ID</th>
+                  <th>Project</th>
+                  <th class="text-end">% to Bill</th>
+                  <th class="text-end pe-3">Amount to Bill</th>
+                  <th class="text-center pe-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="collections-body">
+                <tr><td colspan="5" class="text-center py-4 text-muted">Loading approved RTBs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END PROJECT PAYMENT COLLECTION SECTION ===== -->
+
+
+    <!-- ===== COLLECTION MODAL ===== -->
+    <div class="modal fade" id="collectionModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Mark as Collected</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div id="collection-modal-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Amount Collected (â‚±) <span class="text-danger">*</span></label>
+              <input type="number" id="col-amount" class="form-control" placeholder="0.00" step="0.01" min="0">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Bank <span class="text-danger">*</span></label>
+              <input type="text" id="col-bank" class="form-control" placeholder="e.g. BDO, BPI, Metrobank">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Due Date <span class="text-danger">*</span></label>
+              <input type="date" id="col-due-date" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Check Number <span class="text-danger">*</span></label>
+              <input type="text" id="col-check-number" class="form-control" placeholder="e.g. CHK-12345">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success fw-bold px-4" id="collection-save-btn" onclick="saveCollection()">Save Collection</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END COLLECTION MODAL ===== -->
+
+
+    <!-- ===== SUBCONTRACTOR AP SECTION ===== -->
+    <div id="section-subcontractor-ap" class="content-section">
+      <h2 class="page-title">Subcontractor AP â€” Outstanding &amp; History</h2>
+      <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-sm fw-bold px-3" style="background:#e8a820;color:#fff;border:none;border-radius:8px;" onclick="openSubcontractorCrud()">Subcontractors</button>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Open</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="kpi-open-sum">â‚±0</div>
+            <div class="small text-muted" id="kpi-open-count">0 milestones</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Ready to Pay</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#e8a820;" id="kpi-ready-sum">â‚±0</div>
+            <div class="small text-muted" id="kpi-ready-count">0 milestones</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Paid</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#16a34a;" id="kpi-paid-sum">â‚±0</div>
+            <div class="small text-muted" id="kpi-paid-count">0 milestones</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Voided WPs</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#6b7280;" id="kpi-voided-count">0</div>
+            <div class="small text-muted">excluded from totals</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-3">
+          <div class="row g-2 align-items-end">
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label fw-bold small text-muted mb-1">Subcontractor</label>
+              <select id="ap-filter-sub" class="form-select form-select-sm">
+                <option value="">All Subcontractors</option>
+              </select>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label fw-bold small text-muted mb-1">Project</label>
+              <select id="ap-filter-project" class="form-select form-select-sm">
+                <option value="">All Projects</option>
+              </select>
+            </div>
+            <div class="col-sm-12 col-md-4">
+              <label class="form-label fw-bold small text-muted mb-1">Status</label>
+              <div class="d-flex gap-3 flex-wrap">
+                <div class="form-check mb-0"><input class="form-check-input ap-status-check" type="checkbox" value="Open" id="apst-open" checked><label class="form-check-label small" for="apst-open">Open</label></div>
+                <div class="form-check mb-0"><input class="form-check-input ap-status-check" type="checkbox" value="Ready to Pay" id="apst-ready" checked><label class="form-check-label small" for="apst-ready">Ready to Pay</label></div>
+                <div class="form-check mb-0"><input class="form-check-input ap-status-check" type="checkbox" value="Paid" id="apst-paid" checked><label class="form-check-label small" for="apst-paid">Paid</label></div>
+                <div class="form-check mb-0"><input class="form-check-input ap-status-check" type="checkbox" value="Voided" id="apst-voided"><label class="form-check-label small" for="apst-voided">Voided</label></div>
+              </div>
+            </div>
+            <div class="col-sm-12 col-md-2 d-flex gap-2">
+              <button class="btn btn-sm btn-primary flex-grow-1" onclick="applySubApFilters()">Apply</button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="resetSubApFilters()">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Milestone table -->
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:0.81rem;">
+              <thead style="background:#0f172a;color:#fff;font-size:0.71rem;text-transform:uppercase;letter-spacing:0.04em;">
+                <tr>
+                  <th class="ps-3">Work Package</th>
+                  <th>Project</th>
+                  <th>Milestone</th>
+                  <th class="text-end">Amount</th>
+                  <th class="text-center">Status</th>
+                  <th>Check</th>
+                  <th class="text-center pe-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="sub-ap-mil-tbody">
+                <tr><td colspan="7" class="text-center py-4 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END SUBCONTRACTOR AP SECTION ===== -->
+
+
+    <!-- ===== ASSIGN WORK PACKAGE SECTION ===== -->
+    <div id="section-assign-wp" class="content-section">
+      <h2 class="page-title">Assign Work Package</h2>
+      <div class="card border-0 shadow-sm mx-auto" style="border-radius:14px; max-width:860px;">
+        <div class="card-body p-4">
+
+          <!-- 1. Project -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-muted">Project <span class="text-danger">*</span></label>
+            <select id="wp-project" class="form-select" onchange="onWpProjectChange()">
+              <option value="">â€” Select Project â€”</option>
+            </select>
+          </div>
+
+          <!-- 2. Subcontractor + Quick Add -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-muted">Subcontractor <span class="text-danger">*</span></label>
+            <div class="d-flex gap-2">
+              <select id="wp-sub" class="form-select flex-grow-1">
+                <option value="">â€” Select Subcontractor â€”</option>
+              </select>
+              <button type="button" class="btn btn-outline-secondary btn-sm px-3 flex-shrink-0" onclick="toggleWpQuickAddSub()" style="border-radius:8px;">ï¼‹ New</button>
+            </div>
+          </div>
+
+          <!-- Quick-add sub panel -->
+          <div id="wp-quick-add-sub" class="card border-0 mb-3 p-3" style="display:none; background:#f8fafc; border-radius:10px;">
+            <p class="fw-bold small text-muted mb-2">Quick Add Subcontractor</p>
+            <div id="wp-quick-add-alert" class="alert py-2 mb-2" style="display:none; font-size:0.82rem;"></div>
+            <div class="mb-2">
+              <input type="text" id="wp-qa-name" class="form-control form-control-sm" placeholder="Name *">
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col"><input type="text" id="wp-qa-tin" class="form-control form-control-sm" placeholder="TIN (optional)"></div>
+              <div class="col"><input type="text" id="wp-qa-contact" class="form-control form-control-sm" placeholder="Contact (optional)"></div>
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+              <button type="button" class="btn btn-sm btn-secondary" onclick="toggleWpQuickAddSub()">Cancel</button>
+              <button type="button" id="wp-qa-save-btn" class="btn btn-sm btn-primary fw-bold" onclick="submitWpQuickAddSub()">Save Sub</button>
+            </div>
+          </div>
+
+          <!-- 3. Budget Basis -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-muted">Budget Basis</label>
+            <select id="wp-basis" class="form-select" onchange="onWpBasisChange()">
+              <option value="">â€” None â€”</option>
+              <option value="labor">Labor only</option>
+              <option value="material">Materials only</option>
+              <option value="total">Materials + Labor / Total</option>
+            </select>
+          </div>
+
+          <!-- 4. BOQ Line Picker -->
+          <div class="mb-3" id="wp-boq-picker-wrap" style="display:none;">
+            <label class="form-label fw-bold small text-muted">BOQ Lines to Assign</label>
+            <input type="text" id="wp-boq-search" class="form-control form-control-sm mb-2"
+              placeholder="Search items, scopes, phasesâ€¦" oninput="filterWpBoqPicker()">
+            <div id="wp-boq-picker-body"></div>
+            <div class="mt-2 small fw-bold" id="wp-boq-running-total" style="color:#1d3461;"></div>
+          </div>
+
+          <!-- 5. Label -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-muted">Work Package Label <span class="text-danger">*</span></label>
+            <input type="text" id="wp-label" class="form-control" placeholder="e.g. Structural Works â€“ Phase 1">
+          </div>
+
+          <!-- 6. Contract Value -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-muted">Contract Value (â‚±) <span class="text-danger">*</span></label>
+            <input type="text" inputmode="decimal" id="wp-contract-value" class="form-control"
+              placeholder="e.g. 500,000" oninput="formatThousands(this); recomputeWpMilestoneAmounts()">
+          </div>
+
+          <!-- 7. Contract PDF (optional) -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-muted">Contract PDF (optional)</label>
+            <input type="file" id="wp-contract-pdf" class="form-control form-control-sm" accept=".pdf,.doc,.docx">
+          </div>
+
+          <!-- 8. Milestones -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-muted d-block mb-1">Milestone Terms <span class="text-danger">*</span></label>
+            <div class="row g-1 mb-1" style="font-size:0.73rem; color:#6c757d; font-weight:600;">
+              <div class="col">Label</div>
+              <div class="col-2">Target %</div>
+              <div class="col-2">Pay %</div>
+              <div class="col-3">Amount (â‚±)</div>
+              <div class="col-auto" style="width:42px;"></div>
+            </div>
+            <div id="wp-milestonesContainer"></div>
+            <div class="d-flex align-items-center gap-3 mt-2 flex-wrap">
+              <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;" onclick="addWpMilestoneRow()">+ Add Milestone</button>
+              <span id="wp-milestoneTotal" class="badge bg-secondary">Total Payment: 0%</span>
+              <span id="wp-milestoneAmtTotal" class="small fw-bold" style="color:#1d3461;">Total: â‚±0.00</span>
+            </div>
+          </div>
+
+          <div id="wp-form-alert" class="alert py-2 mt-2" style="display:none; font-size:0.85rem;"></div>
+
+          <div class="d-grid mt-3">
+            <button id="wp-submit-btn" class="btn btn-primary fw-bold py-3" style="border-radius:10px; font-size:1rem;" onclick="submitWorkPackage()">
+              Save Work Package
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- ===== END ASSIGN WORK PACKAGE SECTION ===== -->
+
+
+    <!-- ===== SUBCONTRACTOR REPORTS SECTION ===== -->
+    <div id="section-subcontractor-reports" class="content-section">
+      <h2 class="page-title">Subcontractor Reports</h2>
+      <p class="text-center text-muted mb-4" style="margin-top:-1.5rem; font-size:0.9rem;">Field accomplishment log</p>
+
+      <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-sm fw-bold px-3" style="background:#e8a820; color:#fff; border:none; border-radius:8px;" onclick="openNewSubconReport()">
+          + New Report
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-md-4">
+          <select id="rpt-filter-project" class="form-select form-select-sm" onchange="onRptProjectFilterChange()">
+            <option value="">All Projects</option>
+          </select>
+        </div>
+        <div class="col-sm-6 col-md-4">
+          <select id="rpt-filter-wp" class="form-select form-select-sm" disabled onchange="filterRptTable()">
+            <option value="">All Work Packages</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:0.83rem;">
+              <thead style="background:#0f172a; color:#fff; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em;">
+                <tr>
+                  <th class="ps-3">Date</th>
+                  <th>Project</th>
+                  <th>Work Package</th>
+                  <th>Payment Term</th>
+                  <th class="text-center">% Complete</th>
+                  <th>Reported By</th>
+                  <th class="text-center pe-3">Photos</th>
+                </tr>
+              </thead>
+              <tbody id="rpt-table-body">
+                <tr><td colspan="7" class="text-center py-4 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END SUBCONTRACTOR REPORTS SECTION ===== -->
+
+
+    <!-- ===== NEW SUBCON REPORT MODAL ===== -->
+    <div class="modal fade" id="subconReportModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">New Subcontractor Report</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div id="rpt-modal-alert" class="alert py-2 mb-3" style="display:none; font-size:0.85rem;"></div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Project <span class="text-danger">*</span></label>
+              <select id="rpt-project" class="form-select" onchange="onRptModalProjectChange()">
+                <option value="">â€” Select Project â€”</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Work Package <span class="text-danger">*</span></label>
+              <select id="rpt-wp" class="form-select" disabled onchange="onRptModalWpChange()">
+                <option value="">â€” Select Work Package â€”</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Payment Term</label>
+              <select id="rpt-term" class="form-select" disabled>
+                <option value="">General work package progress</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">% Complete <span class="text-danger">*</span></label>
+              <div class="d-flex align-items-center gap-2">
+                <input type="range" id="rpt-percent" class="form-range flex-grow-1" min="0" max="100" step="1" value="0"
+                  oninput="syncRptPct(this.value)">
+                <input type="number" id="rpt-percent-num" class="form-control form-control-sm" style="width:70px;text-align:center;"
+                  min="0" max="100" step="any" value="0" oninput="syncRptPct(this.value)">
+                <span class="small fw-bold" style="color:#1d3461;">%</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Narrative <span class="text-danger">*</span></label>
+              <textarea id="rpt-narrative" class="form-control" rows="3" placeholder="Describe the work accomplished this period..."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">Photos / Documents (optional)</label>
+              <input type="file" id="rpt-photos" class="form-control form-control-sm" multiple accept="image/*,.pdf">
+              <div class="form-text">Upload site photos or PDF documentation.</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="rpt-submit-btn" class="btn btn-primary fw-bold px-4" onclick="submitNewSubconReport()">Submit Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END NEW SUBCON REPORT MODAL ===== -->
+
+
+    <!-- ===== SUBCONTRACT BUDGET VS ACTUAL SECTION ===== -->
+    <div id="section-subcontract-budget" class="content-section">
+      <h2 class="page-title">Subcontract Budget vs Actual</h2>
+
+      <!-- KPI cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">BOQ Budget</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="bkpi-boq">â‚±0</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Contract Committed</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#1d3461;" id="bkpi-contract">â‚±0</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Paid</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;color:#16a34a;" id="bkpi-paid">â‚±0</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <div class="small fw-bold text-muted text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Variance</div>
+            <div class="fw-bold mt-1" style="font-size:1.2rem;" id="bkpi-variance">â‚±0</div>
+            <div class="small text-muted">BOQ âˆ’ Contract</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter + Export -->
+      <div class="d-flex gap-2 mb-3 flex-wrap align-items-end">
+        <select id="budget-filter-project" class="form-select form-select-sm" style="min-width:180px;">
+          <option value="">All Projects</option>
+        </select>
+        <button class="btn btn-sm btn-primary" onclick="applyBudgetFilters()">Apply</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="resetBudgetFilters()">Reset</button>
+        <button class="btn btn-sm btn-outline-secondary ms-auto" onclick="exportBudgetCsv()">Export CSV</button>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:0.81rem;">
+              <thead style="background:#0f172a;color:#fff;font-size:0.71rem;text-transform:uppercase;letter-spacing:0.04em;">
+                <tr>
+                  <th class="ps-3">Work Package</th>
+                  <th>Project</th>
+                  <th>Subcontractor</th>
+                  <th>Basis</th>
+                  <th class="text-end">BOQ Budget</th>
+                  <th class="text-end">Contract Value</th>
+                  <th class="text-end">Paid</th>
+                  <th class="text-end pe-3">Variance</th>
+                </tr>
+              </thead>
+              <tbody id="budget-tbody">
+                <tr><td colspan="8" class="text-center py-4 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END SUBCONTRACT BUDGET VS ACTUAL SECTION ===== -->
+
+
+    <!-- ===== SUBCONTRACTOR PAYABLES SECTION ===== -->
+    <div id="section-subcon-payables" class="content-section">
+      <h2 class="page-title">Subcontractor Payables</h2>
+      <p class="text-center text-muted mb-4" style="margin-top:-1.5rem;font-size:0.9rem;">Milestones ready to pay â€” settlement queue</p>
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:0.81rem;">
+              <thead style="background:#0f172a;color:#fff;font-size:0.71rem;text-transform:uppercase;letter-spacing:0.04em;">
+                <tr>
+                  <th class="ps-3">Subcontractor</th>
+                  <th>Work Package</th>
+                  <th>Milestone</th>
+                  <th class="text-end">Amount</th>
+                  <th class="text-center pe-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="subcon-payables-tbody">
+                <tr><td colspan="5" class="text-center py-4 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END SUBCONTRACTOR PAYABLES SECTION ===== -->
+
+
+    <!-- ===== LINK CHECK MODAL ===== -->
+    <div class="modal fade" id="subconLinkCheckModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Link Check to Milestone</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div id="link-check-modal-info" class="mb-3 rounded p-2" style="background:#f8fafc;font-size:0.85rem;"></div>
+            <div id="link-check-modal-alert" class="alert py-2 mb-3" style="display:none;font-size:0.85rem;"></div>
+            <div id="link-check-table-wrap">
+              <p class="text-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Loading checks...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END LINK CHECK MODAL ===== -->
+
+
+    <!-- ===== SUBCONTRACTOR CRUD MODAL ===== -->
+    <div class="modal fade" id="subconCrudModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Subcontractors</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="row g-4">
+              <div class="col-md-7">
+                <p class="fw-bold small text-muted mb-2 text-uppercase" style="letter-spacing:0.04em;">Active &amp; Retired</p>
+                <div id="subcon-list" style="max-height:360px; overflow-y:auto;">
+                  <p class="text-muted small py-2 text-center">Loading...</p>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <p class="fw-bold small text-muted mb-2 text-uppercase" style="letter-spacing:0.04em;">New Subcontractor</p>
+                <div id="subcon-form-alert" class="alert py-2 mb-2" style="display:none; font-size:0.82rem;"></div>
+                <div class="mb-2">
+                  <input type="text" id="subcon-new-name" class="form-control form-control-sm" placeholder="Name *">
+                </div>
+                <div class="mb-2">
+                  <input type="text" id="subcon-new-tin" class="form-control form-control-sm" placeholder="TIN (optional)">
+                </div>
+                <div class="mb-3">
+                  <input type="text" id="subcon-new-contact" class="form-control form-control-sm" placeholder="Contact (optional)">
+                </div>
+                <button id="subcon-save-btn" class="btn btn-primary btn-sm fw-bold w-100" onclick="submitNewSubcontractor()">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== END SUBCONTRACTOR CRUD MODAL ===== -->
+
+
+  </div> </div> <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<%= javascript_include_tag "google-script-shim" %>
+<%= javascript_include_tag "portal" %>
+<script>
+  // Dynamically update document title
+  document.title = CLIENT_NAME + " Portal";
+</script>
+</body>
+</html>
+
+

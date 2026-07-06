@@ -1,0 +1,2 @@
+class WpBoqLine < ApplicationRecord
+end

@@ -1,0 +1,2 @@
+class ReturnableItem < ApplicationRecord
+end

@@ -1,0 +1,2 @@
+class PendingRefund < ApplicationRecord
+end

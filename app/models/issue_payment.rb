@@ -1,0 +1,2 @@
+class IssuePayment < ApplicationRecord
+end

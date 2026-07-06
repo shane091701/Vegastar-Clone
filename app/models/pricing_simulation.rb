@@ -1,0 +1,2 @@
+class PricingSimulation < ApplicationRecord
+end

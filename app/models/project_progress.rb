@@ -1,0 +1,2 @@
+class ProjectProgress < ApplicationRecord
+end

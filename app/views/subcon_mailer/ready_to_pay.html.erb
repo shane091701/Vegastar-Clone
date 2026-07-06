@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;margin:0;padding:24px;">
+  <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+    <div style="background:#0f172a;padding:20px 28px;">
+      <div style="color:#e8a820;font-weight:700;font-size:1.05rem;letter-spacing:.02em;">Vegastar</div>
+      <div style="color:#94a3b8;font-size:.78rem;margin-top:2px;">Subcontractor Management</div>
+    </div>
+    <div style="padding:24px 28px;">
+      <h2 style="margin:0 0 14px;font-size:1.1rem;color:#0f172a;">&#x2705; Milestone(s) Ready to Pay</h2>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:.85rem;">
+        <tr><td style="padding:4px 0;color:#64748b;width:130px;">Subcontractor</td><td style="font-weight:600;"><%= @context[:subName] %></td></tr>
+        <tr><td style="padding:4px 0;color:#64748b;">Work Package</td><td style="font-weight:600;"><%= @context[:wpLabel] %></td></tr>
+        <tr><td style="padding:4px 0;color:#64748b;">Triggered by</td><td style="color:#1d3461;"><%= @trigger_line %></td></tr>
+      </table>
+      <table style="width:100%;border-collapse:collapse;font-size:.875rem;">
+        <thead>
+          <tr style="background:#f1f5f9;text-transform:uppercase;font-size:.72rem;letter-spacing:.05em;color:#64748b;">
+            <th style="padding:8px 14px;text-align:left;font-weight:600;">Milestone</th>
+            <th style="padding:8px 14px;text-align:center;font-weight:600;">Seq</th>
+            <th style="padding:8px 14px;text-align:right;font-weight:600;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @flagged_details.each do |m| %>
+            <tr style="border-bottom:1px solid #e2e8f0;">
+              <td style="padding:8px 14px;"><%= m[:label].presence || "—" %></td>
+              <td style="padding:8px 14px;text-align:center;color:#64748b;">Seq <%= m[:seq] %></td>
+              <td style="padding:8px 14px;text-align:right;font-weight:600;">₱<%= number_with_delimiter(format("%.2f", m[:amount])) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <p style="margin:20px 0 0;font-size:.78rem;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:14px;">
+        Automated notification from the Vegastar ERP Portal. Navigate to Subcontractor AP to process payment.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<div style="font-family:Arial,sans-serif;color:#333;max-width:700px;">
+  <div style="background:#0d1b2e;color:#fff;padding:20px 30px;border-radius:8px 8px 0 0;">
+    <h2 style="margin:0;font-size:1.2rem;">🏗️ Vegastar &mdash; New <%= @type_label %></h2>
+  </div>
+  <div style="background:#fff;border:1px solid #ddd;padding:24px 30px;border-radius:0 0 8px 8px;">
+    <p style="margin:0 0 8px;"><strong>Project:</strong> <%= @project_name %></p>
+    <p style="margin:0 0 16px;"><strong>Requested by:</strong> <%= @requestor_email %></p>
+    <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+      <thead>
+        <tr style="background:#f2f2f2;">
+          <th style="border:1px solid #ddd;padding:8px;text-align:left;">Item / Description</th>
+          <th style="border:1px solid #ddd;padding:8px;text-align:center;">Unit</th>
+          <th style="border:1px solid #ddd;padding:8px;text-align:center;">Qty / Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @items.each do |it| %>
+          <tr>
+            <td style="border:1px solid #ddd;padding:8px;"><%= it[:item] %></td>
+            <td style="border:1px solid #ddd;padding:8px;text-align:center;"><%= it[:unit].presence || "Units" %></td>
+            <td style="border:1px solid #ddd;padding:8px;text-align:center;"><%= it[:qty] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p style="margin-top:20px;">
+      <a href="<%= @app_url %>" style="background:#c8922a;color:#fff;padding:10px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">
+        &#8594; Open Approval Queue
+      </a>
+    </p>
+    <p style="margin-top:24px;font-size:0.8rem;color:#888;">
+      This is an automated notification from the Vegastar ERP portal.
+    </p>
+  </div>
+</div>

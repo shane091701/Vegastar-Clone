@@ -1,0 +1,2 @@
+class SupplierQuote < ApplicationRecord
+end
