@@ -7,6 +7,8 @@ Rails.application.routes.draw do
     post "handleForgotPassword", to: "auth#handle_forgot_password"
     post "processPasswordReset", to: "auth#process_password_reset"
     post "logout", to: "auth#logout"
+    post "getMySignature", to: "auth#get_my_signature"
+    post "uploadSignature", to: "auth#upload_signature"
 
     # BOQ upload, adjustments & shared lookups
     post "processBOQ", to: "boq#process_boq"

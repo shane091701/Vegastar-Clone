@@ -1,5 +1,6 @@
 class Api::AuthController < Api::BaseController
   skip_before_action :require_login!
+  before_action :require_login!, only: [:get_my_signature, :upload_signature]
 
   # Port of verifyLogin(inputEmail, inputPassword) — Source/code.js:2496
   def verify_login
@@ -60,5 +61,35 @@ class Api::AuthController < Api::BaseController
   def logout
     session.delete(:user_id)
     render json: { success: true }
+  end
+
+  # The users.signature slot existed in the original design but had no UI;
+  # these two endpoints back the "My Signature" button in the top bar. The
+  # image is stamped onto dispatched PO PDFs (see PurchaseOrdersController).
+  def get_my_signature
+    render json: { url: signature_url(current_user) }
+  end
+
+  def upload_signature
+    file = arg(0) || {}
+    raise "Signature image is required." if file["data"].blank?
+    raise "Signature must be an image file (PNG or JPG)." unless file["mimeType"].to_s.start_with?("image/")
+
+    ext = File.extname(file["name"].to_s).presence || ".png"
+    current_user.signature.attach(
+      io: StringIO.new(Base64.decode64(file["data"].to_s)),
+      filename: "signature_user#{current_user.id}#{ext}",
+      content_type: file["mimeType"].to_s
+    )
+    render json: { url: signature_url(current_user.reload) }
+  end
+
+  private
+
+  def signature_url(user)
+    return nil unless user.signature.attached?
+    Rails.application.routes.url_helpers.rails_blob_path(
+      user.signature, disposition: "inline", only_path: true
+    )
   end
 end
