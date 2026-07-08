@@ -11,6 +11,11 @@ Rails.application.routes.draw do
     post "uploadSignature", to: "auth#upload_signature"
     post "importCsvData", to: "csv_import#import_data"
 
+    # Account management (admin only)
+    post "getUsersList", to: "users#get_users_list"
+    post "createUser", to: "users#create_user"
+    post "deactivateUser", to: "users#deactivate_user"
+
     # BOQ upload, adjustments & shared lookups
     post "processBOQ", to: "boq#process_boq"
     post "getProjectsListOnly", to: "boq#get_projects_list_only"
