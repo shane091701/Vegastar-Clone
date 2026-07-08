@@ -26,7 +26,10 @@ class Api::UsersController < Api::BaseController
     raise "Password must be at least 8 characters." if password.length < 8
     raise "An account with this email already exists." if User.where(email: email).exists?
 
-    user = User.create!(name: name, email: email, role: role, password: password)
+    # A password the admin just typed in is, by definition, known to at
+    # least one other person -- always force a change on first login.
+    user = User.create!(name: name, email: email, role: role, password: password,
+                        must_change_password: true)
     render json: { id: user.id, name: user.name, email: user.email, role: user.role,
                    createdAt: user.created_at.strftime("%b %d, %Y") }
   end

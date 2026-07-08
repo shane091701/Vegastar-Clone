@@ -1,6 +1,7 @@
 class Api::BaseController < ApplicationController
   skip_before_action :verify_authenticity_token, raise: false
   before_action :require_login!
+  before_action :require_password_changed!
 
   private
 
@@ -10,6 +11,17 @@ class Api::BaseController < ApplicationController
 
   def require_login!
     render json: { error: "Not authenticated" }, status: :unauthorized unless current_user
+  end
+
+  # Accounts created via Manage Users start with must_change_password:true
+  # (a temporary password the admin set is, by definition, one more person
+  # already knows). Blocks every endpoint except Api::AuthController#change_password
+  # until they've set their own -- server-side, not just a frontend nag, so
+  # a stale localStorage session can't be used to skip it.
+  def require_password_changed!
+    return unless current_user&.must_change_password?
+    render json: { error: "You must set a new password before continuing.", mustChangePassword: true },
+           status: :forbidden
   end
 
   # The google.script.run shim posts {args: [...]} — positional arguments

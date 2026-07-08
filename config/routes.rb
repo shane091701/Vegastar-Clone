@@ -9,6 +9,7 @@ Rails.application.routes.draw do
     post "logout", to: "auth#logout"
     post "getMySignature", to: "auth#get_my_signature"
     post "uploadSignature", to: "auth#upload_signature"
+    post "changePassword", to: "auth#change_password"
     post "importCsvData", to: "csv_import#import_data"
 
     # Account management (admin only)

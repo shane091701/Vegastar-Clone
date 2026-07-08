@@ -1,6 +1,7 @@
 class Api::AuthController < Api::BaseController
   skip_before_action :require_login!
-  before_action :require_login!, only: [:get_my_signature, :upload_signature]
+  skip_before_action :require_password_changed!
+  before_action :require_login!, only: [:get_my_signature, :upload_signature, :change_password]
 
   # Port of verifyLogin(inputEmail, inputPassword) — Source/code.js:2496
   def verify_login
@@ -20,8 +21,18 @@ class Api::AuthController < Api::BaseController
 
     session[:user_id] = user.id
     allowed = user.allowed_tabs.presence&.split(",")&.map { |t| t.strip.downcase } || []
-    render json: { authorized: true, email: user.email, name: user.name,
-                   role: user.role, allowedTabs: allowed }
+    render json: { authorized: true, email: user.email, name: user.name, role: user.role,
+                   allowedTabs: allowed, mustChangePassword: user.must_change_password? }
+  end
+
+  # Sets a new password for the CURRENTLY LOGGED IN user (distinct from the
+  # forgot-password token flow above). Used by the mandatory "set a new
+  # password" screen shown when must_change_password is true.
+  def change_password
+    new_password = args[0].to_s
+    raise "Password must be at least 8 characters." if new_password.length < 8
+    current_user.update!(password: new_password, must_change_password: false)
+    render json: { success: true }
   end
 
   # Port of handleForgotPassword(inputEmail) — Source/code.js:2539
