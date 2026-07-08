@@ -14,6 +14,7 @@ class Api::AuthController < Api::BaseController
 
     user = User.find_by(email: email)
     return render json: { authorized: false, message: "Email not found in the system." } unless user
+    return render json: { authorized: false, message: "This account has been deactivated." } unless user.active?
 
     unless user.authenticate(password)
       return render json: { authorized: false, message: "Incorrect password." }

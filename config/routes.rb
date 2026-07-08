@@ -15,7 +15,10 @@ Rails.application.routes.draw do
     # Account management (admin only)
     post "getUsersList", to: "users#get_users_list"
     post "createUser", to: "users#create_user"
+    post "updateUser", to: "users#update_user"
+    post "resetPassword", to: "users#reset_password"
     post "deactivateUser", to: "users#deactivate_user"
+    post "reactivateUser", to: "users#reactivate_user"
 
     # BOQ upload, adjustments & shared lookups
     post "processBOQ", to: "boq#process_boq"

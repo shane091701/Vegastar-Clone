@@ -1,9 +1,11 @@
-// "Manage Users" -- admin-only screen to create new logins and see who has
-// access. The original system had no account-creation UI either (accounts
-// only ever came from db:seed); this closes that gap. Kept out of
-// portal.js because that file is regenerated from Source/ by
+// "Manage Users" -- admin-only screen to create, edit, reset, deactivate,
+// and reactivate logins. The original system had no account-creation UI at
+// all (accounts only ever came from db:seed); this closes that gap. Kept
+// out of portal.js because that file is regenerated from Source/ by
 // tools/port_frontend.ps1.
 (function () {
+  var usersCache = [];
+
   function init() {
     var anchor = document.getElementById("nav-expense");
     if (!anchor || document.getElementById("nav-manage-users")) return;
@@ -34,7 +36,7 @@
     section.className = "content-section";
     section.innerHTML =
       '<h2 class="page-title">Manage <span class="text-highlight">Users</span></h2>' +
-      '<div class="upload-card" style="max-width: 750px; margin: 0 auto;">' +
+      '<div class="upload-card" style="max-width: 800px; margin: 0 auto;">' +
       '  <div id="mu-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>' +
       '  <h5 class="fw-bold mb-3 border-bottom pb-2 text-start">Add a New Login</h5>' +
       '  <div class="row g-3 mb-2 text-start">' +
@@ -56,55 +58,44 @@
       '        <input type="text" id="mu-password" class="form-control" placeholder="At least 8 characters">' +
       '        <button type="button" class="btn btn-outline-secondary" id="mu-generate-btn">Generate</button>' +
       "      </div>" +
-      '      <div class="form-text">Share this with them directly -- have them change it after first login.</div>' +
+      '      <div class="form-text">Share this with them directly -- they\'ll be forced to set their own on first login.</div>' +
       "    </div>" +
       "  </div>" +
       '  <button id="mu-create-btn" class="btn btn-primary fw-bold w-100 mt-2 mb-4" type="button">Create Login</button>' +
       '  <h5 class="fw-bold mb-3 border-bottom pb-2 text-start">Existing Logins</h5>' +
       '  <div class="table-responsive">' +
       '    <table class="table table-sm align-middle">' +
-      '      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th></th></tr></thead>' +
-      '      <tbody id="mu-table-body"><tr><td colspan="5" class="text-center text-muted">Loading...</td></tr></tbody>' +
+      '      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th></th></tr></thead>' +
+      '      <tbody id="mu-table-body"><tr><td colspan="6" class="text-center text-muted">Loading...</td></tr></tbody>' +
       "    </table>" +
       "  </div>" +
-      "</div>";
+      "</div>" +
+      buildEditModal() +
+      buildResetModal();
 
     var mainContainer = document.querySelector(".main-container");
     if (mainContainer) mainContainer.appendChild(section);
 
     document.getElementById("mu-generate-btn").addEventListener("click", function () {
-      var chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-      var pw = "";
-      for (var i = 0; i < 10; i++) pw += chars[Math.floor(Math.random() * chars.length)];
-      document.getElementById("mu-password").value = pw;
+      document.getElementById("mu-password").value = randomPassword();
     });
-
     document.getElementById("mu-create-btn").addEventListener("click", createUser);
+    document.getElementById("mu-edit-save-btn").addEventListener("click", saveEdit);
+    document.getElementById("mu-reset-generate-btn").addEventListener("click", function () {
+      document.getElementById("mu-reset-password").value = randomPassword();
+    });
+    document.getElementById("mu-reset-save-btn").addEventListener("click", saveReset);
 
     window.loadManageUsers = function () {
       google.script.run
         .withSuccessHandler(function (res) {
+          usersCache = res.users;
           var roleSelect = document.getElementById("mu-role");
-          var currentVal = roleSelect.value;
-          roleSelect.innerHTML = '<option value="">— Select Role —</option>' +
+          var roleOptions = '<option value="">— Select Role —</option>' +
             res.roles.map(function (r) { return '<option value="' + r + '">' + r + "</option>"; }).join("");
-          roleSelect.value = currentVal;
-
-          var body = document.getElementById("mu-table-body");
-          if (!res.users.length) {
-            body.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No users yet.</td></tr>';
-            return;
-          }
-          body.innerHTML = res.users.map(function (u) {
-            return "<tr>" +
-              "<td>" + escapeHtml(u.name) + "</td>" +
-              "<td>" + escapeHtml(u.email) + "</td>" +
-              '<td><span class="badge bg-secondary">' + escapeHtml(u.role) + "</span></td>" +
-              "<td>" + escapeHtml(u.createdAt) + "</td>" +
-              '<td><button class="btn btn-sm btn-outline-danger" onclick="deactivateUser(' + u.id + ', \'' +
-                escapeHtml(u.email).replace(/'/g, "\\'") + '\')">Deactivate</button></td>' +
-              "</tr>";
-          }).join("");
+          roleSelect.innerHTML = roleOptions;
+          document.getElementById("mu-edit-role").innerHTML = roleOptions;
+          renderTable();
         })
         .withFailureHandler(function (err) { showAlert("Error loading users: " + err.message); })
         .getUsersList();
@@ -117,6 +108,121 @@
         .withFailureHandler(function (err) { showAlert("Error: " + err.message); })
         .deactivateUser(id);
     };
+
+    window.reactivateUser = function (id, email) {
+      google.script.run
+        .withSuccessHandler(function () { showAlert('Reactivated "' + email + '".', "success"); loadManageUsers(); })
+        .withFailureHandler(function (err) { showAlert("Error: " + err.message); })
+        .reactivateUser(id);
+    };
+
+    window.openEditUser = function (id) {
+      var u = usersCache.find(function (x) { return x.id === id; });
+      if (!u) return;
+      document.getElementById("mu-edit-id").value = u.id;
+      document.getElementById("mu-edit-name").value = u.name;
+      document.getElementById("mu-edit-email").value = u.email;
+      document.getElementById("mu-edit-role").value = u.role;
+      document.getElementById("mu-edit-alert").style.display = "none";
+      new bootstrap.Modal(document.getElementById("editUserModal")).show();
+    };
+
+    window.openResetPassword = function (id, email) {
+      document.getElementById("mu-reset-id").value = id;
+      document.getElementById("mu-reset-email-label").textContent = email;
+      document.getElementById("mu-reset-password").value = "";
+      document.getElementById("mu-reset-alert").style.display = "none";
+      new bootstrap.Modal(document.getElementById("resetPasswordModal")).show();
+    };
+  }
+
+  function buildEditModal() {
+    return '<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">' +
+      '  <div class="modal-dialog modal-dialog-centered">' +
+      '    <div class="modal-content border-0 shadow">' +
+      '      <div class="modal-header"><h5 class="modal-title fw-bold">Edit User</h5>' +
+      '        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>' +
+      '      <div class="modal-body">' +
+      '        <div id="mu-edit-alert" class="alert alert-danger py-2" style="display:none; font-size: 0.85rem;"></div>' +
+      '        <input type="hidden" id="mu-edit-id">' +
+      '        <div class="mb-3"><label class="form-label fw-bold small text-muted">Full Name</label>' +
+      '          <input type="text" id="mu-edit-name" class="form-control"></div>' +
+      '        <div class="mb-3"><label class="form-label fw-bold small text-muted">Email</label>' +
+      '          <input type="email" id="mu-edit-email" class="form-control"></div>' +
+      '        <div class="mb-2"><label class="form-label fw-bold small text-muted">Role</label>' +
+      '          <select id="mu-edit-role" class="form-select"></select></div>' +
+      "      </div>" +
+      '      <div class="modal-footer">' +
+      '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>' +
+      '        <button type="button" class="btn btn-primary fw-bold" id="mu-edit-save-btn">Save Changes</button>' +
+      "      </div>" +
+      "    </div></div></div>";
+  }
+
+  function buildResetModal() {
+    return '<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">' +
+      '  <div class="modal-dialog modal-dialog-centered">' +
+      '    <div class="modal-content border-0 shadow">' +
+      '      <div class="modal-header"><h5 class="modal-title fw-bold">Reset Password</h5>' +
+      '        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>' +
+      '      <div class="modal-body">' +
+      '        <p class="small text-muted">Setting a new password for <strong id="mu-reset-email-label"></strong>. ' +
+      "        They'll be forced to set their own on next login.</p>" +
+      '        <div id="mu-reset-alert" class="alert alert-danger py-2" style="display:none; font-size: 0.85rem;"></div>' +
+      '        <input type="hidden" id="mu-reset-id">' +
+      '        <label class="form-label fw-bold small text-muted">New Temporary Password</label>' +
+      '        <div class="input-group">' +
+      '          <input type="text" id="mu-reset-password" class="form-control" placeholder="At least 8 characters">' +
+      '          <button type="button" class="btn btn-outline-secondary" id="mu-reset-generate-btn">Generate</button>' +
+      "        </div>" +
+      "      </div>" +
+      '      <div class="modal-footer">' +
+      '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>' +
+      '        <button type="button" class="btn btn-primary fw-bold" id="mu-reset-save-btn">Set Password</button>' +
+      "      </div>" +
+      "    </div></div></div>";
+  }
+
+  function randomPassword() {
+    var chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    var pw = "";
+    for (var i = 0; i < 10; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+    return pw;
+  }
+
+  function renderTable() {
+    var body = document.getElementById("mu-table-body");
+    if (!usersCache.length) {
+      body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No users yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = usersCache.map(function (u) {
+      var statusBadge = u.active
+        ? '<span class="badge bg-success">Active</span>'
+        : '<span class="badge bg-secondary">Inactive</span>';
+      var actionBtn = u.active
+        ? '<button class="btn btn-sm btn-outline-danger" onclick="deactivateUser(' + u.id + ", '" +
+          jsStr(u.email) + "')\">Deactivate</button>"
+        : '<button class="btn btn-sm btn-outline-success" onclick="reactivateUser(' + u.id + ", '" +
+          jsStr(u.email) + "')\">Reactivate</button>";
+      return "<tr>" +
+        "<td>" + escapeHtml(u.name) + "</td>" +
+        "<td>" + escapeHtml(u.email) + "</td>" +
+        '<td><span class="badge bg-secondary">' + escapeHtml(u.role) + "</span></td>" +
+        "<td>" + statusBadge + "</td>" +
+        "<td>" + escapeHtml(u.createdAt) + "</td>" +
+        '<td class="text-nowrap">' +
+          '<button class="btn btn-sm btn-outline-secondary me-1" onclick="openEditUser(' + u.id + ')">Edit</button>' +
+          '<button class="btn btn-sm btn-outline-secondary me-1" onclick="openResetPassword(' + u.id + ", '" +
+            jsStr(u.email) + "')\">Reset Password</button>" +
+          actionBtn +
+        "</td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  function jsStr(s) {
+    return String(s == null ? "" : s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
   }
 
   function escapeHtml(s) {
@@ -164,6 +270,71 @@
         showAlert("Error: " + err.message);
       })
       .createUser({ name: name, email: email, role: role, password: password });
+  }
+
+  function saveEdit() {
+    var id = parseInt(document.getElementById("mu-edit-id").value, 10);
+    var name = document.getElementById("mu-edit-name").value.trim();
+    var email = document.getElementById("mu-edit-email").value.trim();
+    var role = document.getElementById("mu-edit-role").value;
+    var btn = document.getElementById("mu-edit-save-btn");
+    var alertBox = document.getElementById("mu-edit-alert");
+    alertBox.style.display = "none";
+
+    if (!name || !email || !role) {
+      alertBox.textContent = "Please fill in Name, Email, and Role.";
+      alertBox.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    google.script.run
+      .withSuccessHandler(function () {
+        btn.disabled = false;
+        btn.textContent = "Save Changes";
+        bootstrap.Modal.getInstance(document.getElementById("editUserModal")).hide();
+        showAlert("User updated.", "success");
+        loadManageUsers();
+      })
+      .withFailureHandler(function (err) {
+        btn.disabled = false;
+        btn.textContent = "Save Changes";
+        alertBox.textContent = "Error: " + err.message;
+        alertBox.style.display = "block";
+      })
+      .updateUser(id, { name: name, email: email, role: role });
+  }
+
+  function saveReset() {
+    var id = parseInt(document.getElementById("mu-reset-id").value, 10);
+    var password = document.getElementById("mu-reset-password").value;
+    var btn = document.getElementById("mu-reset-save-btn");
+    var alertBox = document.getElementById("mu-reset-alert");
+    alertBox.style.display = "none";
+
+    if (password.length < 8) {
+      alertBox.textContent = "Password must be at least 8 characters.";
+      alertBox.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    google.script.run
+      .withSuccessHandler(function () {
+        btn.disabled = false;
+        btn.textContent = "Set Password";
+        bootstrap.Modal.getInstance(document.getElementById("resetPasswordModal")).hide();
+        showAlert("Password reset. Share the new temporary password with them directly.", "success");
+      })
+      .withFailureHandler(function (err) {
+        btn.disabled = false;
+        btn.textContent = "Set Password";
+        alertBox.textContent = "Error: " + err.message;
+        alertBox.style.display = "block";
+      })
+      .resetPassword(id, password);
   }
 
   if (document.readyState === "loading") {
