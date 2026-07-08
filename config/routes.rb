@@ -11,6 +11,9 @@ Rails.application.routes.draw do
     post "uploadSignature", to: "auth#upload_signature"
     post "changePassword", to: "auth#change_password"
     post "importCsvData", to: "csv_import#import_data"
+    post "getManagedRows", to: "data_management#get_managed_rows"
+    post "updateManagedRow", to: "data_management#update_managed_row"
+    post "deleteManagedRow", to: "data_management#delete_managed_row"
 
     # Account management (admin only)
     post "getUsersList", to: "users#get_users_list"

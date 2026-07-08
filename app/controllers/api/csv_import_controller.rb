@@ -6,17 +6,50 @@
 class Api::CsvImportController < Api::BaseController
   IMPORTERS = %w[suppliers materials subcontractors expense_categories expenses checks].freeze
 
+  # args: [type, csvText, mode]  (mode: "append" (default) | "replace")
   def import_data
     type = args[0].to_s
     csv_text = args[1].to_s
-    encoder = (args[2].presence || current_user.email).to_s
+    mode = args[2].to_s.presence || "append"
+    encoder = current_user.email.to_s
     raise "Unknown import type: #{type}" unless IMPORTERS.include?(type)
     raise "No file content received." if csv_text.blank?
+    raise "Unknown import mode: #{mode}" unless %w[append replace].include?(mode)
 
-    render json: send("import_#{type}", csv_text, encoder)
+    result = nil
+    # Wrap in a transaction so a mid-import failure also rolls back the
+    # replace-wipe -- we never leave the table half-emptied.
+    ActiveRecord::Base.transaction do
+      wipe_for_replace!(type) if mode == "replace"
+      result = send("import_#{type}", csv_text, encoder)
+    end
+    render json: result.merge(mode: mode)
   end
 
   private
+
+  # "Replace" mode empties the existing rows of this type first. Guards
+  # protect data other parts of the app still point at (a wholesale wipe
+  # would orphan those references), directing the admin to edit individually.
+  def wipe_for_replace!(type)
+    case type
+    when "suppliers"          then Supplier.delete_all
+    when "materials"          then Material.delete_all
+    when "expense_categories" then ExpenseListEntry.delete_all
+    when "expenses"           then Expense.delete_all
+    when "subcontractors"
+      if WorkPackage.exists?
+        raise "Can't replace subcontractors: some already have work packages assigned. Edit or deactivate them individually instead."
+      end
+      SubconAudit.where(entity: "Subcontractor").delete_all
+      Subcontractor.delete_all
+    when "checks"
+      if SubconMilestone.where.not(check_number: [nil, ""]).exists?
+        raise "Can't replace checks: some checks are linked to subcontractor milestones. Edit them individually instead."
+      end
+      Check.delete_all
+    end
+  end
 
   def import_suppliers(csv_text, encoder)
     rows = CsvImporter.parse(csv_text,
