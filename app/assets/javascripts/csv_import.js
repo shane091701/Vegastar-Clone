@@ -105,8 +105,8 @@
       '  <h5 class="fw-bold mb-3 border-bottom pb-2 text-start">Import from CSV</h5>' +
       '  <div class="mb-3 text-start">' +
       '    <div class="small fw-bold text-muted mb-1">Your file should look like this:</div>' +
-      '    <div class="table-responsive">' +
-      '      <table class="table table-sm table-bordered mb-1" style="font-size: 0.8rem;">' +
+      '    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">' +
+      '      <table class="table table-sm table-bordered mb-1" style="font-size: 0.8rem; white-space: nowrap;">' +
       '        <thead id="csvFormatPreviewHead"></thead>' +
       '        <tbody id="csvFormatPreviewBody"></tbody>' +
       "      </table>" +

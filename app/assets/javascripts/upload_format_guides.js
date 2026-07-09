@@ -62,14 +62,14 @@
     modal.tabIndex = -1;
     modal.setAttribute("aria-hidden", "true");
     modal.innerHTML =
-      '<div class="modal-dialog modal-dialog-centered modal-lg">' +
+      '<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">' +
       '  <div class="modal-content border-0 shadow">' +
       '    <div class="modal-header"><h5 class="modal-title fw-bold">' + escapeHtml(guide.title) + '</h5>' +
       '      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>' +
       '    <div class="modal-body">' +
       '      <p class="small">' + guide.intro + "</p>" +
-      '      <div class="table-responsive">' +
-      '        <table class="table table-sm table-bordered mb-2" style="font-size: 0.78rem;">' +
+      '      <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">' +
+      '        <table class="table table-sm table-bordered mb-2" style="font-size: 0.78rem; white-space: nowrap;">' +
       '          <thead><tr><th></th>' + theadCells + "</tr></thead>" +
       "          <tbody>" + bodyRows + "</tbody>" +
       "        </table>" +
