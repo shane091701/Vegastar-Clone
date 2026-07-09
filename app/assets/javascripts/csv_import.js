@@ -286,6 +286,8 @@
     reader.readAsText(fileInput.files[0]);
   }
 
+  window.loadRecords = loadRecords;
+
   function loadRecords() {
     var head = document.getElementById("csvRecordsHead");
     var body = document.getElementById("csvRecordsBody");
