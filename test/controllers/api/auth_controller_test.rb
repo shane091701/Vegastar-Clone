@@ -60,4 +60,31 @@ class Api::AuthControllerTest < ActionDispatch::IntegrationTest
     refute body["success"]
     assert_equal "This reset link has expired. Please request a new one.", body["message"]
   end
+
+  test "changePassword without a current password (forced first-login flow) always succeeds" do
+    post "/api/verifyLogin", params: { args: ["admin@test.local", "Secret123!"] }, as: :json
+
+    post "/api/changePassword", params: { args: ["NewSecret123!"] }, as: :json
+    assert_response :success
+    assert JSON.parse(response.body)["success"]
+    assert @user.reload.authenticate("NewSecret123!")
+    refute @user.must_change_password?
+  end
+
+  test "changePassword with a current password (voluntary change) requires it to be correct" do
+    post "/api/verifyLogin", params: { args: ["admin@test.local", "Secret123!"] }, as: :json
+
+    post "/api/changePassword", params: { args: ["NewSecret123!", "WrongCurrent!"] }, as: :json
+    assert_response :unprocessable_entity
+    assert_equal "Current password is incorrect.", JSON.parse(response.body)["error"]
+    assert @user.reload.authenticate("Secret123!")
+  end
+
+  test "changePassword with the correct current password succeeds" do
+    post "/api/verifyLogin", params: { args: ["admin@test.local", "Secret123!"] }, as: :json
+
+    post "/api/changePassword", params: { args: ["NewSecret123!", "Secret123!"] }, as: :json
+    assert_response :success
+    assert @user.reload.authenticate("NewSecret123!")
+  end
 end

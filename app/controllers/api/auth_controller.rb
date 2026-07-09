@@ -27,11 +27,19 @@ class Api::AuthController < Api::BaseController
   end
 
   # Sets a new password for the CURRENTLY LOGGED IN user (distinct from the
-  # forgot-password token flow above). Used by the mandatory "set a new
-  # password" screen shown when must_change_password is true.
+  # forgot-password token flow above). Used both by the mandatory "set a new
+  # password" screen shown when must_change_password is true (which omits
+  # args[1] -- there's nothing to confirm right after using a temp password
+  # someone else set) and by the voluntary "Change Password" button (which
+  # always sends args[1] so a shared/unlocked device can't silently take over
+  # the account).
   def change_password
     new_password = args[0].to_s
+    current_password = args[1]
     raise "Password must be at least 8 characters." if new_password.length < 8
+    if current_password && !current_user.authenticate(current_password)
+      raise "Current password is incorrect."
+    end
     current_user.update!(password: new_password, must_change_password: false)
     render json: { success: true }
   end
