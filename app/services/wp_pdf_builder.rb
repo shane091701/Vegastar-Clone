@@ -8,12 +8,14 @@ class WpPdfBuilder
     lines = WpBoqLine.where(wp_code: wp_code).order(:id)
     boq_rows = if lines.any?
       lines.map do |l|
-        "<tr>" \
-          %(<td style="border:1px solid #ddd;padding:8px;">#{h(l.phase)} / #{h(l.scope)}</td>) \
-          %(<td style="border:1px solid #ddd;padding:8px;">#{h(l.item)}</td>) \
-          %(<td style="border:1px solid #ddd;padding:8px;text-align:right;">#{fmt(l.boq_cost)}</td>) \
-          %(<td style="border:1px solid #ddd;padding:8px;text-align:right;">#{fmt(l.allocated_cost)}</td>) \
+        [
+          "<tr>",
+          %(<td style="border:1px solid #ddd;padding:8px;">#{h(l.phase)} / #{h(l.scope)}</td>),
+          %(<td style="border:1px solid #ddd;padding:8px;">#{h(l.item)}</td>),
+          %(<td style="border:1px solid #ddd;padding:8px;text-align:right;">#{fmt(l.boq_cost)}</td>),
+          %(<td style="border:1px solid #ddd;padding:8px;text-align:right;">#{fmt(l.allocated_cost)}</td>),
           "</tr>"
+        ].join
       end.join
     else
       %(<tr><td colspan="4" style="text-align:center;padding:8px;color:#999;">No BOQ lines assigned.</td></tr>)
@@ -22,13 +24,15 @@ class WpPdfBuilder
     milestones = SubconMilestone.where(wp_code: wp_code).order(:seq, :id)
     mil_rows = if milestones.any?
       milestones.map do |m|
-        "<tr>" \
-          %(<td style="border:1px solid #ddd;padding:8px;text-align:center;">#{m.seq}</td>) \
-          %(<td style="border:1px solid #ddd;padding:8px;">#{h(m.label)}</td>) \
-          %(<td style="border:1px solid #ddd;padding:8px;text-align:center;">#{pct(m.target_pct)}%</td>) \
-          %(<td style="border:1px solid #ddd;padding:8px;text-align:center;">#{pct(m.payment_pct)}%</td>) \
-          %(<td style="border:1px solid #ddd;padding:8px;text-align:right;">#{fmt(m.amount)}</td>) \
+        [
+          "<tr>",
+          %(<td style="border:1px solid #ddd;padding:8px;text-align:center;">#{m.seq}</td>),
+          %(<td style="border:1px solid #ddd;padding:8px;">#{h(m.label)}</td>),
+          %(<td style="border:1px solid #ddd;padding:8px;text-align:center;">#{pct(m.target_pct)}%</td>),
+          %(<td style="border:1px solid #ddd;padding:8px;text-align:center;">#{pct(m.payment_pct)}%</td>),
+          %(<td style="border:1px solid #ddd;padding:8px;text-align:right;">#{fmt(m.amount)}</td>),
           "</tr>"
+        ].join
       end.join
     else
       %(<tr><td colspan="5" style="text-align:center;padding:8px;color:#999;">No milestones defined.</td></tr>)

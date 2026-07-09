@@ -18,5 +18,14 @@ test:
   database: vegastar_erp_test
 
 production:
-  <<: *default
-  database: vegastar_erp_production
+  # Railway provides the full connection string as DATABASE_URL (its internal
+  # network is plaintext, so sslmode disable is correct there). gssencmode is
+  # disabled to skip GSSAPI negotiation -- harmless on Linux and required by
+  # the Windows libpq build. If you ever point this at an SSL-required
+  # database, set PGSSLMODE=require in the environment.
+  adapter: postgresql
+  encoding: unicode
+  url: <%= ENV["DATABASE_URL"] %>
+  gssencmode: disable
+  sslmode: <%= ENV.fetch("PGSSLMODE", "disable") %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>

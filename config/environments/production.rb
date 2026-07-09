@@ -22,7 +22,10 @@ Rails.application.configure do
   # config.asset_host = "http://assets.example.com"
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Uploaded files (receipts, signatures, delivery photos, generated PDFs)
+  # persist on a Railway volume mounted at RAILS_STORAGE_PATH. Without a
+  # persistent volume the container filesystem is wiped on every redeploy.
+  config.active_storage.service = :railway
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
@@ -46,19 +49,20 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
-  # Replace the default in-process memory cache store with a durable alternative.
-  config.cache_store = :solid_cache_store
-
-  # Replace the default in-process and non-durable queuing backend for Active Job.
-  config.active_job.queue_adapter = :solid_queue
-  config.solid_queue.connects_to = { database: { writing: :queue } }
+  # This app runs as a single instance with no real background jobs (mailers
+  # deliver synchronously; the pending-checks digest is a scheduled rake task),
+  # so we use in-process adapters instead of the database-backed Solid Queue/
+  # Cache. That keeps the deploy to a single database with no extra tables.
+  config.cache_store = :memory_store
+  config.active_job.queue_adapter = :async
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
-  # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  # Set host to be used by links generated in mailer templates (e.g. password
+  # reset links). Set APP_HOST to your Railway domain, e.g. myapp.up.railway.app
+  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "example.com"), protocol: "https" }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   # config.action_mailer.smtp_settings = {

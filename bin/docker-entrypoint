@@ -1,8 +1,19 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
+# Railway (and most cloud hosts) inject the public port as $PORT. The default
+# CMD serves through Thruster, which listens on $HTTP_PORT -- map $PORT across
+# so the container binds where the platform expects. Defaults to 80 for a
+# plain `docker run`.
+if [ -n "${PORT}" ]; then
+  export HTTP_PORT="${PORT}"
+fi
+
+# If running the rails server then create or migrate existing database,
+# then seed (idempotent -- ensures the admin login + role permissions exist
+# on the first deploy without recreating or overwriting existing data).
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
+  ./bin/rails db:seed
 fi
 
 exec "${@}"
