@@ -103,6 +103,16 @@
       "  </div>" +
 
       '  <h5 class="fw-bold mb-3 border-bottom pb-2 text-start">Import from CSV</h5>' +
+      '  <div class="mb-3 text-start">' +
+      '    <div class="small fw-bold text-muted mb-1">Your file should look like this:</div>' +
+      '    <div class="table-responsive">' +
+      '      <table class="table table-sm table-bordered mb-1" style="font-size: 0.8rem;">' +
+      '        <thead id="csvFormatPreviewHead"></thead>' +
+      '        <tbody id="csvFormatPreviewBody"></tbody>' +
+      "      </table>" +
+      "    </div>" +
+      '    <div class="form-text mt-0">First row must have these column headers — everything below it is treated as data. Columns can be in any order, and header spelling/casing is flexible (a few common alternate names are accepted too).</div>' +
+      "  </div>" +
       '  <div id="csv-import-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>' +
       '  <button type="button" class="btn btn-outline-secondary btn-sm fw-bold mb-3" id="csvDownloadTemplateBtn">' +
       "    Download CSV Template" +
@@ -174,7 +184,13 @@
   }
 
   function refreshNote() {
-    document.getElementById("csvImportNote").textContent = TYPES[currentType()].note;
+    var type = TYPES[currentType()];
+    document.getElementById("csvImportNote").textContent = type.note;
+
+    document.getElementById("csvFormatPreviewHead").innerHTML =
+      "<tr>" + type.headers.map(function (h) { return "<th>" + escapeHtml(h) + "</th>"; }).join("") + "</tr>";
+    document.getElementById("csvFormatPreviewBody").innerHTML =
+      "<tr>" + type.example.map(function (v) { return "<td>" + escapeHtml(v) + "</td>"; }).join("") + "</tr>";
   }
 
   function resetImportUi() {
