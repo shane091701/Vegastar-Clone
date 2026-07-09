@@ -5,6 +5,8 @@
 // tools/port_frontend.ps1.
 (function () {
   var usersCache = [];
+  var rolePermissionsCache = [];
+  var allTabsCache = [];
 
   function init() {
     var anchor = document.getElementById("nav-expense");
@@ -69,9 +71,18 @@
       '      <tbody id="mu-table-body"><tr><td colspan="6" class="text-center text-muted">Loading...</td></tr></tbody>' +
       "    </table>" +
       "  </div>" +
+      '  <h5 class="fw-bold mb-3 mt-4 border-bottom pb-2 text-start">Roles &amp; Tab Access</h5>' +
+      '  <p class="small text-muted text-start">Controls which tabs each role sees in the top navigation. Admin always has full access.</p>' +
+      '  <div class="table-responsive">' +
+      '    <table class="table table-sm align-middle">' +
+      '      <thead><tr><th>Role</th><th>Tabs</th><th></th></tr></thead>' +
+      '      <tbody id="mu-roles-table-body"><tr><td colspan="3" class="text-center text-muted">Loading...</td></tr></tbody>' +
+      "    </table>" +
+      "  </div>" +
       "</div>" +
       buildEditModal() +
-      buildResetModal();
+      buildResetModal() +
+      buildRolePermissionsModal();
 
     var mainContainer = document.querySelector(".main-container");
     if (mainContainer) mainContainer.appendChild(section);
@@ -85,6 +96,7 @@
       document.getElementById("mu-reset-password").value = randomPassword();
     });
     document.getElementById("mu-reset-save-btn").addEventListener("click", saveReset);
+    document.getElementById("mu-role-perm-save-btn").addEventListener("click", saveRolePermissions);
 
     window.loadManageUsers = function () {
       google.script.run
@@ -99,6 +111,15 @@
         })
         .withFailureHandler(function (err) { showAlert("Error loading users: " + err.message); })
         .getUsersList();
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          rolePermissionsCache = res.roles;
+          allTabsCache = res.allTabs;
+          renderRolesTable();
+        })
+        .withFailureHandler(function (err) { showAlert("Error loading role permissions: " + err.message); })
+        .getRolePermissions();
     };
 
     window.deactivateUser = function (id, email) {
@@ -125,6 +146,24 @@
       document.getElementById("mu-edit-role").value = u.role;
       document.getElementById("mu-edit-alert").style.display = "none";
       new bootstrap.Modal(document.getElementById("editUserModal")).show();
+    };
+
+    window.openRolePermissions = function (role) {
+      var entry = rolePermissionsCache.find(function (r) { return r.role === role; });
+      var currentTabs = entry ? entry.tabs : [];
+
+      document.getElementById("mu-role-perm-role").value = role;
+      document.getElementById("mu-role-perm-role-label").textContent = role;
+      document.getElementById("mu-role-perm-alert").style.display = "none";
+      document.getElementById("mu-role-perm-checklist").innerHTML = allTabsCache.map(function (tab) {
+        var checked = currentTabs.indexOf(tab) !== -1 ? " checked" : "";
+        var id = "mu-role-perm-tab-" + tab.replace(/[^a-z0-9]/gi, "-");
+        return '<div class="form-check">' +
+          '<input class="form-check-input" type="checkbox" value="' + escapeHtml(tab) + '" id="' + id + '"' + checked + '>' +
+          '<label class="form-check-label" for="' + id + '">' + escapeHtml(tabLabel(tab)) + "</label>" +
+          "</div>";
+      }).join("");
+      new bootstrap.Modal(document.getElementById("rolePermissionsModal")).show();
     };
 
     window.openResetPassword = function (id, email) {
@@ -181,6 +220,79 @@
       '        <button type="button" class="btn btn-primary fw-bold" id="mu-reset-save-btn">Set Password</button>' +
       "      </div>" +
       "    </div></div></div>";
+  }
+
+  function buildRolePermissionsModal() {
+    return '<div class="modal fade" id="rolePermissionsModal" tabindex="-1" aria-hidden="true">' +
+      '  <div class="modal-dialog modal-dialog-centered">' +
+      '    <div class="modal-content border-0 shadow">' +
+      '      <div class="modal-header"><h5 class="modal-title fw-bold">Tab Access for <span id="mu-role-perm-role-label"></span></h5>' +
+      '        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>' +
+      '      <div class="modal-body">' +
+      '        <div id="mu-role-perm-alert" class="alert alert-danger py-2" style="display:none; font-size: 0.85rem;"></div>' +
+      '        <input type="hidden" id="mu-role-perm-role">' +
+      '        <p class="small text-muted">Check every tab this role should be able to see.</p>' +
+      '        <div id="mu-role-perm-checklist"></div>' +
+      "      </div>" +
+      '      <div class="modal-footer">' +
+      '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>' +
+      '        <button type="button" class="btn btn-primary fw-bold" id="mu-role-perm-save-btn">Save Access</button>' +
+      "      </div>" +
+      "    </div></div></div>";
+  }
+
+  function tabLabel(tab) {
+    return tab.replace(/-/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+  }
+
+  function renderRolesTable() {
+    var body = document.getElementById("mu-roles-table-body");
+    if (!rolePermissionsCache.length) {
+      body.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No roles found.</td></tr>';
+      return;
+    }
+    body.innerHTML = rolePermissionsCache.map(function (r) {
+      var isAdmin = r.role.toLowerCase() === "admin";
+      var tabsDisplay = isAdmin
+        ? '<span class="badge bg-secondary">All tabs</span>'
+        : r.tabs.map(function (t) { return '<span class="badge bg-light text-dark border me-1">' + escapeHtml(tabLabel(t)) + "</span>"; }).join(" ") || '<span class="text-muted">No tabs</span>';
+      var actionCell = isAdmin
+        ? ""
+        : '<button class="btn btn-sm btn-outline-secondary" onclick="openRolePermissions(\'' + jsStr(r.role) + '\')">Edit Access</button>';
+      return "<tr>" +
+        '<td><span class="badge bg-secondary">' + escapeHtml(r.role) + "</span></td>" +
+        "<td>" + tabsDisplay + "</td>" +
+        '<td class="text-nowrap">' + actionCell + "</td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  function saveRolePermissions() {
+    var role = document.getElementById("mu-role-perm-role").value;
+    var checked = Array.prototype.slice.call(
+      document.querySelectorAll("#mu-role-perm-checklist input[type=checkbox]:checked")
+    ).map(function (cb) { return cb.value; });
+    var btn = document.getElementById("mu-role-perm-save-btn");
+    var alertBox = document.getElementById("mu-role-perm-alert");
+    alertBox.style.display = "none";
+
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    google.script.run
+      .withSuccessHandler(function () {
+        btn.disabled = false;
+        btn.textContent = "Save Access";
+        bootstrap.Modal.getInstance(document.getElementById("rolePermissionsModal")).hide();
+        showAlert('Updated tab access for "' + role + '".', "success");
+        loadManageUsers();
+      })
+      .withFailureHandler(function (err) {
+        btn.disabled = false;
+        btn.textContent = "Save Access";
+        alertBox.textContent = "Error: " + err.message;
+        alertBox.style.display = "block";
+      })
+      .updateRolePermissions(role, checked);
   }
 
   function randomPassword() {

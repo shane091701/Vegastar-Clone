@@ -86,6 +86,32 @@ class Api::UsersController < Api::BaseController
     render json: serialize(user)
   end
 
+  # Backs the "Manage Roles & Tab Access" checklist. Admin always has every
+  # tab and isn't editable -- there'd be no way back in if it were misconfigured.
+  def get_role_permissions
+    roles = RolePermission.order(:role).map do |rp|
+      { role: rp.role, tabs: rp.allowed_tabs.to_s.split(",").map(&:strip) }
+    end
+    render json: { roles: roles, allTabs: RolePermission::ALL_TABS }
+  end
+
+  def update_role_permissions
+    role = args[0].to_s.strip
+    tabs = Array(args[1]).map(&:to_s)
+
+    raise "Role is required." if role.blank?
+    raise "The admin role's access can't be changed." if role.downcase == "admin"
+
+    rp = RolePermission.find_by("LOWER(role) = ?", role.downcase)
+    raise "Unknown role: #{role}" unless rp
+
+    unknown = tabs - RolePermission::ALL_TABS
+    raise "Unknown tab(s): #{unknown.join(', ')}" if unknown.any?
+
+    rp.update!(allowed_tabs: tabs.join(","))
+    render json: { role: rp.role, tabs: tabs }
+  end
+
   private
 
   def serialize(user)

@@ -22,6 +22,8 @@ Rails.application.routes.draw do
     post "resetPassword", to: "users#reset_password"
     post "deactivateUser", to: "users#deactivate_user"
     post "reactivateUser", to: "users#reactivate_user"
+    post "getRolePermissions", to: "users#get_role_permissions"
+    post "updateRolePermissions", to: "users#update_role_permissions"
 
     # BOQ upload, adjustments & shared lookups
     post "processBOQ", to: "boq#process_boq"
