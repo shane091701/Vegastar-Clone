@@ -25,6 +25,12 @@ Rails.application.routes.draw do
     post "getRolePermissions", to: "users#get_role_permissions"
     post "updateRolePermissions", to: "users#update_role_permissions"
 
+    # Assign Company dropdown options (admin can edit; anyone logged in can list)
+    post "getCompaniesList", to: "companies#get_companies_list"
+    post "createCompany", to: "companies#create_company"
+    post "updateCompany", to: "companies#update_company"
+    post "deleteCompany", to: "companies#delete_company"
+
     # BOQ upload, adjustments & shared lookups
     post "processBOQ", to: "boq#process_boq"
     post "getProjectsListOnly", to: "boq#get_projects_list_only"

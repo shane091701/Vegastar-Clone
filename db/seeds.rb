@@ -41,6 +41,13 @@ end
   ExpenseListEntry.find_or_create_by!(expense_type: type, item_name: nil)
 end
 
+# "Assign Company" dropdown options -- previously hardcoded <option> tags in
+# index.html.erb, moved into the database so admins can add/rename/remove
+# them from the UI instead of editing code.
+["Krone Konstruct", "Vegastar", "CT"].each do |name|
+  AssignCompany.find_or_create_by!(name: name)
+end
+
 # One ready-made login per role so every permission set can be verified by
 # hand (see UAT-TEST-GUIDE.md). These have known passwords, so they are
 # seeded ONLY outside production -- never ship them to a public deployment.
