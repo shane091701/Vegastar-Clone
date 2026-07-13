@@ -2411,7 +2411,7 @@ function generateBulkRows() {
   const project = document.getElementById('paymentProjectSelect').value;
   const count = parseInt(document.getElementById('bulkCount').value) || 0;
   const startDateStr = document.getElementById('paymentDate').value;
-  const amount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+  const amount = parseFormattedNumber(document.getElementById('paymentAmount').value);
   const body = document.getElementById('bulkPaymentBody');
 
   if (!project || !startDateStr || count <= 0) {
@@ -2440,11 +2440,14 @@ function generateBulkRows() {
       <td><input type="date" class="form-control form-control-sm bulk-date" value="${dateStr}"></td>
       <td><input type="text" class="form-control form-control-sm bulk-bank" placeholder="e.g. BDO, BPI"></td>
       <td><input type="text" class="form-control form-control-sm bulk-check-num" placeholder="Check #"></td>
-      <td><input type="number" class="form-control form-control-sm bulk-amt" value="${amount}" step="0.01"></td>
+      <td><input type="text" inputmode="decimal" class="form-control form-control-sm bulk-amt" oninput="formatThousands(this)"></td>
       <td><button class="btn btn-link text-danger p-0" onclick="this.closest('tr').remove()">✕</button></td>
     `;
     tr.dataset.project = project;
     body.appendChild(tr);
+    const amtEl = tr.querySelector('.bulk-amt');
+    amtEl.value = amount;
+    formatThousands(amtEl);
   }
 }
 
@@ -2458,8 +2461,8 @@ function submitBulkPayments() {
     const date = row.querySelector('.bulk-date').value;
     const bank = row.querySelector('.bulk-bank').value.trim();
     const checkNum = row.querySelector('.bulk-check-num').value.trim();
-    const amount = parseFloat(row.querySelector('.bulk-amt').value);
-    
+    const amount = parseFormattedNumber(row.querySelector('.bulk-amt').value);
+
     if (date && !isNaN(amount) && amount > 0) {
       submissions.push({ 
         project: row.dataset.project, 
@@ -3024,7 +3027,7 @@ async function submitPettyCash() {
   const project = document.getElementById('pcProjectSelect').value;
   const expenseType = document.getElementById('pcExpenseType').value;
   const particulars = document.getElementById('pcParticulars').value.trim();
-  const amount = parseFloat(document.getElementById('pcAmount').value);
+  const amount = parseFormattedNumber(document.getElementById('pcAmount').value);
   const fileInput = document.getElementById('pcReceiptFile');
   const alertBox = document.getElementById('pc-alert');
   const btn = document.getElementById('pcSubmitBtn');
@@ -3229,7 +3232,7 @@ function openReplenishModal(project) {
 
 async function submitReplenishment() {
   const project = document.getElementById('replenishProject').value;
-  const amount = parseFloat(document.getElementById('replenishAmount').value);
+  const amount = parseFormattedNumber(document.getElementById('replenishAmount').value);
   const fileInput = document.getElementById('replenishFile');
   const alertBox = document.getElementById('replenish-alert');
   const btn = document.getElementById('replenishSubmitBtn');
@@ -4233,8 +4236,9 @@ function renderPaymentTermsTable(data) {
           <input type="text" class="form-control form-control-sm ip-check-num" placeholder="Check #">
         </td>
         <td>
-          <input type="number" class="form-control form-control-sm ip-pay-amt text-end"
-                 placeholder="0.00" value="${invoicedAmt.toFixed(2)}" step="0.01">
+          <input type="text" inputmode="decimal" class="form-control form-control-sm ip-pay-amt text-end"
+                 placeholder="0.00" value="${invoicedAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"
+                 oninput="formatThousands(this)">
         </td>
       </tr>`;
   }).join('');
@@ -4265,7 +4269,7 @@ function saveIssuePayments() {
     const dueDate  = row.querySelector('.ip-due-date').value;
     const bank     = row.querySelector('.ip-bank').value.trim();
     const checkNum = row.querySelector('.ip-check-num').value.trim();
-    const payAmt   = parseFloat(row.querySelector('.ip-pay-amt').value);
+    const payAmt   = parseFormattedNumber(row.querySelector('.ip-pay-amt').value);
 
     if (dueDate && bank && checkNum && !isNaN(payAmt) && payAmt > 0) {
       submissions.push({
@@ -5679,7 +5683,7 @@ function saveCollection() {
   const payload = {
     rtbId:       activeCollectionRtbId,
     projectCode: projectCode,
-    amount:      parseFloat(amount),
+    amount:      parseFormattedNumber(amount),
     bank:        bank,
     dueDate:     dueDate,
     checkNumber: checkNumber
