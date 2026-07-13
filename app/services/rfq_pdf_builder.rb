@@ -27,6 +27,7 @@ class RfqPdfBuilder
     end.join
 
     <<~HTML
+      <!DOCTYPE html>
       <html>
         <body style="font-family: sans-serif; color: #333; padding: 20px;">
           #{PdfGenerator.logo_header_html("Request for Quotation")}

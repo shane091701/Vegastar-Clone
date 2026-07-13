@@ -39,11 +39,27 @@ class PdfGenerator
                                   browser_options: { "no-sandbox" => nil })
     begin
       page = browser.create_page
-      page.go_to("data:text/html;base64,#{Base64.strict_encode64(html)}")
-      page.network.wait_for_idle(timeout: 10) rescue nil
-      Tempfile.create(["doc", ".pdf"], binmode: true) do |f|
-        page.pdf(path: f.path, format: :A4, printBackground: true)
-        return File.binread(f.path)
+      # A data: URI (the previous approach) is unreliable in headless/
+      # no-sandbox Chromium -- large or oddly-encoded payloads can fail to
+      # be recognized as HTML at all, which shows up as the raw markup
+      # ("<html>...") being printed as plain text instead of rendered.
+      # Writing to a real file and navigating via file:// is the standard,
+      # reliable way to hand Chromium HTML to render.
+      Tempfile.create(["pdf_source", ".html"]) do |html_file|
+        html_file.write(html)
+        html_file.flush
+        # An absolute path on Unix already starts with "/", so "file://" + path
+        # naturally yields the correct three slashes (file:///tmp/x.html). On
+        # Windows the path starts with a drive letter ("C:/..."), which needs
+        # an extra leading slash to form a valid file URI (file:///C:/...) --
+        # without it, "C:" gets misparsed as a URI host and the colon is lost.
+        leading_slash = html_file.path.start_with?("/") ? "" : "/"
+        page.go_to("file://#{leading_slash}#{html_file.path}")
+        page.network.wait_for_idle(timeout: 10) rescue nil
+        Tempfile.create(["doc", ".pdf"], binmode: true) do |f|
+          page.pdf(path: f.path, format: :A4, printBackground: true)
+          return File.binread(f.path)
+        end
       end
     ensure
       browser.quit
