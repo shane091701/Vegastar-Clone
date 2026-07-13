@@ -19,7 +19,7 @@ WORKDIR /rails
 # (Purchase Orders, RFQs, BOQs) via ferrum -- there is no Edge/Chrome on a
 # Linux container the way there is on the Windows dev machine.
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client chromium fonts-liberation && \
+    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client chromium fonts-liberation gosu && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -69,16 +69,21 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Final stage for app image
 FROM base
 
-# Run and own only the runtime files as a non-root user for security
+# Runtime files are owned by a non-root user, and the app runs as that user
+# (see bin/docker-entrypoint) -- but the container itself starts as root so
+# the entrypoint can fix ownership of the Railway volume mounted at runtime
+# (e.g. /data for Active Storage) before dropping privileges. A mounted
+# volume is provisioned owned by root regardless of what the image's default
+# user is, so a permanently non-root container can never write to it.
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
-USER 1000:1000
 
 # Copy built artifacts: gems, application
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
 
-# Entrypoint prepares the database.
+# Entrypoint starts as root: fixes volume ownership, then re-execs itself as
+# the rails user via gosu before preparing the database and starting Rails.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start server via Thruster by default, this can be overwritten at runtime

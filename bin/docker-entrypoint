@@ -8,6 +8,19 @@ if [ -n "${PORT}" ]; then
   export HTTP_PORT="${PORT}"
 fi
 
+# The container starts as root (see Dockerfile) specifically so this can run:
+# a freshly mounted Railway volume (e.g. RAILS_STORAGE_PATH, default
+# /data/storage -- see config/storage.yml) is owned by root regardless of the
+# image's default user, so the app user can't write to it until we chown it
+# here, once, before dropping privileges. Skip entirely if we're not actually
+# root (e.g. a plain `docker run --user` override, or re-entry after gosu).
+if [ "$(id -u)" = "0" ]; then
+  storage_path="${RAILS_STORAGE_PATH:-/rails/storage}"
+  mkdir -p "${storage_path}"
+  chown -R rails:rails "${storage_path}"
+  exec gosu rails:rails "$0" "$@"
+fi
+
 # If running the rails server then create or migrate existing database,
 # then seed (idempotent -- ensures the admin login + role permissions exist
 # on the first deploy without recreating or overwriting existing data).
