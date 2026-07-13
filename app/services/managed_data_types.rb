@@ -10,7 +10,7 @@ module ManagedDataTypes
   def self.all
     {
       "suppliers" => {
-        model: Supplier, label: "Suppliers",
+        model: Supplier, label: "Suppliers", label_field: "company_name",
         fields: [
           { key: "company_name", label: "Company Name", required: true },
           { key: "contact_person", label: "Contact Person" },
@@ -23,7 +23,7 @@ module ManagedDataTypes
         ]
       },
       "materials" => {
-        model: Material, label: "Materials",
+        model: Material, label: "Materials", label_field: "item_name",
         fields: [
           { key: "item_name", label: "Item Name", required: true },
           { key: "unit", label: "Unit" },
@@ -32,7 +32,7 @@ module ManagedDataTypes
         ]
       },
       "subcontractors" => {
-        model: Subcontractor, label: "Subcontractors",
+        model: Subcontractor, label: "Subcontractors", label_field: "name",
         fields: [
           { key: "sub_code", label: "Code", readonly: true },
           { key: "name", label: "Name", required: true },
@@ -41,14 +41,14 @@ module ManagedDataTypes
         ]
       },
       "expense_categories" => {
-        model: ExpenseListEntry, label: "Expense Categories",
+        model: ExpenseListEntry, label: "Expense Categories", label_field: "expense_type",
         fields: [
           { key: "expense_type", label: "Type", required: true },
           { key: "item_name", label: "Item" }
         ]
       },
       "expenses" => {
-        model: Expense, label: "Historical Expenses",
+        model: Expense, label: "Historical Expenses", label_field: "particular",
         fields: [
           { key: "entry_date", label: "Date", type: "date" },
           { key: "project_code", label: "Project", required: true },
@@ -58,7 +58,7 @@ module ManagedDataTypes
         ]
       },
       "checks" => {
-        model: Check, label: "Historical Checks",
+        model: Check, label: "Historical Checks", label_field: "check_number",
         fields: [
           { key: "check_date", label: "Date", type: "date" },
           { key: "project_name", label: "Project", required: true },
@@ -69,7 +69,7 @@ module ManagedDataTypes
         ]
       },
       "projects" => {
-        model: Project, label: "Projects",
+        model: Project, label: "Projects", label_field: "code",
         fields: [
           { key: "code", label: "Project Code", required: true },
           { key: "customer_name", label: "Customer Name" },
@@ -77,6 +77,27 @@ module ManagedDataTypes
           { key: "phone", label: "Phone" },
           { key: "email", label: "Email" },
           { key: "site_location", label: "Site Location" }
+        ]
+      },
+      "deliveries" => {
+        model: Delivery, label: "Receiving / Deliveries", label_field: "item_name",
+        fields: [
+          { key: "received_date", label: "Date Received", type: "date" },
+          { key: "delivery_doc_number", label: "Delivery Doc #" },
+          { key: "po_number", label: "PO Number", required: true },
+          { key: "item_name", label: "Item", required: true },
+          { key: "quantity", label: "Quantity", type: "number", required: true },
+          { key: "receiver_email", label: "Received By" },
+          { key: "remarks", label: "Remarks" }
+        ]
+      },
+      "reimbursements" => {
+        model: Reimbursement, label: "Reimbursements / Petty Cash", label_field: "particulars",
+        fields: [
+          { key: "project_code", label: "Project", required: true },
+          { key: "expense_type", label: "Expense Type" },
+          { key: "particulars", label: "Particulars" },
+          { key: "amount", label: "Amount", type: "number", required: true }
         ]
       }
     }
@@ -115,6 +136,15 @@ module ManagedDataTypes
     else
       []
     end
+  end
+
+  # Human-readable identifier for audit-log entries (see DataAudit / the
+  # "View History" action) -- e.g. a project's code, a supplier's name.
+  def self.label_for(type, record)
+    field = config(type)[:label_field]
+    return "##{record.id}" unless field
+    val = record.public_send(field).to_s.strip
+    val.presence || "##{record.id}"
   end
 
   # Serialize a record into the flat { id:, <field>: value } shape the

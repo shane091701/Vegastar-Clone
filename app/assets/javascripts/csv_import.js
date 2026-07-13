@@ -47,6 +47,16 @@
       noImport: true,
       note: "View or delete project records. Projects are created via BOQ Upload, not CSV import. " +
         "A project can only be deleted here if it has no BOQ items, MRF requests, expenses, RTB records, or reimbursements attached."
+    },
+    deliveries: {
+      label: "Receiving / Deliveries",
+      noImport: true,
+      note: "View, correct, or delete a receiving entry. Deliveries are created via the Receiving screen, not CSV import."
+    },
+    reimbursements: {
+      label: "Reimbursements / Petty Cash",
+      noImport: true,
+      note: "View, correct, or delete a petty cash / reimbursement record. These are created via the Petty Cash screen, not CSV import."
     }
   };
 
@@ -149,7 +159,10 @@
       "    Use this screen only to view or delete project records (e.g. a stuck record left behind by a failed BOQ upload)." +
       "  </div>" +
 
-      '  <h5 class="fw-bold mb-3 mt-4 border-bottom pb-2 text-start">Existing Records <span id="csvRecordCount" class="text-muted fw-normal"></span></h5>' +
+      '  <div class="d-flex justify-content-between align-items-center mt-4 mb-3 border-bottom pb-2">' +
+      '    <h5 class="fw-bold mb-0">Existing Records <span id="csvRecordCount" class="text-muted fw-normal"></span></h5>' +
+      '    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" id="csvViewHistoryBtn">View History</button>' +
+      "  </div>" +
       '  <div id="csv-records-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>' +
       '  <div class="table-responsive">' +
       '    <table class="table table-sm align-middle" style="font-size: 0.85rem;">' +
@@ -174,7 +187,67 @@
     document.getElementById("csvDownloadTemplateBtn").addEventListener("click", downloadTemplate);
     document.getElementById("csvImportBtn").addEventListener("click", doImport);
     document.getElementById("csvEditSaveBtn").addEventListener("click", saveEdit);
+    document.getElementById("csvViewHistoryBtn").addEventListener("click", function () {
+      window.showManagedDataHistory(currentType(), TYPES[currentType()].label);
+    });
   }
+
+  // Shared across every screen that edits/deletes through these same
+  // getManagedRows/updateManagedRow/deleteManagedRow endpoints -- Supplier
+  // Data and the BOQ Upload Projects panel call this too (see their own
+  // "View History" buttons), so it's appended to <body> directly rather
+  // than nested inside this screen's own (frequently hidden) section.
+  function ensureHistoryModal() {
+    if (document.getElementById("dataHistoryModal")) return;
+    var modal = document.createElement("div");
+    modal.innerHTML = '<div class="modal fade" id="dataHistoryModal" tabindex="-1" aria-hidden="true">' +
+      '  <div class="modal-dialog modal-dialog-centered modal-lg">' +
+      '    <div class="modal-content border-0 shadow">' +
+      '      <div class="modal-header"><h5 class="modal-title fw-bold" id="dataHistoryModalTitle">Edit/Delete History</h5>' +
+      '        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>' +
+      '      <div class="modal-body">' +
+      '        <div class="table-responsive">' +
+      '          <table class="table table-sm align-middle" style="font-size:0.8rem;">' +
+      '            <thead><tr><th>Date</th><th>Actor</th><th>Action</th><th>Record</th><th>Details</th></tr></thead>' +
+      '            <tbody id="dataHistoryBody"><tr><td colspan="5" class="text-center text-muted">Loading...</td></tr></tbody>' +
+      "          </table>" +
+      "        </div>" +
+      "      </div>" +
+      '      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>' +
+      "    </div></div></div>";
+    document.body.appendChild(modal);
+  }
+
+  window.showManagedDataHistory = function (type, label) {
+    ensureHistoryModal();
+    document.getElementById("dataHistoryModalTitle").textContent = (label || type) + " — Edit/Delete History";
+    var body = document.getElementById("dataHistoryBody");
+    body.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>';
+    new bootstrap.Modal(document.getElementById("dataHistoryModal")).show();
+
+    google.script.run
+      .withSuccessHandler(function (entries) {
+        if (!entries.length) {
+          body.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No edit or delete history yet.</td></tr>';
+          return;
+        }
+        body.innerHTML = entries.map(function (e) {
+          var badgeClass = e.action === "delete" ? "bg-danger" : "bg-primary";
+          return "<tr>" +
+            '<td class="text-nowrap">' + escapeHtml(e.date) + "</td>" +
+            "<td>" + escapeHtml(e.actor) + "</td>" +
+            '<td><span class="badge ' + badgeClass + '">' + escapeHtml(e.action) + "</span></td>" +
+            "<td>" + escapeHtml(e.label) + "</td>" +
+            '<td style="max-width:320px; white-space:normal;">' + escapeHtml(e.detail) + "</td>" +
+            "</tr>";
+        }).join("");
+      })
+      .withFailureHandler(function (err) {
+        body.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history: ' +
+          escapeHtml(err.message) + "</td></tr>";
+      })
+      .getManagedRowHistory(type);
+  };
 
   function buildEditModal() {
     return '<div class="modal fade" id="csvEditModal" tabindex="-1" aria-hidden="true">' +

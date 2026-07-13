@@ -3851,6 +3851,21 @@ function savePricing() {
 let supplierRows = [];
 const SUPPLIER_FIELD_KEYS = ["company_name", "contact_person", "email", "phone", "tin", "category", "address", "bank_details"];
 
+// "View History" button lives in the Directory card-header, which the view
+// already renders with d-flex/justify-content-between for exactly this kind
+// of second element -- inject it once rather than editing the .erb further.
+(function addSupplierHistoryButton() {
+    const header = document.querySelector('#section-supplier-data .card-header.d-flex');
+    if (!header || document.getElementById('supplierHistoryBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'supplierHistoryBtn';
+    btn.type = 'button';
+    btn.className = 'btn btn-sm btn-outline-secondary fw-bold';
+    btn.textContent = 'View History';
+    btn.addEventListener('click', () => window.showManagedDataHistory('suppliers', 'Suppliers'));
+    header.appendChild(btn);
+})();
+
 function loadSuppliers() {
     const thead = document.querySelector('#section-supplier-data thead');
     const tbody = document.getElementById('supplierTableBody');

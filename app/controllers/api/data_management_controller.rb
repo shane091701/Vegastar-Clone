@@ -32,7 +32,16 @@ class Api::DataManagementController < Api::BaseController
       end
     end
 
+    changes = attrs.filter_map do |key, new_val|
+      old_val = record.public_send(key)
+      next if old_val.to_s == new_val.to_s
+      "#{key}: #{old_val.inspect} -> #{new_val.inspect}"
+    end
+
     record.update!(attrs)
+    DataAudit.log!(entity_type: @type, action: "update", actor_email: current_user.email,
+                   record_id: record.id, entity_label: ManagedDataTypes.label_for(@type, record),
+                   detail: changes.any? ? changes.join("; ") : "Saved with no field changes")
     render json: ManagedDataTypes.serialize(@type, record)
   end
 
@@ -43,8 +52,28 @@ class Api::DataManagementController < Api::BaseController
     blockers = ManagedDataTypes.deletion_blockers(@type, record)
     raise blockers.first if blockers.any?
 
+    label = ManagedDataTypes.label_for(@type, record)
+    record_id = record.id
     record.destroy!
+    DataAudit.log!(entity_type: @type, action: "delete", actor_email: current_user.email,
+                   record_id: record_id, entity_label: label, detail: "Record deleted")
     render json: { success: true }
+  end
+
+  # Audit trail for this type's edits/deletes -- backs the "View History"
+  # button next to the Manage Data grid (and the screens that reuse these
+  # same endpoints directly: Supplier Data, BOQ Upload's Projects panel).
+  def get_managed_row_history
+    entries = DataAudit.where(entity_type: @type).order(created_at: :desc).limit(200).map do |a|
+      {
+        date: a.created_at.strftime("%b %d, %Y %H:%M"),
+        actor: a.actor_email.presence || "Unknown",
+        action: a.action,
+        label: a.entity_label,
+        detail: a.detail
+      }
+    end
+    render json: entries
   end
 
   private

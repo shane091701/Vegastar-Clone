@@ -141,7 +141,10 @@
       '  <div class="card card-body bg-light border-0 p-3">' +
       '    <div class="d-flex justify-content-between align-items-center mb-2">' +
       '      <span class="fw-bold small">Existing Projects <span id="boqProjectsCount" class="text-muted fw-normal"></span></span>' +
-      '      <button class="btn btn-sm btn-outline-primary" type="button" onclick="window.__loadBoqProjects()">Refresh</button>' +
+      '      <span>' +
+      '        <button class="btn btn-sm btn-outline-secondary me-1" type="button" onclick="window.showManagedDataHistory(\'projects\', \'Projects\')">View History</button>' +
+      '        <button class="btn btn-sm btn-outline-primary" type="button" onclick="window.__loadBoqProjects()">Refresh</button>' +
+      "      </span>" +
       "    </div>" +
       '    <div class="table-responsive">' +
       '      <table class="table table-sm align-middle" style="font-size:0.8rem;">' +

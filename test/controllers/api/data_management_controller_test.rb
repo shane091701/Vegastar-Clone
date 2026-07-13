@@ -61,4 +61,73 @@ class Api::DataManagementControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     refute Supplier.exists?(supplier.id)
   end
+
+  test "a delivery record can be edited and deleted (previously had no correction UI anywhere)" do
+    delivery = Delivery.create!(received_date: Time.current, delivery_doc_number: "DR-1",
+                                po_number: "PO-1", item_name: "Cement", quantity: 10,
+                                receiver_email: "admin@test.local")
+
+    # The real edit modal always submits every field, not just the changed
+    # one (see boq_projects_panel.js/csv_import.js) -- match that shape here,
+    # since update_managed_row only validates required-ness against whatever
+    # keys are actually submitted.
+    api("updateManagedRow", "deliveries", delivery.id, {
+      "po_number" => "PO-1", "item_name" => "Cement", "quantity" => "8"
+    })
+    assert_response :success
+    assert_equal 8.0, delivery.reload.quantity.to_f
+
+    api("deleteManagedRow", "deliveries", delivery.id)
+    assert_response :success
+    refute Delivery.exists?(delivery.id)
+  end
+
+  test "a reimbursement record can be edited and deleted (previously had no correction UI anywhere)" do
+    reimbursement = Reimbursement.create!(project_code: "PRJ1", expense_type: "Fuel",
+                                          particulars: "Gasoline", amount: 500)
+
+    api("updateManagedRow", "reimbursements", reimbursement.id, {
+      "project_code" => "PRJ1", "amount" => "450"
+    })
+    assert_response :success
+    assert_equal 450.0, reimbursement.reload.amount.to_f
+
+    api("deleteManagedRow", "reimbursements", reimbursement.id)
+    assert_response :success
+    refute Reimbursement.exists?(reimbursement.id)
+  end
+
+  test "editing and deleting a managed row writes an audit entry, retrievable via getManagedRowHistory" do
+    supplier = Supplier.create!(company_name: "ACME Corp", email: "old@acme.test")
+
+    api("updateManagedRow", "suppliers", supplier.id, { "company_name" => "ACME Corp", "email" => "new@acme.test" })
+    assert_response :success
+    api("deleteManagedRow", "suppliers", supplier.id)
+    assert_response :success
+
+    history = api("getManagedRowHistory", "suppliers")
+    assert_response :success
+    assert_equal 2, history.length # newest first: delete, then update
+
+    delete_entry = history[0]
+    assert_equal "delete", delete_entry["action"]
+    assert_equal "ACME Corp", delete_entry["label"]
+    assert_equal "admin@test.local", delete_entry["actor"]
+
+    update_entry = history[1]
+    assert_equal "update", update_entry["action"]
+    assert_match(/email.*old@acme\.test.*new@acme\.test/, update_entry["detail"])
+  end
+
+  test "getManagedRowHistory only returns entries for the requested type" do
+    Supplier.create!(company_name: "ACME Corp").tap do |s|
+      api("deleteManagedRow", "suppliers", s.id)
+    end
+    Material.create!(item_name: "Cement").tap do |m|
+      api("deleteManagedRow", "materials", m.id)
+    end
+
+    assert_equal 1, api("getManagedRowHistory", "suppliers").length
+    assert_equal 1, api("getManagedRowHistory", "materials").length
+  end
 end

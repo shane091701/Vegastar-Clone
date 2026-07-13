@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     post "getManagedRows", to: "data_management#get_managed_rows"
     post "updateManagedRow", to: "data_management#update_managed_row"
     post "deleteManagedRow", to: "data_management#delete_managed_row"
+    post "getManagedRowHistory", to: "data_management#get_managed_row_history"
 
     # Account management (admin only)
     post "getUsersList", to: "users#get_users_list"
