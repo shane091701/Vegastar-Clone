@@ -5457,10 +5457,15 @@ function initProjectEngineer() {
   document.getElementById('pe-rtb-pct').value = '';
   document.getElementById('pe-project-details').style.display = 'none';
 
+  // getInitialData() only lists projects that already have BOQ items (it
+  // derives its project list from BoqItem, not Project) -- a brand new
+  // project with no items uploaded yet would never appear here. Use
+  // getProjectsListOnly() instead, which unions Project + BoqItem + MrfItem
+  // + Reimbursement project codes, so every real project shows up.
   google.script.run
-    .withSuccessHandler(function(data) {
-      if (!data || !data.projects) return;
-      data.projects.forEach(function(p) {
+    .withSuccessHandler(function(projects) {
+      if (!projects) return;
+      projects.forEach(function(p) {
         const opt = document.createElement('option');
         opt.value = p;
         opt.textContent = p;
@@ -5472,7 +5477,7 @@ function initProjectEngineer() {
     .withFailureHandler(function(err) {
       showToast('Could not load projects: ' + err.message, 'danger');
     })
-    .getInitialData();
+    .getProjectsListOnly();
 }
 
 function onPeProjectChange() {
