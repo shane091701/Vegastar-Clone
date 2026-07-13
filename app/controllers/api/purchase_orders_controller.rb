@@ -95,10 +95,15 @@ class Api::PurchaseOrdersController < Api::BaseController
     raise "PO not found in the database." unless first_item
 
     current_status = first_item.status.to_s.strip
-    if ["Partial delivery", "Received all"].include?(current_status)
+    raise "Action Denied: This PO is already voided." if current_status == "Voided"
+
+    # Partial delivery/Received all are never persisted on PurchaseOrderItem
+    # (see PoStatusCalculator) -- they only exist as a computed status, so
+    # this guard must check the computed value, not the raw DB column.
+    computed_status = PoStatusCalculator.call(po_code)
+    if ["Partial delivery", "Received all"].include?(computed_status)
       raise "Action Denied: Items from this PO have already arrived on site. It cannot be voided as it is now locked in the financial ledger."
     end
-    raise "Action Denied: This PO is already voided." if current_status == "Voided"
 
     ActiveRecord::Base.transaction do
       first_item.update!(status: "Voided", void_reason: reason)
