@@ -24,6 +24,17 @@ let sukiItemsData = [];
 let sukiSupplierName = "";
 let receivingData = { projects: [], pos: {} };
 
+// Display-only thousands-separator formatting for plain quantity/count
+// numbers (money fields already use .toLocaleString(...) with 2 decimals
+// throughout this file -- this is for bare quantities like BOQ/MRF/PO qty,
+// ordered/received/remaining, and record-count badges). Never use this on
+// a value that feeds back into an <input> or an HTML numeric attribute
+// (max=, data-qty=, etc.) -- those must stay plain numbers.
+function fmtNum(n) {
+  var num = Number(n);
+  return isNaN(num) ? (n == null ? '' : n) : num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
 // --- INITIALIZATION & AUTHENTICATION ---
 let userProfile = null;
 let _resubmitReturnedId = null;   // set when editing a Returned BOQ for resubmission
@@ -962,7 +973,7 @@ function renderHistoryGrouped(rows) {
         <td>${it.scope ? cleanBullets(it.scope) : '—'}</td>
         <td class="fw-bold">${cleanBullets(it.item)}</td>
         <td>${it.unit}</td>
-        <td class="text-end">${it.qty}</td>
+        <td class="text-end">${fmtNum(it.qty)}</td>
         <td class="text-muted">${it.remarks || '—'}</td>
         <td class="text-center">${statusBadge(it.status)}</td>
       </tr>`).join('');
@@ -1542,7 +1553,7 @@ function filterBids() {
     tableBody.innerHTML = finalItemsToQuote.map((item) => `
         <tr>
             <td class="align-middle fw-medium">${item.description}</td>
-            <td class="align-middle">${item.quantity}</td>
+            <td class="align-middle">${fmtNum(item.quantity)}</td>
             <td class="align-middle text-muted">${item.brand}</td>
             <td class="align-middle">
                 <input type="number" class="form-control form-control-sm text-end quote-amt" data-original-idx="${item.originalId}" data-brand="${item.brand}" placeholder="0.00" min="0" step="0.01">
@@ -1826,7 +1837,7 @@ function renderSukiTable() {
          <tr>
            <td>${it.name}</td>
            <td>${it.unit}</td>
-           <td class="text-center">${qtyDisplay}</td>
+           <td class="text-center">${fmtNum(qtyDisplay)}</td>
            <td><input type="number" class="form-control form-control-sm suki-price-input" data-idx="${idx}" placeholder="${placeholder}" oninput="calcSuki()"></td>
            <td class="suki-line-total fw-bold text-end" id="suki-total-${idx}">₱0.00</td>
          </tr>
@@ -1948,8 +1959,8 @@ function renderReceivingTable() {
         
         return `
         <tr>
-            <td class="align-middle fw-bold">${it.name}${brandDisplay}</td> <td class="align-middle text-center">${it.ordered}</td>
-            <td class="align-middle text-center text-primary fw-bold">${it.remaining}</td>
+            <td class="align-middle fw-bold">${it.name}${brandDisplay}</td> <td class="align-middle text-center">${fmtNum(it.ordered)}</td>
+            <td class="align-middle text-center text-primary fw-bold">${fmtNum(it.remaining)}</td>
             <td width="20%">
                 <input type="number" class="form-control form-control-sm text-center rcv-qty" 
                        data-name="${safeName}" 
@@ -2115,7 +2126,7 @@ function renderReceivingHistory() {
             <td class="fw-bold text-primary">${row.poCode}</td>
             <td>${row.docNum}</td>
             <td class="fw-bold">${row.item}</td>
-            <td class="text-center fw-bold">${row.qty}</td>
+            <td class="text-center fw-bold">${fmtNum(row.qty)}</td>
             <td>${row.receiver}</td>
             <td class="text-muted">${row.remarks || '—'}</td>
             <td>${attachmentHtml}</td>
@@ -2125,7 +2136,7 @@ function renderReceivingHistory() {
     // Toggle Button Logic
     if (source.length > 10) {
         footer.style.display = 'block';
-        btn.innerText = showAllReceiving ? "Show Less" : `Show All (${source.length})`;
+        btn.innerText = showAllReceiving ? "Show Less" : `Show All (${fmtNum(source.length)})`;
     } else {
         footer.style.display = 'none';
     }
@@ -3483,7 +3494,7 @@ function loadReturnableItems() {
         <td class="text-nowrap">${r.date}</td>
         <td>${r.project}</td>
         <td class="fw-bold">${r.item}</td>
-        <td class="text-center fw-bold">${r.qty}</td>
+        <td class="text-center fw-bold">${fmtNum(r.qty)}</td>
         <td>${r.requester}</td>
         <td><span class="badge ${badgeClass}">${r.status}</span></td>
       </tr>

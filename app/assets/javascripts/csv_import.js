@@ -73,6 +73,19 @@
     return d.innerHTML;
   }
 
+  // Display-only formatting for the read-only records grid -- adds
+  // thousands separators to number fields (quantities, amounts, costs) so
+  // they read as digits rather than a plain unformatted string. The edit
+  // modal's <input type="number"> keeps the raw value untouched.
+  function formatFieldValue(val, field) {
+    if (val == null || val === "") return "";
+    if (field.type === "number") {
+      var n = Number(val);
+      if (!isNaN(n)) return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
+    return val;
+  }
+
   function currentType() {
     return document.getElementById("csvImportType").value;
   }
@@ -402,7 +415,7 @@
         }
         body.innerHTML = res.rows.map(function (row) {
           var cells = res.fields.map(function (f) {
-            return "<td>" + escapeHtml(row[f.key] == null ? "" : row[f.key]) + "</td>";
+            return "<td>" + escapeHtml(formatFieldValue(row[f.key], f)) + "</td>";
           }).join("");
           return "<tr>" + cells +
             '<td class="text-end text-nowrap">' +
