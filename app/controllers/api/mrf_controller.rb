@@ -211,11 +211,23 @@ class Api::MrfController < Api::BaseController
     end
 
     if action == "Approve" && approved_items.any?
-      rfq_url = PdfGenerator.store(doc_type: "rfq", reference_code: request_id,
-                                   html: RfqPdfBuilder.html(request_id, approved_items),
-                                   file_name: "RFQ_#{request_id}.pdf")
-      MrfItem.where(mrf_code: request_id).update_all(pdf_url: rfq_url)
-      return render json: rfq_url
+      # The status change above already committed -- the approval itself
+      # succeeded regardless of what happens to the PDF. Don't let a PDF
+      # failure (e.g. a storage outage) raise here: that used to surface as
+      # a scary "Permission denied" error for an action that had actually
+      # already gone through, while leaving the item invisible in the RFQ
+      # tab forever (getRFQsList used to require a pdf_url to show a row at
+      # all). Log it and let the RFQ tab offer a retry instead (see
+      # regenerate_rfq_pdf below).
+      begin
+        rfq_url = PdfGenerator.store(doc_type: "rfq", reference_code: request_id,
+                                     html: RfqPdfBuilder.html(request_id, approved_items),
+                                     file_name: "RFQ_#{request_id}.pdf")
+        MrfItem.where(mrf_code: request_id).update_all(pdf_url: rfq_url)
+        return render json: rfq_url
+      rescue => e
+        Rails.logger.error("processApproval RFQ PDF generation failed: #{e.message}")
+      end
     end
     render json: true
   end
@@ -227,7 +239,6 @@ class Api::MrfController < Api::BaseController
     MrfItem.order(:id).each do |m|
       mrf_id = m.mrf_code.to_s
       next unless m.status.to_s.strip == "Approved"
-      next if m.pdf_url.to_s.strip.blank?
       next if seen.include?(mrf_id)
       seen << mrf_id
       rfqs << {
@@ -235,12 +246,32 @@ class Api::MrfController < Api::BaseController
         date: m.entry_date&.strftime("%b %d, %Y"),
         rawDate: m.entry_date.to_i,
         project: m.project_code.to_s.strip,
-        url: m.pdf_url.to_s.strip,
+        url: m.pdf_url.to_s.strip.presence,
         hasPo: m.po_code.to_s.strip.present?,
         createdBy: m.requester_email.present? ? m.requester_email.split("@").first : "Unknown"
       }
     end
     render json: rfqs.sort_by { |r| -r[:rawDate] }.each { |r| r.delete(:rawDate) }
+  end
+
+  # Regenerates a missing RFQ PDF for an already-Approved MRF -- recovery
+  # path for rows left with a blank pdf_url by a past PDF-generation
+  # failure (see process_approval above).
+  def regenerate_rfq_pdf
+    mrf_id = args[0].to_s
+    rows = MrfItem.where(mrf_code: mrf_id).where("TRIM(status) = 'Approved'").order(:id).to_a
+    raise "No approved items found for RFQ \"#{mrf_id}\"." if rows.empty?
+
+    approved_items = rows.map do |row|
+      { item: row.item, qty: row.approved_qty, unit: row.unit,
+        attachmentUrl: row.attachment_url.to_s, brand: row.preferred_brands.to_s }
+    end
+
+    rfq_url = PdfGenerator.store(doc_type: "rfq", reference_code: mrf_id,
+                                 html: RfqPdfBuilder.html(mrf_id, approved_items),
+                                 file_name: "RFQ_#{mrf_id}.pdf")
+    MrfItem.where(mrf_code: mrf_id).update_all(pdf_url: rfq_url)
+    render json: rfq_url
   end
 
   # Port of voidAlphaRFQ(mrfId, reason, userEmail) — code.js:1356

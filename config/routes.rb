@@ -57,6 +57,7 @@ Rails.application.routes.draw do
     post "processApproval", to: "mrf#process_approval"
     post "getRFQsList", to: "mrf#get_rfqs_list"
     post "voidAlphaRFQ", to: "mrf#void_alpha_rfq"
+    post "regenerateRfqPdf", to: "mrf#regenerate_rfq_pdf"
     post "submitReturnableRequest", to: "mrf#submit_returnable_request"
     post "getReturnableItemsData", to: "mrf#get_returnable_items_data"
 

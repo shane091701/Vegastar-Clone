@@ -90,6 +90,32 @@ class Api::MrfControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, OutLedgerEntry.count
   end
 
+  test "approval succeeds even when RFQ PDF generation fails, and the item still appears in getRFQsList for retry" do
+    submit_sample_request
+
+    result = PdfGenerator.stub(:store, -> (*) { raise "storage unavailable" }) do
+      api("processApproval", "MRF-PRJ1-1", "Approve", ["ok"], [8], [], "admin@test.local", ["Holcim"])
+    end
+    assert_equal true, result
+    mrf = MrfItem.last.reload
+    assert_equal "Approved", mrf.status
+    assert_nil mrf.pdf_url
+
+    rfqs = api("getRFQsList")
+    assert_equal 1, rfqs.length
+    assert_equal "MRF-PRJ1-1", rfqs[0]["mrfId"]
+    assert_nil rfqs[0]["url"]
+
+    url = PdfGenerator.stub(:store, "/pdf/retry.pdf") do
+      api("regenerateRfqPdf", "MRF-PRJ1-1")
+    end
+    assert_equal "/pdf/retry.pdf", url
+    assert_equal "/pdf/retry.pdf", MrfItem.last.reload.pdf_url
+
+    rfqs = api("getRFQsList")
+    assert_equal "/pdf/retry.pdf", rfqs[0]["url"]
+  end
+
   test "voidAlphaRFQ restores budget and refuses when PO exists" do
     submit_sample_request
     MrfItem.last.update!(status: "Approved", pdf_url: "/x.pdf")

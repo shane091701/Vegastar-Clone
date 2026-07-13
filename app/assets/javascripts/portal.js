@@ -1037,6 +1037,13 @@ function filterRFQs() {
             ? `<button class="btn btn-sm btn-outline-danger ms-1" onclick="voidRFQ('${r.mrfId}')">Void</button>`
             : '';
 
+        // PDF generation can fail transiently (e.g. a storage outage) even
+        // though the approval itself already went through -- offer a retry
+        // instead of hiding the row (see regenerateRfqPdf below).
+        const pdfBtn = r.url
+            ? `<a href="${r.url}" target="_blank" class="btn btn-sm btn-primary">Download PDF</a>`
+            : `<button class="btn btn-sm btn-outline-warning" onclick="regenerateRfqPdf('${r.mrfId}')">Generate PDF</button>`;
+
         return `
         <tr>
             <td class="align-middle fw-bold text-dark">${r.mrfId} ${badge}</td>
@@ -1044,10 +1051,17 @@ function filterRFQs() {
             <td class="align-middle">${r.project}</td>
             <td class="align-middle">${r.date}</td>
             <td class="align-middle">
-                <a href="${r.url}" target="_blank" class="btn btn-sm btn-primary">Download PDF</a>${voidBtn}
+                ${pdfBtn}${voidBtn}
             </td>
         </tr>`;
     }).join('');
+}
+
+function regenerateRfqPdf(mrfId) {
+    google.script.run
+        .withSuccessHandler(() => { loadRFQs(); })
+        .withFailureHandler(err => { alert('Error generating PDF: ' + err.message); })
+        .regenerateRfqPdf(mrfId);
 }
 
 function voidRFQ(mrfId) {
