@@ -74,6 +74,27 @@ class BoqIngestorTest < ActiveSupport::TestCase
       "a failed upload must not leave a stuck Project row behind, blocking a retry with the same code"
   end
 
+  test "anchors on the first QTY header row, not the last, so items above a later stray match aren't skipped" do
+    rows = [
+      ["", "", "", "", "", "", "", "", ""],
+      ["ITEM", "DESCRIPTION", "QTY", "UNIT", "U/C MAT", "TOTAL MAT", "U/C LABOR", "TOTAL LABOR", "TOTAL"],
+      ["1. CIVIL WORKS", "", "", "", "", "", "", "", ""],
+      ["1.1", "Foundation", "", "", "", "", "", "", ""],
+      ["", "Concrete 4000psi", "10", "cu.m", "4,500.00", "45,000.00", "1,200.00", "12,000.00", "57,000.00"],
+      ["", "", "QTY", "", "", "", "", "", ""], # a stray second "QTY" match in column C
+      ["II. ELECTRICAL", "", "", "", "", "", "", "", ""],
+      ["", "Panel Board", "1", "Lot", "", "25,000", "", "5,000", "30,000"]
+    ]
+
+    BoqIngestor.ingest_rows(rows, "AR BOM", "PRJ-MULTI", "Vegastar", "boq.xlsx")
+
+    items = BoqItem.order(:id).pluck(:item)
+    assert_includes items, "Concrete 4000psi",
+      "an item row above a later stray QTY match must still be imported"
+    assert_includes items, "Panel Board"
+    assert_equal 2, items.length
+  end
+
   test "call rolls back the Project row when no valid item rows are found" do
     # A minimal CSV containing only the QTY header row (no data rows below
     # it), so BoqIngestor.ingest_rows returns the "no valid items" warning

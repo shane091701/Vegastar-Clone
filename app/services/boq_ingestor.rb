@@ -44,7 +44,10 @@ class BoqIngestor
     header_row_idx = nil
     raw_data.each_with_index do |row, i|
       col_c = cell(row, 2).upcase
-      header_row_idx = i if QTY_HEADERS.include?(col_c)
+      if QTY_HEADERS.include?(col_c)
+        header_row_idx = i
+        break
+      end
     end
     unless header_row_idx
       raise "Could not find 'QTY' in Column C of sheet #{sheet_name} to use as the header anchor."

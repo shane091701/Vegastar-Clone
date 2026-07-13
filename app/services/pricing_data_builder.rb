@@ -16,7 +16,13 @@ class PricingDataBuilder
     end
 
     grouped.each_value do |grp|
-      grp["lineItems"] << blank_line("Miscellaneous") unless grp["isLumpSum"]
+      next if grp["isLumpSum"]
+      # An ExpenseListEntry literally named "Miscellaneous" may have already
+      # added this line above -- don't add a second one, or its amount gets
+      # double-counted into grp["amount"] below (both rows resolve the same
+      # expense_map key).
+      next if grp["lineItems"].any? { |li| li["name"] == "Miscellaneous" }
+      grp["lineItems"] << blank_line("Miscellaneous")
     end
 
     # --- 3-way join: deliveries × PO items × mrf_items, by MRF unit class ---

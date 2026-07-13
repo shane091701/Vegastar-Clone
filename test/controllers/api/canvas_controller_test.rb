@@ -83,6 +83,34 @@ class Api::CanvasControllerTest < ActionDispatch::IntegrationTest
     assert_equal "/pdf/stub.pdf", @mrf.pdf_url
   end
 
+  test "a PO PDF failure for one supplier doesn't block the rest of the same award batch" do
+    MrfItem.create!(entry_date: Time.current, item: "Rebar", unit: "pcs",
+                    request_amount: 5, project_code: "PRJ1", phase: "Civil",
+                    status: "Approved", approved_qty: 5, mrf_code: "MRF-PRJ1-1",
+                    requester_email: "admin@test.local")
+
+    call_count = 0
+    flaky_store = lambda do |*|
+      call_count += 1
+      raise "storage unavailable" if call_count == 1
+      "/pdf/stub.pdf"
+    end
+
+    result = PdfGenerator.stub(:store, flaky_store) do
+      api("awardCanvasWinners", "MRF-PRJ1-1", [
+        { "item" => "Cement", "supplier" => "ACME", "qty" => 8, "amount" => 4000 },
+        { "item" => "Rebar", "supplier" => "BuildCo", "qty" => 0, "amount" => 1500 }
+      ], "admin@test.local")
+    end
+
+    assert_equal "Successfully generated 2 Purchase Orders!", result
+    assert PurchaseOrderItem.find_by(item_name: "Cement"),
+      "the first supplier's PO must still be created even though its PDF generation failed"
+    assert PurchaseOrderItem.find_by(item_name: "Rebar"),
+      "the second supplier must still be processed after the first supplier's PDF failure"
+    assert_equal "Win", MrfItem.find_by(item: "Rebar").win_loss
+  end
+
   test "canvas MRF list reflects PO state" do
     SupplierQuote.create!(mrf_code: "MRF-PRJ1-1", item: "Cement", supplier: "ACME", amount: 1)
     list = api("getCanvasMRFList")

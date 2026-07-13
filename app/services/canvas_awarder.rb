@@ -39,14 +39,22 @@ class CanvasAwarder
         end
       end
 
+      # The PurchaseOrderItem/MrfItem updates above already committed for
+      # this supplier -- a PDF failure here must not raise, or every
+      # remaining supplier in `groups` (this loop) never gets processed at
+      # all, with no indication that this supplier partially succeeded.
       if representative
-        pdf_url = PdfGenerator.store(
-          doc_type: "po", reference_code: po_code,
-          html: PoPdfBuilder.html(po_code: po_code, project: representative.project_code,
-                                  supplier: supplier, mrf_code: mrf_code),
-          file_name: "#{po_code}.pdf"
-        )
-        MrfItem.where(po_code: po_code).update_all(pdf_url: pdf_url)
+        begin
+          pdf_url = PdfGenerator.store(
+            doc_type: "po", reference_code: po_code,
+            html: PoPdfBuilder.html(po_code: po_code, project: representative.project_code,
+                                    supplier: supplier, mrf_code: mrf_code),
+            file_name: "#{po_code}.pdf"
+          )
+          MrfItem.where(po_code: po_code).update_all(pdf_url: pdf_url)
+        rescue => e
+          Rails.logger.error("awardCanvasWinners PO PDF generation failed for #{po_code}: #{e.message}")
+        end
       end
       generated += 1
     end

@@ -45,52 +45,56 @@ class Api::ReceivingController < Api::BaseController
     photo_url = ""
     attach_records = []
 
-    (payload["items"] || []).each_with_index do |item, idx|
-      delivery = Delivery.new(
-        received_date: date,
-        delivery_doc_number: payload["docNum"].to_s,
-        receiver_email: (payload["email"].presence || current_user.email).to_s,
-        item_name: item["name"], quantity: item["qty"],
-        po_number: payload["poCode"].to_s,
-        remarks: item["remarks"].to_s
-      )
-      # Files attach to the first delivery row; URL string mirrors the original
-      # "Receipt: <url> \nPhoto: <url>" format the client parses.
-      if idx.zero?
-        if payload["receiptFile"].present?
-          f = payload["receiptFile"]
-          delivery.receipt.attach(io: StringIO.new(Base64.decode64(f["data"].to_s)),
-                                  filename: "#{payload['project']}_Delivery_Receipt#{File.extname(f['name'].to_s)}",
-                                  content_type: f["mimeType"].to_s)
+    # Wrapped so a failure partway through a multi-item batch can't leave it
+    # half-recorded (some Delivery rows committed, the rest silently missing).
+    ActiveRecord::Base.transaction do
+      (payload["items"] || []).each_with_index do |item, idx|
+        delivery = Delivery.new(
+          received_date: date,
+          delivery_doc_number: payload["docNum"].to_s,
+          receiver_email: (payload["email"].presence || current_user.email).to_s,
+          item_name: item["name"], quantity: item["qty"],
+          po_number: payload["poCode"].to_s,
+          remarks: item["remarks"].to_s
+        )
+        # Files attach to the first delivery row; URL string mirrors the original
+        # "Receipt: <url> \nPhoto: <url>" format the client parses.
+        if idx.zero?
+          if payload["receiptFile"].present?
+            f = payload["receiptFile"]
+            delivery.receipt.attach(io: StringIO.new(Base64.decode64(f["data"].to_s)),
+                                    filename: "#{payload['project']}_Delivery_Receipt#{File.extname(f['name'].to_s)}",
+                                    content_type: f["mimeType"].to_s)
+          end
+          if payload["photoFile"].present?
+            f = payload["photoFile"]
+            delivery.photos.attach(io: StringIO.new(Base64.decode64(f["data"].to_s)),
+                                   filename: "#{payload['project']}_Item_Photos#{File.extname(f['name'].to_s)}",
+                                   content_type: f["mimeType"].to_s)
+          end
         end
-        if payload["photoFile"].present?
-          f = payload["photoFile"]
-          delivery.photos.attach(io: StringIO.new(Base64.decode64(f["data"].to_s)),
-                                 filename: "#{payload['project']}_Item_Photos#{File.extname(f['name'].to_s)}",
-                                 content_type: f["mimeType"].to_s)
-        end
-      end
-      delivery.save!
-      attach_records << delivery
+        delivery.save!
+        attach_records << delivery
 
-      if idx.zero?
-        url_helpers = Rails.application.routes.url_helpers
-        receipt_url = url_helpers.rails_blob_path(delivery.receipt, disposition: "inline", only_path: true) if delivery.receipt.attached?
-        photo_url = url_helpers.rails_blob_path(delivery.photos.first, disposition: "inline", only_path: true) if delivery.photos.attached?
+        if idx.zero?
+          url_helpers = Rails.application.routes.url_helpers
+          receipt_url = url_helpers.rails_blob_path(delivery.receipt, disposition: "inline", only_path: true) if delivery.receipt.attached?
+          photo_url = url_helpers.rails_blob_path(delivery.photos.first, disposition: "inline", only_path: true) if delivery.photos.attached?
+        end
       end
+
+      combined =
+        if receipt_url.present? && photo_url.present?
+          "Receipt: #{receipt_url} \nPhoto: #{photo_url}"
+        elsif receipt_url.present?
+          "Receipt: #{receipt_url}"
+        elsif photo_url.present?
+          "Photo: #{photo_url}"
+        else
+          ""
+        end
+      attach_records.each { |d| d.update!(url_pictures: combined) }
     end
-
-    combined =
-      if receipt_url.present? && photo_url.present?
-        "Receipt: #{receipt_url} \nPhoto: #{photo_url}"
-      elsif receipt_url.present?
-        "Receipt: #{receipt_url}"
-      elsif photo_url.present?
-        "Photo: #{photo_url}"
-      else
-        ""
-      end
-    attach_records.each { |d| d.update!(url_pictures: combined) }
 
     render json: "Success"
   end

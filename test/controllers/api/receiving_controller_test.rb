@@ -48,6 +48,37 @@ class Api::ReceivingControllerTest < ActionDispatch::IntegrationTest
     assert_empty api("getReceivingData")["projects"]
   end
 
+  test "a delivery batch is fully rolled back if any item in it fails to save" do
+    call_count = 0
+    real_new = Delivery.method(:new)
+    flaky_new = lambda do |*args, **kwargs|
+      call_count += 1
+      record = real_new.call(*args, **kwargs)
+      if call_count == 2
+        def record.save!(*)
+          raise ActiveRecord::RecordInvalid.new(self)
+        end
+      end
+      record
+    end
+
+    Delivery.stub(:new, flaky_new) do
+      post "/api/submitReceivingToBackend", params: { args: [{
+        "project" => "PRJ1", "docNum" => "DR-FAIL", "email" => "admin@test.local",
+        "poCode" => "PO-1",
+        "items" => [
+          { "name" => "Cement", "qty" => 3 },
+          { "name" => "Cement", "qty" => 2 }
+        ]
+      }] }, as: :json
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal 0, Delivery.where(delivery_doc_number: "DR-FAIL").count,
+      "no Delivery rows from a failed batch should remain committed -- half a batch silently " \
+      "recorded is worse than none of it recorded"
+  end
+
   test "receipt upload produces the Receipt: url format" do
     png = Base64.strict_encode64("fakepngdata")
     api("submitReceivingToBackend", {
