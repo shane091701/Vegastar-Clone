@@ -65,4 +65,24 @@ class BoqIngestorTest < ActiveSupport::TestCase
                               project_code: "dupe 1", customer_data: {})
     assert_equal "Error: Project Code 'dupe 1' was already used. Please enter a unique code.", result
   end
+
+  test "call rolls back the Project row when the workbook fails to parse" do
+    result = BoqIngestor.call(base64_data: "not a real workbook", file_name: "f.xlsx",
+                              project_code: "PRJ FAIL", customer_data: { "name" => "Someone" })
+    assert_match(/\AError in processBOQ:/, result)
+    refute Project.exists?(code: "PRJ FAIL"),
+      "a failed upload must not leave a stuck Project row behind, blocking a retry with the same code"
+  end
+
+  test "call rolls back the Project row when no valid item rows are found" do
+    # A minimal CSV containing only the QTY header row (no data rows below
+    # it), so BoqIngestor.ingest_rows returns the "no valid items" warning
+    # instead of raising -- exercises the non-exception rollback path.
+    csv_data = Base64.strict_encode64("ITEM,DESCRIPTION,QTY,UNIT\n")
+    result = BoqIngestor.call(base64_data: csv_data, file_name: "empty.csv",
+                              project_code: "PRJ EMPTY", customer_data: { "name" => "Someone" })
+    assert_match(/\A⚠️ No valid item rows found/, result)
+    refute Project.exists?(code: "PRJ EMPTY"),
+      "a workbook with no item rows must not leave a stuck Project row behind"
+  end
 end

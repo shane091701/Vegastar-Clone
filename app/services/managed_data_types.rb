@@ -67,6 +67,17 @@ module ManagedDataTypes
           { key: "amount", label: "Amount", type: "number", required: true },
           { key: "status", label: "Status" }
         ]
+      },
+      "projects" => {
+        model: Project, label: "Projects",
+        fields: [
+          { key: "code", label: "Project Code", required: true },
+          { key: "customer_name", label: "Customer Name" },
+          { key: "company", label: "Company" },
+          { key: "phone", label: "Phone" },
+          { key: "email", label: "Email" },
+          { key: "site_location", label: "Site Location" }
+        ]
       }
     }
   end
@@ -87,6 +98,20 @@ module ManagedDataTypes
       else
         []
       end
+    when "projects"
+      # Project isn't a real foreign key elsewhere -- other tables just carry
+      # a matching project_code string (see docs/VEGASTAR_ERP_MANUAL_FLOW.md).
+      # Only let admins delete a project that has no real business data
+      # attached (e.g. a stuck row left by a failed BOQ upload); a project
+      # with actual history should never be silently deleted from here.
+      code = record.code.to_s.strip
+      blockers = []
+      blockers << "This project has BOQ items." if BoqItem.where("LOWER(TRIM(project_code)) = ?", code.downcase).exists?
+      blockers << "This project has MRF requests." if MrfItem.where("LOWER(TRIM(project_code)) = ?", code.downcase).exists?
+      blockers << "This project has recorded expenses." if Expense.where("LOWER(TRIM(project_code)) = ?", code.downcase).exists?
+      blockers << "This project has RTB records." if RtbLog.where("LOWER(TRIM(project_code)) = ?", code.downcase).exists?
+      blockers << "This project has reimbursements." if Reimbursement.where("LOWER(TRIM(project_code)) = ?", code.downcase).exists?
+      blockers
     else
       []
     end

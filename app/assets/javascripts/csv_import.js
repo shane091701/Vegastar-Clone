@@ -42,6 +42,12 @@
       headers: ["Date", "Project", "Bank", "Check Number", "Amount", "Status"],
       example: ["2026-01-15", "DEMO-001", "BDO", "CHK-1001", "48000", "Not Deposited"],
       note: "Project, Check Number, and Amount are required. Status defaults to \"Not Deposited\" if left blank."
+    },
+    projects: {
+      label: "Projects",
+      noImport: true,
+      note: "View or delete project records. Projects are created via BOQ Upload, not CSV import. " +
+        "A project can only be deleted here if it has no BOQ items, MRF requests, expenses, RTB records, or reimbursements attached."
     }
   };
 
@@ -102,6 +108,7 @@
       '    <div id="csvImportNote" class="form-text"></div>' +
       "  </div>" +
 
+      '  <div id="csvImportSection">' +
       '  <h5 class="fw-bold mb-3 border-bottom pb-2 text-start">Import from CSV</h5>' +
       '  <div class="mb-3 text-start">' +
       '    <div class="small fw-bold text-muted mb-1">Your file should look like this:</div>' +
@@ -137,6 +144,11 @@
       '    <span id="csvImportBtnText">UPLOAD</span>' +
       "  </button>" +
       '  <div id="csvImportResults" class="mt-3" style="display:none;"></div>' +
+      "  </div>" +
+      '  <div id="csvNoImportNote" class="alert alert-secondary py-2" style="display:none; font-size: 0.85rem;">' +
+      "    Projects aren't bulk-imported here — they're created automatically when a BOQ Excel file is uploaded. " +
+      "    Use this screen only to view or delete project records (e.g. a stuck record left behind by a failed BOQ upload)." +
+      "  </div>" +
 
       '  <h5 class="fw-bold mb-3 mt-4 border-bottom pb-2 text-start">Existing Records <span id="csvRecordCount" class="text-muted fw-normal"></span></h5>' +
       '  <div id="csv-records-alert" class="alert py-2" style="display:none; font-size: 0.85rem;"></div>' +
@@ -186,6 +198,16 @@
   function refreshNote() {
     var type = TYPES[currentType()];
     document.getElementById("csvImportNote").textContent = type.note;
+
+    var importSection = document.getElementById("csvImportSection");
+    var noImportNote = document.getElementById("csvNoImportNote");
+    if (type.noImport) {
+      importSection.style.display = "none";
+      noImportNote.style.display = "block";
+      return;
+    }
+    importSection.style.display = "";
+    noImportNote.style.display = "none";
 
     document.getElementById("csvFormatPreviewHead").innerHTML =
       "<tr>" + type.headers.map(function (h) { return "<th>" + escapeHtml(h) + "</th>"; }).join("") + "</tr>";

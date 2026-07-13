@@ -20,13 +20,20 @@ class BoqIngestor
       return "Error: Project Code '#{clean_code}' was already used. Please enter a unique code."
     end
 
+    result = nil
     begin
-      # Original behavior: customer info is saved before parsing and is NOT
-      # rolled back when parsing fails.
-      save_customer_info(project_code.to_s, customer_data || {})
-      sheet_name, rows = read_workbook(base64_data, file_name)
-      ingest_rows(rows, sheet_name, project_code.to_s,
-                  (customer_data || {})["company"].to_s, file_name)
+      # Save + parse run in one transaction so a parse failure (or a parse
+      # that finds nothing to import) can't leave a Project row behind with
+      # no BOQ items -- that stuck row would block every future upload
+      # attempt using the same project code with "already used".
+      ActiveRecord::Base.transaction do
+        save_customer_info(project_code.to_s, customer_data || {})
+        sheet_name, rows = read_workbook(base64_data, file_name)
+        result = ingest_rows(rows, sheet_name, project_code.to_s,
+                             (customer_data || {})["company"].to_s, file_name)
+        raise ActiveRecord::Rollback if result.start_with?("⚠️")
+      end
+      result
     rescue => e
       "Error in processBOQ: #{e}"
     end
