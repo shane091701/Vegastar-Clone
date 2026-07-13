@@ -42,4 +42,23 @@ class Api::DataManagementControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_match(/MRF requests/, JSON.parse(response.body)["error"])
   end
+
+  # Suppliers no longer have their own "Manage Data" screen entry (edit/delete
+  # moved to Accounting -> Supplier Data, see portal.js), but they still go
+  # through these same generic endpoints -- lock that in.
+  test "a supplier can be listed, edited, and deleted via the generic managed-row endpoints" do
+    supplier = Supplier.create!(company_name: "ACME Corp", contact_person: "Jane Doe", email: "jane@acme.test")
+
+    rows = api("getManagedRows", "suppliers")
+    assert_response :success
+    assert(rows["rows"].any? { |r| r["company_name"] == "ACME Corp" && r["id"] == supplier.id })
+
+    api("updateManagedRow", "suppliers", supplier.id, { "company_name" => "ACME Corporation" })
+    assert_response :success
+    assert_equal "ACME Corporation", supplier.reload.company_name
+
+    api("deleteManagedRow", "suppliers", supplier.id)
+    assert_response :success
+    refute Supplier.exists?(supplier.id)
+  end
 end

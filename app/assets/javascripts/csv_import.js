@@ -1,18 +1,17 @@
 // "Manage Data" -- admin-only screen for the data types that have no
 // one-at-a-time entry form anywhere else (Materials catalog) or would be
-// tedious to retype from old records (Suppliers, Subcontractors, Expense
+// tedious to retype from old records (Subcontractors, Expense
 // Categories, historical Expenses/Checks). Bulk-import via CSV (append or
 // replace) plus view / edit / delete of existing rows. Kept out of
 // portal.js because that file is regenerated from Source/ by
 // tools/port_frontend.ps1.
+//
+// Suppliers used to be managed here too, but that duplicated the dedicated
+// Accounting -> Supplier Data screen's own add form -- edit/delete now live
+// there instead (see portal.js's SUPPLIER DATABASE LOGIC), reusing the same
+// getManagedRows/updateManagedRow/deleteManagedRow("suppliers") endpoints.
 (function () {
   var TYPES = {
-    suppliers: {
-      label: "Suppliers",
-      headers: ["Company Name", "Contact Person", "Email", "Phone", "TIN", "Category", "Address", "Bank Details"],
-      example: ["ABC Hardware Supply", "Ana Cruz", "sales@abchardware.example", "0917-111-2222", "111-222-333-000", "Materials", "45 Aurora Blvd, Quezon City", "BDO - 001122334455"],
-      note: "Only Company Name is required."
-    },
     materials: {
       label: "Materials Catalog",
       headers: ["Item Name", "Unit", "Actual Cost", "Quoted Cost"],

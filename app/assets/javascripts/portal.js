@@ -3844,30 +3844,126 @@ function savePricing() {
 
 
 // --- SUPPLIER DATABASE LOGIC ---
+// Edit/delete reuse the same getManagedRows/updateManagedRow/deleteManagedRow
+// endpoints the "Manage Data" screen uses for other reference data (see
+// csv_import.js) -- this table is the id-bearing source (getSuppliersList,
+// used elsewhere for the bidding supplier picker, doesn't carry row ids).
+let supplierRows = [];
+const SUPPLIER_FIELD_KEYS = ["company_name", "contact_person", "email", "phone", "tin", "category", "address", "bank_details"];
+
 function loadSuppliers() {
+    const thead = document.querySelector('#section-supplier-data thead');
     const tbody = document.getElementById('supplierTableBody');
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm"></div> Fetching suppliers...</td></tr>';
-    
-    google.script.run.withSuccessHandler(data => {
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No suppliers found. Add one on the left.</td></tr>';
+    if (thead) {
+        thead.innerHTML = `<tr>
+            <th class="ps-4">Company Name</th>
+            <th>Contact Details</th>
+            <th>Category</th>
+            <th>TIN</th>
+            <th class="text-end pe-4">Actions</th>
+        </tr>`;
+    }
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm"></div> Fetching suppliers...</td></tr>';
+
+    google.script.run.withSuccessHandler(res => {
+        supplierRows = res.rows;
+        if (supplierRows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No suppliers found. Add one on the left.</td></tr>';
             return;
         }
-        tbody.innerHTML = data.map(sup => `
+        tbody.innerHTML = supplierRows.map(sup => `
             <tr>
-                <td class="ps-4 fw-bold text-dark">${sup.name}</td>
+                <td class="ps-4 fw-bold text-dark">${sup.company_name || ''}</td>
                 <td>
                    <div class="d-flex flex-column">
-                      <span>👤 ${sup.contact}</span>
-                      <a href="mailto:${sup.email}" class="text-primary text-decoration-none hover:underline">✉️ ${sup.email}</a>
+                      <span>👤 ${sup.contact_person || ''}</span>
+                      <a href="mailto:${sup.email || ''}" class="text-primary text-decoration-none hover:underline">✉️ ${sup.email || ''}</a>
                       <span class="text-muted small">📞 ${sup.phone || 'N/A'}</span>
                    </div>
                 </td>
                 <td><span class="badge bg-secondary">${sup.category || 'General'}</span></td>
                 <td class="text-muted">${sup.tin || 'N/A'}</td>
+                <td class="text-end text-nowrap pe-4">
+                    <button class="btn btn-sm btn-outline-secondary me-1" onclick="supplierEdit(${sup.id})">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="supplierDelete(${sup.id})">Delete</button>
+                </td>
             </tr>
         `).join('');
-    }).getSuppliersList();
+    }).getManagedRows('suppliers');
+}
+
+function ensureSupplierEditModal() {
+    if (document.getElementById('supplierEditModal')) return;
+    const modal = document.createElement('div');
+    modal.innerHTML = `<div class="modal fade" id="supplierEditModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header"><h5 class="modal-title fw-bold">Edit Supplier</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">
+            <div id="supplierEdit-alert" class="alert alert-danger py-2" style="display:none; font-size:0.85rem;"></div>
+            <input type="hidden" id="supplierEditId">
+            <div class="mb-2 text-start"><label class="form-label small fw-bold text-muted">Company Name</label>
+              <input id="supplierEdit_company_name" class="form-control form-control-sm"></div>
+            <div class="mb-2 text-start"><label class="form-label small fw-bold text-muted">Contact Person</label>
+              <input id="supplierEdit_contact_person" class="form-control form-control-sm"></div>
+            <div class="mb-2 text-start"><label class="form-label small fw-bold text-muted">Email</label>
+              <input id="supplierEdit_email" class="form-control form-control-sm"></div>
+            <div class="mb-2 text-start"><label class="form-label small fw-bold text-muted">Phone</label>
+              <input id="supplierEdit_phone" class="form-control form-control-sm"></div>
+            <div class="mb-2 text-start"><label class="form-label small fw-bold text-muted">TIN</label>
+              <input id="supplierEdit_tin" class="form-control form-control-sm"></div>
+            <div class="mb-2 text-start"><label class="form-label small fw-bold text-muted">Category</label>
+              <input id="supplierEdit_category" class="form-control form-control-sm"></div>
+            <div class="mb-2 text-start"><label class="form-label small fw-bold text-muted">Address</label>
+              <input id="supplierEdit_address" class="form-control form-control-sm"></div>
+            <div class="mb-2 text-start"><label class="form-label small fw-bold text-muted">Bank Details</label>
+              <textarea id="supplierEdit_bank_details" class="form-control form-control-sm" rows="2"></textarea></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary fw-bold" id="supplierEditSaveBtn">Save Changes</button>
+          </div>
+        </div></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('supplierEditSaveBtn').addEventListener('click', saveSupplierEdit);
+}
+
+function supplierEdit(id) {
+    const row = supplierRows.find(r => r.id === id);
+    if (!row) return;
+    ensureSupplierEditModal();
+    document.getElementById('supplierEditId').value = id;
+    document.getElementById('supplierEdit-alert').style.display = 'none';
+    SUPPLIER_FIELD_KEYS.forEach(k => {
+        document.getElementById('supplierEdit_' + k).value = row[k] == null ? '' : row[k];
+    });
+    new bootstrap.Modal(document.getElementById('supplierEditModal')).show();
+}
+
+function saveSupplierEdit() {
+    const id = document.getElementById('supplierEditId').value;
+    const data = {};
+    SUPPLIER_FIELD_KEYS.forEach(k => { data[k] = document.getElementById('supplierEdit_' + k).value; });
+    const btn = document.getElementById('supplierEditSaveBtn');
+    btn.disabled = true;
+    google.script.run.withSuccessHandler(() => {
+        btn.disabled = false;
+        bootstrap.Modal.getInstance(document.getElementById('supplierEditModal')).hide();
+        loadSuppliers();
+    }).withFailureHandler(err => {
+        btn.disabled = false;
+        const box = document.getElementById('supplierEdit-alert');
+        box.textContent = 'Error: ' + err.message;
+        box.style.display = 'block';
+    }).updateManagedRow('suppliers', id, data);
+}
+
+function supplierDelete(id) {
+    if (!confirm("Delete this supplier permanently? This can't be undone.")) return;
+    google.script.run.withSuccessHandler(() => { loadSuppliers(); })
+        .withFailureHandler(err => { alert('Error: ' + err.message); })
+        .deleteManagedRow('suppliers', id);
 }
 
 function submitSupplier() {

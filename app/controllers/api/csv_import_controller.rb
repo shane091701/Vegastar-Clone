@@ -1,10 +1,12 @@
 # Backs the "Import Data (CSV)" admin screen (app/assets/javascripts/csv_import.js).
 # Covers exactly the data types that have no dedicated entry screen anywhere
 # else in the app (Materials catalog), plus the ones that only support
-# one-row-at-a-time entry (Suppliers, Subcontractors, Expense Categories) or
+# one-row-at-a-time entry (Subcontractors, Expense Categories) or
 # would be tedious to retype from old records (historical Expenses/Checks).
+# Suppliers used to be here too -- see the note in csv_import.js for why
+# that moved to the Accounting -> Supplier Data screen instead.
 class Api::CsvImportController < Api::BaseController
-  IMPORTERS = %w[suppliers materials subcontractors expense_categories expenses checks].freeze
+  IMPORTERS = %w[materials subcontractors expense_categories expenses checks].freeze
 
   # args: [type, csvText, mode]  (mode: "append" (default) | "replace")
   def import_data
@@ -33,7 +35,6 @@ class Api::CsvImportController < Api::BaseController
   # would orphan those references), directing the admin to edit individually.
   def wipe_for_replace!(type)
     case type
-    when "suppliers"          then Supplier.delete_all
     when "materials"          then Material.delete_all
     when "expense_categories" then ExpenseListEntry.delete_all
     when "expenses"           then Expense.delete_all
@@ -49,37 +50,6 @@ class Api::CsvImportController < Api::BaseController
       end
       Check.delete_all
     end
-  end
-
-  def import_suppliers(csv_text, encoder)
-    rows = CsvImporter.parse(csv_text,
-      column_aliases: {
-        company_name: %w[name companyname supplier suppliername company],
-        contact_person: %w[contact contactperson],
-        email: %w[email],
-        phone: %w[phone phonenumber],
-        tin: %w[tin],
-        category: %w[category],
-        address: %w[address],
-        bank_details: %w[bank bankdetails]
-      },
-      required: [:company_name])
-
-    created = 0
-    skipped = []
-    rows.each do |r|
-      d = r[:data]
-      name = d[:company_name].to_s.strip
-      if name.blank?
-        skipped << "Row #{r[:line]}: Company Name is blank"
-        next
-      end
-      Supplier.create!(company_name: name, contact_person: d[:contact_person], email: d[:email],
-        phone: d[:phone], tin: d[:tin], category: d[:category], address: d[:address],
-        bank_details: d[:bank_details], encoder_email: encoder)
-      created += 1
-    end
-    { created: created, skipped: skipped }
   end
 
   def import_materials(csv_text, _encoder)
