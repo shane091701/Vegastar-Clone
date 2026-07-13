@@ -414,11 +414,11 @@
                 <div class="row g-2 mb-3">
                   <div class="col-6">
                     <label class="form-label small fw-bold text-muted">Materials Cost</label>
-                    <input type="number" id="addBoqMat" class="form-control form-control-sm" placeholder="₱0.00">
+                    <input type="text" inputmode="decimal" id="addBoqMat" class="form-control form-control-sm" placeholder="₱0.00" oninput="formatThousands(this)">
                   </div>
                   <div class="col-6">
                     <label class="form-label small fw-bold text-muted">Labor Cost</label>
-                    <input type="number" id="addBoqLab" class="form-control form-control-sm" placeholder="₱0.00">
+                    <input type="text" inputmode="decimal" id="addBoqLab" class="form-control form-control-sm" placeholder="₱0.00" oninput="formatThousands(this)">
                   </div>
                 </div>
                 <div class="mb-3">
@@ -451,12 +451,12 @@
             <div class="row g-3 mb-3">
               <div class="col-6">
                 <label class="form-label small fw-bold text-muted">New Materials Cost</label>
-                <input type="number" id="adjNewMat" class="form-control form-control-sm text-danger fw-bold" placeholder="0.00">
+                <input type="text" inputmode="decimal" id="adjNewMat" class="form-control form-control-sm text-danger fw-bold" placeholder="0.00" oninput="formatThousands(this)">
                 <div class="small text-muted mt-1" id="adjOldMatDisplay">Old: ₱0.00</div>
               </div>
               <div class="col-6">
                 <label class="form-label small fw-bold text-muted">New Labor Cost</label>
-                <input type="number" id="adjNewLab" class="form-control form-control-sm text-danger fw-bold" placeholder="0.00">
+                <input type="text" inputmode="decimal" id="adjNewLab" class="form-control form-control-sm text-danger fw-bold" placeholder="0.00" oninput="formatThousands(this)">
                 <div class="small text-muted mt-1" id="adjOldLabDisplay">Old: ₱0.00</div>
               </div>
             </div>

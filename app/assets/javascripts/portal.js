@@ -3347,8 +3347,12 @@ function openAdjustModal(rowIdx) {
   document.getElementById('adjItemName').innerText = item.item;
   document.getElementById('adjPhaseName').innerText = item.phase;
   
-  document.getElementById('adjNewMat').value = item.matCost;
-  document.getElementById('adjNewLab').value = item.labCost;
+  const adjNewMatEl = document.getElementById('adjNewMat');
+  const adjNewLabEl = document.getElementById('adjNewLab');
+  adjNewMatEl.value = item.matCost;
+  adjNewLabEl.value = item.labCost;
+  formatThousands(adjNewMatEl);
+  formatThousands(adjNewLabEl);
   
   document.getElementById('adjOldMatDisplay').innerText = `Old: ₱${item.matCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
   document.getElementById('adjOldLabDisplay').innerText = `Old: ₱${item.labCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -3364,8 +3368,8 @@ function openAdjustModal(rowIdx) {
 
 function submitAdjustBoqItem() {
   const rowIdx = document.getElementById('adjRowIndex').value;
-  const newMat = parseFloat(document.getElementById('adjNewMat').value) || 0;
-  const newLab = parseFloat(document.getElementById('adjNewLab').value) || 0;
+  const newMat = parseFormattedNumber(document.getElementById('adjNewMat').value);
+  const newLab = parseFormattedNumber(document.getElementById('adjNewLab').value);
   const reason = document.getElementById('adjReason').value.trim();
   const alertBox = document.getElementById('adjust-boq-alert');
   const btn = document.getElementById('adjSubmitBtn');
@@ -3408,8 +3412,8 @@ function submitAddBoqItem() {
   const itemDesc = document.getElementById('addBoqDesc').value.trim();
   const unit = document.getElementById('addBoqUnit').value.trim();
   const qty = parseFloat(document.getElementById('addBoqQty').value) || 0;
-  const matCost = parseFloat(document.getElementById('addBoqMat').value) || 0;
-  const labCost = parseFloat(document.getElementById('addBoqLab').value) || 0;
+  const matCost = parseFormattedNumber(document.getElementById('addBoqMat').value);
+  const labCost = parseFormattedNumber(document.getElementById('addBoqLab').value);
   const reason = document.getElementById('addBoqReason').value.trim();
   
   const alertBox = document.getElementById('boq-add-alert');
@@ -4911,13 +4915,13 @@ function addBoqItem(scopeId) {
         style="border-radius: 8px; font-size: 0.81rem;">
     </td>
     <td style="padding: 6px 7px;">
-      <input type="number" class="form-control form-control-sm boq-item-labor"
-        placeholder="0.00" step="0.01" min="0"
+      <input type="text" inputmode="decimal" class="form-control form-control-sm boq-item-labor"
+        placeholder="0.00" oninput="formatThousands(this)"
         style="border-radius: 8px; font-size: 0.81rem;">
     </td>
     <td style="padding: 6px 7px;">
-      <input type="number" class="form-control form-control-sm boq-item-material"
-        placeholder="0.00" step="0.01" min="0"
+      <input type="text" inputmode="decimal" class="form-control form-control-sm boq-item-material"
+        placeholder="0.00" oninput="formatThousands(this)"
         style="border-radius: 8px; font-size: 0.81rem;">
     </td>
     <td style="padding: 6px 7px;">
@@ -4958,24 +4962,24 @@ const NBOQ_MARKUP_RATE = 0.35; // 35% markup applied on top of Total Cost to der
 
 function calcNboqRowTotal(tr) {
   const qty      = parseFloat(tr.querySelector('.boq-item-qty')?.value)      || 0;
-  const labor    = parseFloat(tr.querySelector('.boq-item-labor')?.value)    || 0;
-  const material = parseFloat(tr.querySelector('.boq-item-material')?.value) || 0;
+  const labor    = parseFormattedNumber(tr.querySelector('.boq-item-labor')?.value);
+  const material = parseFormattedNumber(tr.querySelector('.boq-item-material')?.value);
 
   // Total Cost = (Labor Cost + Material Cost) × Quantity
   const totalCost = (labor + material) * qty;
   const totalEl   = tr.querySelector('.boq-item-total');
-  if (totalEl) totalEl.value = (totalCost > 0) ? totalCost.toFixed(2) : '';
+  if (totalEl) totalEl.value = (totalCost > 0) ? totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
 
   // Quoted Cost = Total Cost + (35% of Total Cost)
   const quotedCost = totalCost * (1 + NBOQ_MARKUP_RATE);
   const costEl      = tr.querySelector('.boq-item-cost');
-  if (costEl) costEl.value = (quotedCost > 0) ? quotedCost.toFixed(2) : '';
+  if (costEl) costEl.value = (quotedCost > 0) ? quotedCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
 }
 
 function calcNboqGrandTotal() {
   let sum = 0;
   document.querySelectorAll('#boq-phases-container .boq-item-total').forEach(el => {
-    sum += parseFloat(el.value) || 0;
+    sum += parseFormattedNumber(el.value);
   });
   const el = document.getElementById('nboq-grand-total');
   if (el) el.textContent = '₱' + sum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -5054,10 +5058,10 @@ function submitNativeBoq() {
     const scope = (scopeBlock?.querySelector('.boq-scope-name')?.value || '').trim();
 
     const qty          = parseFloat(tr.querySelector('.boq-item-qty')?.value)      || 0;
-    const laborCost    = parseFloat(tr.querySelector('.boq-item-labor')?.value)    || 0;
-    const materialCost = parseFloat(tr.querySelector('.boq-item-material')?.value) || 0;
-    const totalCost    = parseFloat(tr.querySelector('.boq-item-total')?.value)    || ((laborCost + materialCost) * qty);
-    const quotedCost   = parseFloat(tr.querySelector('.boq-item-cost')?.value)     || (totalCost * (1 + NBOQ_MARKUP_RATE));
+    const laborCost    = parseFormattedNumber(tr.querySelector('.boq-item-labor')?.value);
+    const materialCost = parseFormattedNumber(tr.querySelector('.boq-item-material')?.value);
+    const totalCost    = parseFormattedNumber(tr.querySelector('.boq-item-total')?.value) || ((laborCost + materialCost) * qty);
+    const quotedCost   = parseFormattedNumber(tr.querySelector('.boq-item-cost')?.value)  || (totalCost * (1 + NBOQ_MARKUP_RATE));
 
     items.push({
       phase,
@@ -5214,8 +5218,12 @@ function editReturnedBoq(submissionId) {
           row.querySelector('.boq-item-name').value     = it.name || '';
           row.querySelector('.boq-item-unit').value     = it.unit || '';
           row.querySelector('.boq-item-qty').value      = it.qty || '';
-          row.querySelector('.boq-item-labor').value    = it.laborCost || '';
-          row.querySelector('.boq-item-material').value = it.materialCost || '';
+          const laborEl = row.querySelector('.boq-item-labor');
+          const materialEl = row.querySelector('.boq-item-material');
+          laborEl.value    = it.laborCost || '';
+          materialEl.value = it.materialCost || '';
+          formatThousands(laborEl);
+          formatThousands(materialEl);
           calcNboqRowTotal(row);
         });
         calcNboqGrandTotal();
@@ -5338,6 +5346,14 @@ function formatThousands(el) {
   if (!intStr && !hasDecimal) { el.value = ''; return; }
   const intFormatted = intStr ? Number(intStr).toLocaleString('en-US') : '0';
   el.value = hasDecimal ? intFormatted + '.' + decStr : intFormatted;
+}
+
+// Parses a value that may contain formatThousands()-style comma separators
+// (e.g. "50,000.25") back into a plain number for math -- plain parseFloat
+// stops at the first comma and silently truncates ("50,000" -> 50), so any
+// field wired to formatThousands must be read through this instead.
+function parseFormattedNumber(v) {
+  return parseFloat(String(v == null ? '' : v).replace(/,/g, '')) || 0;
 }
 
 function clampPct(el) {
