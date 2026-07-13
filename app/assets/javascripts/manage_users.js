@@ -98,6 +98,11 @@
     document.getElementById("mu-reset-save-btn").addEventListener("click", saveReset);
     document.getElementById("mu-role-perm-save-btn").addEventListener("click", saveRolePermissions);
 
+    // The nav link's data-permission="admin" (set above) was added after
+    // the one-time permission filter already ran at login -- re-run it so
+    // this doesn't stay visible to every role regardless of permission.
+    if (typeof window.reapplyPermissions === "function") window.reapplyPermissions();
+
     window.loadManageUsers = function () {
       google.script.run
         .withSuccessHandler(function (res) {

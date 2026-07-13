@@ -100,6 +100,12 @@
     }
 
     showTab("users");
+
+    // The "Manage" link's data-permission="admin" was just added above --
+    // the one-time permission filter already ran at login, long before this
+    // deferred script finished its own async setup, so without this the
+    // link would stay visible to every role regardless of permission.
+    if (typeof window.reapplyPermissions === "function") window.reapplyPermissions();
   }
 
   // The three source sections are each built asynchronously by their own

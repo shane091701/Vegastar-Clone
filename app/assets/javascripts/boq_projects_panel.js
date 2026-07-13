@@ -161,6 +161,11 @@
     document.getElementById("boqProjectsCollapse").addEventListener("shown.bs.collapse", loadProjects);
     document.getElementById("boqProjEditSaveBtn").addEventListener("click", saveEdit);
     window.__loadBoqProjects = loadProjects;
+
+    // This panel's data-permission="admin" (set above) was added after the
+    // one-time permission filter already ran at login -- re-run it so this
+    // doesn't stay visible to every role regardless of permission.
+    if (typeof window.reapplyPermissions === "function") window.reapplyPermissions();
   }
 
   if (document.readyState === "loading") {

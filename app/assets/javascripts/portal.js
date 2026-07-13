@@ -481,6 +481,19 @@ function applyPermissions(allowedTabs) {
   return null;
 }
 
+// applyPermissions() above only runs once, right after login -- but several
+// admin-only nav items (Manage Data/Users/Companies, the consolidated
+// "Manage" tab, the BOQ Upload Projects panel) are built by separate
+// deferred scripts that finish AFTER that point, since each waits on its own
+// DOMContentLoaded + async setup. Those elements' [data-permission="admin"]
+// attribute is never re-checked, so they stayed visible to every role
+// regardless of permission. Those scripts call this right after inserting
+// their element to re-run the same filtering pass.
+window.reapplyPermissions = function () {
+  if (!userProfile || !userProfile.allowedTabs) return;
+  applyPermissions(userProfile.allowedTabs);
+};
+
 function showSection(sectionId) {
   document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
   document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));

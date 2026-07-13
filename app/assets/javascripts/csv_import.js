@@ -203,6 +203,11 @@
     document.getElementById("csvViewHistoryBtn").addEventListener("click", function () {
       window.showManagedDataHistory(currentType(), TYPES[currentType()].label);
     });
+
+    // The nav link's data-permission="admin" (set above) was added after
+    // the one-time permission filter already ran at login -- re-run it so
+    // this doesn't stay visible to every role regardless of permission.
+    if (typeof window.reapplyPermissions === "function") window.reapplyPermissions();
   }
 
   // Shared across every screen that edits/deletes through these same

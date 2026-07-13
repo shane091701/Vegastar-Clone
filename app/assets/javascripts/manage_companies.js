@@ -110,6 +110,11 @@
     document.getElementById("mc-add-btn").addEventListener("click", createCompany);
     document.getElementById("mc-edit-save-btn").addEventListener("click", saveEditCompany);
 
+    // The nav link's data-permission="admin" (set above) was added after
+    // the one-time permission filter already ran at login -- re-run it so
+    // this doesn't stay visible to every role regardless of permission.
+    if (typeof window.reapplyPermissions === "function") window.reapplyPermissions();
+
     window.openEditCompany = function (name) {
       document.getElementById("mc-edit-old-name").value = name;
       document.getElementById("mc-edit-name").value = name;
