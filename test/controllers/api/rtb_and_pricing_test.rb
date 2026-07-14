@@ -5,7 +5,7 @@ class Api::RtbAndPricingTest < ActionDispatch::IntegrationTest
     RolePermission.create!(role: "admin", allowed_tabs: "admin")
     User.create!(name: "Admin", email: "admin@test.local", role: "admin", password: "Secret123!")
     post "/api/verifyLogin", params: { args: ["admin@test.local", "Secret123!"] }, as: :json
-    Project.create!(code: "PRJ1", customer_name: "Juan", company: "Vegastar", quoted_cost: 1_000_000)
+    Project.create!(code: "PRJ1", customer_name: "Juan", company: "SP Bedana", quoted_cost: 1_000_000)
     BoqItem.create!(project_code: "PRJ1", phase: "Civil", item: "Cement",
                     total_labor: 10_000, total_material: 40_000, total_cost: 50_000)
   end

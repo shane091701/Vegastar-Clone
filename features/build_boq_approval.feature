@@ -10,14 +10,14 @@ Feature: Build BOQ (native builder) submission and approval
     And I am logged in as "admin@test.local"
 
   Scenario: Submitting a native BOQ for approval succeeds and appears in pending approvals
-    When I submit a native BOQ for approval for project "NB PROJ" customer "Juan Dela Cruz" company "Vegastar" with items:
+    When I submit a native BOQ for approval for project "NB PROJ" customer "Juan Dela Cruz" company "SP Bedana" with items:
       | phase | scope      | name     | unit | qty | laborCost | materialCost |
       | Civil | Foundation | Concrete | cu.m | 10  | 100       | 400          |
     Then the request should succeed
     And that BOQ submission should appear in pending approvals for project "NB PROJ"
 
   Scenario: The pending approvals grand total is computed correctly from item costs
-    When I submit a native BOQ for approval for project "NB CALC" customer "Juan" company "Vegastar" with items:
+    When I submit a native BOQ for approval for project "NB CALC" customer "Juan" company "SP Bedana" with items:
       | phase | scope      | name     | unit | qty | laborCost | materialCost |
       | Civil | Foundation | Concrete | cu.m | 10  | 100       | 400          |
       | Civil | Foundation | Rebar    | pcs  | 2   | 50        | 150          |
@@ -25,13 +25,13 @@ Feature: Build BOQ (native builder) submission and approval
 
   Scenario: Submitting to an already-used project code is rejected
     Given a project "DUPE NATIVE" already exists
-    When I submit a native BOQ for approval for project "DUPE NATIVE" customer "Juan" company "Vegastar" with items:
+    When I submit a native BOQ for approval for project "DUPE NATIVE" customer "Juan" company "SP Bedana" with items:
       | phase | scope | name   | unit | qty | laborCost | materialCost |
       | Civil | Gen   | Cement | bags | 10  | 50        | 100          |
     Then the request should fail with an error matching "was already used"
 
   Scenario: Submitting with an invalid project code is rejected
-    When I submit a native BOQ for approval for project "BAD-CODE!" customer "Juan" company "Vegastar" with items:
+    When I submit a native BOQ for approval for project "BAD-CODE!" customer "Juan" company "SP Bedana" with items:
       | phase | scope | name   | unit | qty | laborCost | materialCost |
       | Civil | Gen   | Cement | bags | 10  | 50        | 100          |
     Then the request should fail with an error matching "may contain only letters, numbers, and spaces"

@@ -14,7 +14,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
   ].freeze
 
   test "parses phases, scopes, and items exactly like processData_" do
-    result = BoqIngestor.ingest_rows(SAMPLE_ROWS.map(&:dup), "AR BOM", "PRJ1", "Vegastar", "boq.xlsx")
+    result = BoqIngestor.ingest_rows(SAMPLE_ROWS.map(&:dup), "AR BOM", "PRJ1", "SP Bedana", "boq.xlsx")
     assert_equal "✅ Successfully processed 3 items from \"AR BOM\" into the database.", result
 
     items = BoqItem.order(:id).to_a
@@ -32,7 +32,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
     assert_equal 45_000.0, concrete.total_material.to_f   # source col F
     assert_equal 57_000.0, concrete.total_cost.to_f       # source col I
     assert_equal "PRJ1", concrete.project_code
-    assert_equal "Vegastar", concrete.company
+    assert_equal "SP Bedana", concrete.company
 
     panel = items[2]
     assert_equal "ELECTRICAL", panel.phase # roman numeral prefix stripped
@@ -86,7 +86,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
       ["", "Panel Board", "1", "Lot", "", "25,000", "", "5,000", "30,000"]
     ]
 
-    BoqIngestor.ingest_rows(rows, "AR BOM", "PRJ-MULTI", "Vegastar", "boq.xlsx")
+    BoqIngestor.ingest_rows(rows, "AR BOM", "PRJ-MULTI", "SP Bedana", "boq.xlsx")
 
     items = BoqItem.order(:id).pluck(:item)
     assert_includes items, "Concrete 4000psi",

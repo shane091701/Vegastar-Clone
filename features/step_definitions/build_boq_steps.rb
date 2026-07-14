@@ -50,7 +50,7 @@ Then("the pending approval grand total for project {string} should be {float}") 
 end
 
 Given("a native BOQ has been submitted for project {string}") do |project_code|
-  payload = build_native_boq_payload(project_code, "Juan Dela Cruz", "Vegastar", [
+  payload = build_native_boq_payload(project_code, "Juan Dela Cruz", "SP Bedana", [
     { "phase" => "Civil", "scope" => "Foundation", "name" => "Concrete", "unit" => "cu.m",
       "qty" => "10", "laborCost" => "100", "materialCost" => "400" }
   ])
