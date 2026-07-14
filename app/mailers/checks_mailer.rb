@@ -4,6 +4,6 @@ class ChecksMailer < ApplicationMailer
     @due_checks = due_checks
     @today_str = today_str
     mail(to: recipients.first, bcc: recipients.drop(1),
-         subject: "[Checks Due] #{due_checks.length} check(s) require deposit — Vegastar")
+         subject: "[Checks Due] #{due_checks.length} check(s) require deposit — SP Bedana")
   end
 end

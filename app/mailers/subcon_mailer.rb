@@ -10,6 +10,6 @@ class SubconMailer < ApplicationMailer
       "#{context[:reporterName]} — #{context[:percentComplete]}% complete (Report #{context[:reportId]})"
     end
     mail(to: recipients,
-         subject: "[Vegastar] Subcontractor milestone(s) ready to pay — #{context[:subName]}")
+         subject: "[SP Bedana] Subcontractor milestone(s) ready to pay — #{context[:subName]}")
   end
 end

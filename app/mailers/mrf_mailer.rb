@@ -9,7 +9,7 @@ class MrfMailer < ApplicationMailer
     @app_url = root_url
     subject_prefix = is_returnable ? "[New Returnable Request]" : "[New MRF]"
     mail(to: recipients.first, bcc: recipients.drop(1),
-         subject: "#{subject_prefix} #{project_name} — Action Required | Vegastar")
+         subject: "#{subject_prefix} #{project_name} — Action Required | SP Bedana")
   end
 
   def approval_result(action, request_id, project_name, requestor_email, processed_items)
@@ -19,6 +19,6 @@ class MrfMailer < ApplicationMailer
     @requestor_email = requestor_email
     @processed_items = processed_items
     status_word = @is_approved ? "APPROVED" : "REJECTED"
-    mail(to: requestor_email, subject: "[MRF #{status_word}] #{request_id} — Vegastar")
+    mail(to: requestor_email, subject: "[MRF #{status_word}] #{request_id} — SP Bedana")
   end
 end

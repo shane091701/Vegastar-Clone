@@ -6,6 +6,6 @@ class PoMailer < ApplicationMailer
     @project_name = project_name
     @signer_name = signer_name
     attachments["#{po_code}_Signed.pdf"] = pdf_data
-    mail(to: to_email, subject: "Purchase Order [#{po_code}] - Vegastar")
+    mail(to: to_email, subject: "Purchase Order [#{po_code}] - SP Bedana")
   end
 end
