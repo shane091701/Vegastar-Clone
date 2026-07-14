@@ -20,14 +20,14 @@ namespace :sample_data do
       email: "sales@abchardware.example", phone: "0917-111-2222", tin: "111-222-333-000",
       category: "Materials", address: "45 Aurora Blvd, Cubao, Quezon City",
       bank_details: "BDO - 001122334455", supplier_type: "Materials Supplier",
-      encoder_email: "admin@vegastar.local"
+      encoder_email: "admin@spbedana.local"
     )
     supplier_b = Supplier.create!(
       company_name: "BuildMart Trading", contact_person: "Mark Santos",
       email: "orders@buildmart.example", phone: "0918-333-4444", tin: "444-555-666-000",
       category: "Materials", address: "88 EDSA, Mandaluyong City",
       bank_details: "BPI - 998877665544", supplier_type: "Materials Supplier",
-      encoder_email: "admin@vegastar.local"
+      encoder_email: "admin@spbedana.local"
     )
     puts "  2 suppliers"
 
@@ -43,7 +43,7 @@ namespace :sample_data do
     Project.create!(
       code: "DEMO-001", customer_name: "Juan Dela Cruz", phone: "0917-555-0100",
       email: "juan.delacruz@example.com", site_location: "123 Rizal St, Brgy. San Isidro, Quezon City",
-      billing_address: "Same as site address", tin: "123-456-789-000", company: "Vegastar Construction",
+      billing_address: "Same as site address", tin: "123-456-789-000", company: "SP Bedana Construction",
       quoted_cost: 850_000,
       milestone_terms: [{ "label" => "Mobilization", "percent" => 25 }, { "label" => "Completion", "percent" => 75 }]
     )
@@ -63,7 +63,7 @@ namespace :sample_data do
         total_labor: 29_750, total_material: 227_500, labor_cost_k: 29_750, total_cost: 257_250 }
     ]
     boq_rows.each do |r|
-      BoqItem.create!(r.merge(project_code: "DEMO-001", company: "Vegastar Construction",
+      BoqItem.create!(r.merge(project_code: "DEMO-001", company: "SP Bedana Construction",
                               source_file: "demo-seed", entry_date: now))
     end
     puts "  Project DEMO-001 with #{boq_rows.length} BOQ items"
@@ -74,7 +74,7 @@ namespace :sample_data do
         "code" => "DEMO 002", "customerName" => "Maria Santos", "phone" => "0928-444-5555",
         "email" => "maria.santos@example.com", "site" => "56 Katipunan Ave, Loyola Heights, Quezon City",
         "billing" => "Same as site address", "birthday" => "", "tin" => "987-654-321-000",
-        "company" => "Vegastar Construction", "quotedCost" => 420_000, "milestoneTerms" => []
+        "company" => "SP Bedana Construction", "quotedCost" => 420_000, "milestoneTerms" => []
       },
       "items" => [
         { "phase" => "Interior Works", "scope" => "2.1 Finishes", "name" => "Ceramic Floor Tiles 60x60",
@@ -85,7 +85,7 @@ namespace :sample_data do
     }
     boq_sub_code = "BOQ-#{Date.current.strftime('%Y%m%d')}-#{(BoqSubmission.count + 1).to_s.rjust(3, '0')}"
     BoqSubmission.create!(submission_code: boq_sub_code, project_code: "DEMO 002",
-                          submitter_email: "encoder@vegastar.local", status: "Pending", payload: demo2_payload)
+                          submitter_email: "encoder@spbedana.local", status: "Pending", payload: demo2_payload)
     puts "  #{boq_sub_code}: Pending BOQ for \"DEMO 002\" -- log in as admin to Accept/Return/Reject it"
 
     # --- MRF #1: left Pending so you can practice approving it ---
@@ -99,10 +99,10 @@ namespace :sample_data do
         movement_type: "Material Request")
       MrfItem.create!(entry_date: now, item: r[:item], unit: r[:unit], request_amount: r[:qty],
         project_code: "DEMO-001", phase: r[:phase], status: "Pending", mrf_code: mrf1,
-        requester_email: "site.engineer@vegastar.local",
+        requester_email: "site.engineer@spbedana.local",
         remarks: "For wall and rebar works -- please review", scope: r[:scope])
     end
-    puts "  #{mrf1}: Pending -- log in as approver@vegastar.local to approve it"
+    puts "  #{mrf1}: Pending -- log in as approver@spbedana.local to approve it"
 
     # --- MRF #2: pushed all the way through the pipeline ---
     mrf2 = SequencedCode.next_mrf_code("DEMO-001")
@@ -117,7 +117,7 @@ namespace :sample_data do
       MrfItem.create!(entry_date: now, item: r[:item], unit: r[:unit], request_amount: r[:qty],
         project_code: "DEMO-001", phase: r[:phase], status: "Approved", approved_qty: r[:qty],
         action_timestamp: now, win_loss: "", po_code: "", mrf_code: mrf2,
-        requester_email: "site.engineer@vegastar.local", remarks: "Approved for demo", scope: r[:scope])
+        requester_email: "site.engineer@spbedana.local", remarks: "Approved for demo", scope: r[:scope])
     end
 
     begin
@@ -132,13 +132,13 @@ namespace :sample_data do
 
     # --- Supplier quotes + payment terms for MRF #2 ---
     SupplierQuote.create!(mrf_code: mrf2, item: "CHB Wall (4in)", supplier: supplier_a.company_name,
-      amount: 96_000, encoder_email: "approver@vegastar.local", brand: "Eagle", delivery_fee: "0")
+      amount: 96_000, encoder_email: "approver@spbedana.local", brand: "Eagle", delivery_fee: "0")
     SupplierQuote.create!(mrf_code: mrf2, item: "CHB Wall (4in)", supplier: supplier_b.company_name,
-      amount: 99_000, encoder_email: "approver@vegastar.local", brand: "Holcim", delivery_fee: "500")
+      amount: 99_000, encoder_email: "approver@spbedana.local", brand: "Holcim", delivery_fee: "500")
     SupplierQuote.create!(mrf_code: mrf2, item: "Reinforcing Steel Bars", supplier: supplier_a.company_name,
-      amount: 130_000, encoder_email: "approver@vegastar.local", brand: "PhilSteel", delivery_fee: "0")
+      amount: 130_000, encoder_email: "approver@spbedana.local", brand: "PhilSteel", delivery_fee: "0")
     SupplierQuote.create!(mrf_code: mrf2, item: "Reinforcing Steel Bars", supplier: supplier_b.company_name,
-      amount: 128_000, encoder_email: "approver@vegastar.local", brand: "PhilSteel", delivery_fee: "800")
+      amount: 128_000, encoder_email: "approver@spbedana.local", brand: "PhilSteel", delivery_fee: "800")
 
     PaymentTerm.create!(mrf_code: mrf2, supplier: supplier_a.company_name, description: "50% Down Payment", percentage: "50%")
     PaymentTerm.create!(mrf_code: mrf2, supplier: supplier_a.company_name, description: "50% within 30 days", percentage: "50%")
@@ -152,7 +152,7 @@ namespace :sample_data do
       { "supplier" => supplier_b.company_name, "item" => "Reinforcing Steel Bars", "qty" => 2, "amount" => 128_000 }
     ]
     begin
-      CanvasAwarder.call(mrf_code: mrf2, winners: winners, user: "approver@vegastar.local")
+      CanvasAwarder.call(mrf_code: mrf2, winners: winners, user: "approver@spbedana.local")
       puts "  Awarded -- 2 Purchase Orders generated"
     rescue => e
       puts "  WARNING: award failed (#{e.message}) -- receiving/payments below will be skipped"
@@ -165,12 +165,12 @@ namespace :sample_data do
     # --- Receiving: CHB fully delivered, Rebar partially delivered ---
     if chb_po
       Delivery.create!(received_date: now - 3.days, delivery_doc_number: "DR-DEMO-0001",
-        receiver_email: "site.engineer@vegastar.local", item_name: chb_po.item_name,
+        receiver_email: "site.engineer@spbedana.local", item_name: chb_po.item_name,
         quantity: chb_po.quantity, po_number: chb_po.po_number, remarks: "Full delivery, good condition")
     end
     if rebar_po
       Delivery.create!(received_date: now - 1.day, delivery_doc_number: "DR-DEMO-0002",
-        receiver_email: "site.engineer@vegastar.local", item_name: rebar_po.item_name,
+        receiver_email: "site.engineer@spbedana.local", item_name: rebar_po.item_name,
         quantity: (rebar_po.quantity.to_f / 2).round(2), po_number: rebar_po.po_number,
         remarks: "Partial delivery -- remainder pending")
     end
@@ -181,30 +181,30 @@ namespace :sample_data do
       IssuePayment.create!(mrf_code: mrf2, po_number: chb_po.po_number, term_description: "50% Down Payment",
         percentage: "50%", supplier: supplier_a.company_name, invoiced_amount: 96_000,
         due_date: (now - 3.days).to_date.to_s, bank: "BDO", check_number: "CHK-DEMO-1001",
-        payment_amount: 48_000, encoder_email: "accountant@vegastar.local")
+        payment_amount: 48_000, encoder_email: "accountant@spbedana.local")
 
       Check.create!(check_date: (now - 2.days).to_date, project_name: "DEMO-001", bank: "BDO",
-        check_number: "CHK-DEMO-1001", amount: 48_000, encoded_by: "accountant@vegastar.local",
+        check_number: "CHK-DEMO-1001", amount: 48_000, encoded_by: "accountant@spbedana.local",
         encode_date: now - 2.days, status: "Deposited")
     end
     Check.create!(check_date: now.to_date, project_name: "DEMO-001", bank: "BPI",
-      check_number: "CHK-DEMO-1002", amount: 70_000, encoded_by: "accountant@vegastar.local",
+      check_number: "CHK-DEMO-1002", amount: 70_000, encoded_by: "accountant@spbedana.local",
       encode_date: now, status: "Not Deposited")
     puts "  1 payment issued + 1 check deposited; 1 check left Not Deposited for you to test"
 
     # --- Expenses (incl. an auto-refund example) ---
     Expense.create!(entry_date: now, project_code: "DEMO-001", expense_type: "Material",
-      particular: "Fuel and hauling", total_amount: 3_500.75, encoder_email: "encoder@vegastar.local")
+      particular: "Fuel and hauling", total_amount: 3_500.75, encoder_email: "encoder@spbedana.local")
     Expense.create!(entry_date: now, project_code: "DEMO-001", expense_type: "Others",
-      particular: "H.O: Construction Bond", total_amount: 20_000, encoder_email: "encoder@vegastar.local")
+      particular: "H.O: Construction Bond", total_amount: 20_000, encoder_email: "encoder@spbedana.local")
     PendingRefund.create!(entry_date: now, project_code: "DEMO-001", particular: "H.O: Construction Bond",
-      total_amount: 20_000, status: "Pending", encoder_email: "encoder@vegastar.local")
+      total_amount: 20_000, status: "Pending", encoder_email: "encoder@spbedana.local")
     puts "  2 expenses logged (1 pending Construction Bond refund waiting in Refundable Expenses)"
 
     # --- Petty cash / reimbursement, with a placeholder receipt attached ---
     reimb = Reimbursement.create!(project_code: "DEMO-001", expense_type: "Petty Cash",
       particulars: "Site engineer's meals and transportation for site visit",
-      amount: 850, encoder_email: "site.engineer@vegastar.local")
+      amount: 850, encoder_email: "site.engineer@spbedana.local")
     reimb.receipt.attach(io: StringIO.new("Sample receipt placeholder for demo data."),
                          filename: "demo-receipt.txt", content_type: "text/plain")
     puts "  1 petty cash reimbursement with a sample receipt attached"
@@ -212,17 +212,17 @@ namespace :sample_data do
     # --- Project progress + RTB ---
     ProjectProgress.create!(project_code: "DEMO-001", overall_percent: 35,
       phase_breakdown: [{ "phase" => "Civil Works", "percent" => 35 }],
-      encoder_email: "project.engineer@vegastar.local")
+      encoder_email: "project.engineer@spbedana.local")
 
     rtb_code = SequencedCode.next_rtb_code("DEMO-001")
     RtbLog.create!(rtb_code: rtb_code, project_code: "DEMO-001", percent_to_bill: 25,
-      calculated_amount: 850_000 * 0.25, status: "Pending", encoder_email: "project.engineer@vegastar.local")
-    puts "  #{rtb_code}: Pending RTB -- log in as accountant@vegastar.local to approve/collect it"
+      calculated_amount: 850_000 * 0.25, status: "Pending", encoder_email: "project.engineer@spbedana.local")
+    puts "  #{rtb_code}: Pending RTB -- log in as accountant@spbedana.local to approve/collect it"
 
     # --- Subcontractor + work package + milestones + a progress report ---
     sub = Subcontractor.create!(sub_code: SequencedCode.next_sub_code, name: "Demo Builders Co.",
-      tin: "555-666-777-000", contact: "0919-555-0000", active: true, created_by: "admin@vegastar.local")
-    SubconAudit.log!("Subcontractor", sub.sub_code, "create", "Created: Demo Builders Co. (sample data)", "admin@vegastar.local")
+      tin: "555-666-777-000", contact: "0919-555-0000", active: true, created_by: "admin@spbedana.local")
+    SubconAudit.log!("Subcontractor", sub.sub_code, "create", "Created: Demo Builders Co. (sample data)", "admin@spbedana.local")
 
     wp_result = WorkPackageCreator.call({
       "project" => "DEMO-001", "subId" => sub.sub_code, "label" => "Masonry and Rebar Works",
@@ -237,15 +237,15 @@ namespace :sample_data do
         { "seq" => 1, "label" => "Mobilization", "targetPct" => 25, "paymentPct" => 40 },
         { "seq" => 2, "label" => "Completion", "targetPct" => 100, "paymentPct" => 60 }
       ]
-    }, "subcontractor@vegastar.local")
+    }, "subcontractor@spbedana.local")
     puts "  #{wp_result[:wpId]}: work package created for Demo Builders Co."
 
     report = SubconReport.create!(report_code: SequencedCode.next_report_code, wp_code: wp_result[:wpId],
       project_code: "DEMO-001", payment_term: "Mobilization", percent_complete: 30,
       narrative: "Blocked out ground floor walls; rebar cutting in progress.",
-      reported_by: "subcontractor@vegastar.local", reported_by_name: "Test Subcontractor")
+      reported_by: "subcontractor@spbedana.local", reported_by_name: "Test Subcontractor")
     SubconAudit.log!("Report", report.report_code, "create report",
-                     "WP: #{wp_result[:wpId]} | 30% complete", "subcontractor@vegastar.local")
+                     "WP: #{wp_result[:wpId]} | 30% complete", "subcontractor@spbedana.local")
     MilestoneAutoFlagger.call(wp_code: wp_result[:wpId], percent_complete: 30, report_code: report.report_code)
     puts "  #{report.report_code}: 30% complete reported -- Mobilization milestone auto-flagged Ready to Pay"
     puts "    (Completion milestone stays Open -- log in as accountant to link a check to the Ready one)"

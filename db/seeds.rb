@@ -27,7 +27,7 @@ ALL_TABS = [
   end
 end
 
-User.find_or_create_by!(email: "admin@vegastar.local") do |u|
+User.find_or_create_by!(email: "admin@spbedana.local") do |u|
   u.name = "Administrator"
   u.role = "admin"
   u.password = "ChangeMe123!"
@@ -44,7 +44,7 @@ end
 # "Assign Company" dropdown options -- previously hardcoded <option> tags in
 # index.html.erb, moved into the database so admins can add/rename/remove
 # them from the UI instead of editing code.
-["Krone Konstruct", "Vegastar", "CT"].each do |name|
+["Krone Konstruct", "SP Bedana", "CT"].each do |name|
   AssignCompany.find_or_create_by!(name: name)
 end
 
@@ -53,12 +53,12 @@ end
 # seeded ONLY outside production -- never ship them to a public deployment.
 unless Rails.env.production?
   {
-    "accountant"       => "accountant@vegastar.local",
-    "approver"         => "approver@vegastar.local",
-    "site engineer"    => "site.engineer@vegastar.local",
-    "project engineer" => "project.engineer@vegastar.local",
-    "encoder"          => "encoder@vegastar.local",
-    "subcontractor"    => "subcontractor@vegastar.local"
+    "accountant"       => "accountant@spbedana.local",
+    "approver"         => "approver@spbedana.local",
+    "site engineer"    => "site.engineer@spbedana.local",
+    "project engineer" => "project.engineer@spbedana.local",
+    "encoder"          => "encoder@spbedana.local",
+    "subcontractor"    => "subcontractor@spbedana.local"
   }.each do |role, email|
     User.find_or_create_by!(email: email) do |u|
       u.name = "Test #{role.split.map(&:capitalize).join(' ')}"

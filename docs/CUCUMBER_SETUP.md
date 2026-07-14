@@ -1,4 +1,4 @@
-# Cucumber (Ruby) Setup Guide — vegastar-erp
+# Cucumber (Ruby) Setup Guide — sp-bedana-erp
 
 **Status: already installed and working in this repo** (`features/mrf_to_delivery.feature`
 + `features/step_definitions/mrf_to_delivery_steps.rb`, 12 scenarios / 113 steps,
@@ -182,7 +182,7 @@ while reading the controllers:
 - Returnable tool requests (separate track — no PO/delivery involved),
   both approve and reject paths
 
-See `VEGASTAR_ERP_MANUAL_FLOW.md` for the manual/business-flow explanation
+See `SP_BEDANA_ERP_MANUAL_FLOW.md` for the manual/business-flow explanation
 these scenarios are based on.
 
 ## 9. Bug found and fixed while writing these tests

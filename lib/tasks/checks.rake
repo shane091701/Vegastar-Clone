@@ -1,7 +1,7 @@
 # Port of sendPendingChecksEmail() — Source/code.js:4561. Schedule daily
 # (8-9 AM) via Windows Task Scheduler:
-#   schtasks /Create /SC DAILY /ST 08:00 /TN "VegastarChecksReminder" ^
-#     /TR "cmd /c cd /d C:\Users\Shane\Desktop\SP Bedana\vegastar-erp && bin\rails checks:send_reminders"
+#   schtasks /Create /SC DAILY /ST 08:00 /TN "SpBedanaChecksReminder" ^
+#     /TR "cmd /c cd /d C:\Users\Shane\Desktop\SP Bedana\sp-bedana-erp && bin\rails checks:send_reminders"
 namespace :checks do
   desc "Email accounting/admin users a digest of Not Deposited checks due today or overdue"
   task send_reminders: :environment do

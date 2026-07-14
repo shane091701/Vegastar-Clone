@@ -121,7 +121,7 @@ module ManagedDataTypes
       end
     when "projects"
       # Project isn't a real foreign key elsewhere -- other tables just carry
-      # a matching project_code string (see docs/VEGASTAR_ERP_MANUAL_FLOW.md).
+      # a matching project_code string (see docs/SP_BEDANA_ERP_MANUAL_FLOW.md).
       # Only let admins delete a project that has no real business data
       # attached (e.g. a stuck row left by a failed BOQ upload); a project
       # with actual history should never be silently deleted from here.

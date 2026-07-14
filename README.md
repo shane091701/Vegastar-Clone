@@ -1,4 +1,4 @@
-# Vegastar ERP (Ruby on Rails)
+# SP Bedana ERP (Ruby on Rails)
 
 1:1 port of the Google Apps Script ERP portal (`../Source/`) to Rails 8 + PostgreSQL.
 
@@ -21,7 +21,7 @@ source, ports the frontend, prepares the database, and runs the tests.
 5. `bin/rails active_storage:install && bin/rails db:prepare db:seed`
 6. `bin/rails server` → http://localhost:3000
 
-**Default login:** `admin@vegastar.local` / `ChangeMe123!` (change it after first login).
+**Default login:** `admin@spbedana.local` / `ChangeMe123!` (change it after first login).
 
 ## Notes
 
@@ -31,7 +31,7 @@ source, ports the frontend, prepares the database, and runs the tests.
 - **Daily check reminder** (replaces the Apps Script 8AM trigger):
 
   ```
-  schtasks /Create /SC DAILY /ST 08:00 /TN "VegastarChecksReminder" /TR "cmd /c cd /d C:\Users\Shane\Desktop\SP Bedana\vegastar-erp && bin\rails checks:send_reminders"
+  schtasks /Create /SC DAILY /ST 08:00 /TN "SpBedanaChecksReminder" /TR "cmd /c cd /d C:\Users\Shane\Desktop\SP Bedana\sp-bedana-erp && bin\rails checks:send_reminders"
   ```
 
 - **Files** (receipts, photos, contracts, generated PDFs) are stored on local disk
