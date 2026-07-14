@@ -11,11 +11,11 @@ default: &default
 
 development:
   <<: *default
-  database: vegastar_erp_development
+  database: sp_bedana_erp_development
 
 test:
   <<: *default
-  database: vegastar_erp_test
+  database: sp_bedana_erp_test
 
 production:
   # Railway provides the full connection string as DATABASE_URL (its internal
