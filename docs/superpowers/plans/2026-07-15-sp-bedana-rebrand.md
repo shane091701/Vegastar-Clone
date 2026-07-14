@@ -17,11 +17,11 @@
 - **Excluded from the rename:** the lowercase `'vegastar'` string used in `portal.js` / `portal.css` as a CSS-class suffix for company-based row/select highlighting (`proj-hl-vegastar`, `company-highlight-vegastar`). That's a data-driven legacy multi-company feature keyed off whatever `company` value happens to be stored on old records — not app branding. Renaming it would just orphan the highlight for old data without anything upstream ever producing an "sp-bedana" company value (Assign Company now leaves `company` blank going forward). Leave it as-is.
 - "Upload Excel File" BOQ screen's Assign Company field (`id="assignCompany"`) is removed. "Build BOQ" screen's own company field (`id="nboq-assignCompany"`) is untouched — the user's request named "BOQ upload" specifically.
 - Manage Companies/Users: hide nav reachability only. Do not delete `manage_companies.js`, `manage_users.js`, their controllers, or routes.
-- Logo file swap (Task I) is blocked until the user provides `app/assets/images/logo.png` (or `.svg`) — do not attempt it until that file exists.
+- Logo file swap (Task 9) is blocked until the user provides `app/assets/images/logo.png` (or `.svg`) — do not attempt it until that file exists.
 
 ---
 
-### Task A: Rename Ruby module + recreate local databases
+### Task 1: Rename Ruby module + recreate local databases
 
 **Files:**
 - Modify: `config/application.rb:21`
@@ -81,7 +81,7 @@ git commit -m "Rename app module to SpBedanaErp and recreate local DBs under new
 
 ---
 
-### Task B: Rebrand the app shell (layout + PWA manifest)
+### Task 2: Rebrand the app shell (layout + PWA manifest)
 
 **Files:**
 - Modify: `app/views/layouts/application.html.erb:4,7`
@@ -146,7 +146,7 @@ git commit -m "Rebrand app shell (title, meta tags, PWA manifest) to SP Bedana"
 
 ---
 
-### Task C: Rebrand the portal login screen and top nav
+### Task 3: Rebrand the portal login screen and top nav
 
 **Files:**
 - Modify: `app/views/portal/index.html.erb:11,30-31,55-56,84,93,163-164`
@@ -176,7 +176,7 @@ to:
     <div class="lp-logo lp-logo-sm"><img src="https://i.imgur.com/dhbq2a5.png" alt="SP Bedana Logo"></div>
     <h3 class="lp-auth-title">SP Bedana</h3>
 ```
-(the `img src` stays on the placeholder imgur URL for now — swapped in Task I once the logo file is provided)
+(the `img src` stays on the placeholder imgur URL for now — swapped in Task 9 once the logo file is provided)
 
 - [ ] **Step 3: Update the left branding panel (lines ~55-56)**
 
@@ -237,7 +237,7 @@ git commit -m "Rebrand portal login screen and top nav to SP Bedana"
 
 ---
 
-### Task D: Rebrand mailer subjects and email templates
+### Task 4: Rebrand mailer subjects and email templates
 
 **Files:**
 - Modify: `app/mailers/auth_mailer.rb:5`
@@ -410,7 +410,7 @@ to:
         <img src="https://i.imgur.com/dhbq2a5.png" alt="SP Bedana Logo" style="max-height: 70px; width: auto; margin-bottom: 10px;"
              onerror="this.outerHTML='<h1 style=&quot;color:#f8b400;margin:0;&quot;>SP Bedana</h1>'">
 ```
-(the `img src` stays on the placeholder imgur URL for now — swapped in Task I)
+(the `img src` stays on the placeholder imgur URL for now — swapped in Task 9)
 
 - [ ] **Step 4: Verify**
 
@@ -432,7 +432,7 @@ git commit -m "Rebrand mailer subjects, email templates, and PDF header to SP Be
 
 ---
 
-### Task E: Rebrand seeds, sample data, docs, and README
+### Task 5: Rebrand seeds, sample data, docs, and README
 
 **Files:**
 - Modify: `db/seeds.rb:30,47,56-61`
@@ -587,7 +587,7 @@ Then run:
 bin/rails db:seed
 bin/rails sample_data:load
 ```
-Expected: both run without error against the newly-created `sp_bedana_erp_development` database from Task A.
+Expected: both run without error against the newly-created `sp_bedana_erp_development` database from Task 1.
 
 - [ ] **Step 8: Commit**
 
@@ -598,7 +598,7 @@ git commit -m "Rebrand seeds, sample data, docs, and README to SP Bedana"
 
 ---
 
-### Task F: Rebrand test/feature fixture company values
+### Task 6: Rebrand test/feature fixture company values
 
 **Files:**
 - Modify: `test/controllers/api/boq_builder_controller_test.rb:5`
@@ -747,7 +747,7 @@ git commit -m "Rebrand test/feature fixture company values to SP Bedana"
 
 ---
 
-### Task G: Remove the Assign Company field from the BOQ upload screen
+### Task 7: Remove the Assign Company field from the BOQ upload screen
 
 **Files:**
 - Modify: `app/views/portal/index.html.erb:970-977`
@@ -756,7 +756,7 @@ git commit -m "Rebrand test/feature fixture company values to SP Bedana"
 
 **Interfaces:**
 - Consumes: none.
-- Produces: the `startUpload()` submit handler in `portal.js` now sends `company: ''` for every new BOQ upload from this screen (matches the user's "leave it blank" decision from the spec) — this is what Task H and any future work touching this payload should expect.
+- Produces: the `startUpload()` submit handler in `portal.js` now sends `company: ''` for every new BOQ upload from this screen (matches the user's "leave it blank" decision from the spec) — this is what Task 8 and any future work touching this payload should expect.
 
 - [ ] **Step 1: Remove the field markup**
 
@@ -837,7 +837,7 @@ git commit -m "Remove Assign Company field from the BOQ upload screen"
 
 ---
 
-### Task H: Hide the Manage Companies / Manage Users nav tabs
+### Task 8: Hide the Manage Companies / Manage Users nav tabs
 
 **Files:**
 - Modify: `app/assets/javascripts/manage_hub.js` (full rewrite)
@@ -901,11 +901,11 @@ git commit -m "Hide Manage Users and Manage Companies from nav, keep Manage Data
 
 ---
 
-### Task I (blocked — do not start until the user provides the logo file): Swap in the SP Bedana logo
+### Task 9 (blocked — do not start until the user provides the logo file): Swap in the SP Bedana logo
 
 **Files:**
-- Modify: `app/views/portal/index.html.erb` (4 `img src` occurrences, same lines touched in Task C)
-- Modify: `app/services/pdf_generator.rb:73` (`img src`, same line touched in Task D)
+- Modify: `app/views/portal/index.html.erb` (4 `img src` occurrences, same lines touched in Task 3)
+- Modify: `app/services/pdf_generator.rb:73` (`img src`, same line touched in Task 4)
 - Replace: `public/icon.png`
 - Replace or add: `public/icon.svg` (only if the user's file is vector)
 
@@ -917,7 +917,7 @@ Run: `ls app/assets/images/` — expect to see `logo.png` (or `logo.svg`) placed
 
 - [ ] **Step 2: Replace the 4 hardcoded imgur URLs in `app/views/portal/index.html.erb`**
 
-Each of the 4 `<img src="https://i.imgur.com/dhbq2a5.png" alt="SP Bedana Logo">` occurrences (from Task C: the auth-loading overlay, the left branding panel, the form-header logo, and the top-nav logo) becomes:
+Each of the 4 `<img src="https://i.imgur.com/dhbq2a5.png" alt="SP Bedana Logo">` occurrences (from Task 3: the auth-loading overlay, the left branding panel, the form-header logo, and the top-nav logo) becomes:
 ```erb
 <img src="<%= asset_path('logo.png') %>" alt="SP Bedana Logo">
 ```
