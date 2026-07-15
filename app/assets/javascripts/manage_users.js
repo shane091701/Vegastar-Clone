@@ -48,7 +48,7 @@
       "    </div>" +
       '    <div class="col-md-6">' +
       '      <label class="form-label fw-bold small text-muted">Email <span class="text-danger">*</span></label>' +
-      '      <input type="email" id="mu-email" class="form-control" placeholder="name@vegastar.local">' +
+      '      <input type="email" id="mu-email" class="form-control" placeholder="name@spbedana.local">' +
       "    </div>" +
       '    <div class="col-md-6">' +
       '      <label class="form-label fw-bold small text-muted">Role <span class="text-danger">*</span></label>' +

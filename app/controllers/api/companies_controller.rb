@@ -1,5 +1,5 @@
 # Backs the "Assign Company" dropdowns in the BOQ upload screens (previously
-# a hardcoded <option> list in index.html.erb -- Krone Konstruct, Vegastar,
+# a hardcoded <option> list in index.html.erb -- Krone Konstruct, SP Bedana,
 # CT -- meaning adding a new one meant editing code, not something an admin
 # could do). Listing is open to anyone logged in (both dropdowns are used by
 # non-admin roles too); editing the list is admin-only.

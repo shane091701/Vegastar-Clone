@@ -19,12 +19,21 @@ class BoqIngestor
     2 => { # existing "simple" layout -- ITEM,DESCRIPTION,QTY,UNIT,U/C MAT,TOTAL MAT,U/C LABOR,TOTAL LABOR,TOTAL
       phase_col: 0, item_col: 1, qty_col: 2, uom_col: 3,
       unit_material_col: 4, total_material_col: 5,
-      unit_labor_col: 6, total_labor_col: 7, total_col: 8
+      unit_labor_col: 6, total_labor_col: 7, total_col: 8,
+      # Preserves this layout's original behavior exactly: a row with non-empty but
+      # non-numeric qty text (e.g. "L.S.") still gets imported with qty = nil, same
+      # as before this file recognized a second layout.
+      require_numeric_qty: false
     }.freeze,
     4 => { # "detailed breakdown" layout -- verified against the real client BOM file
       phase_col: 1, item_col: 2, qty_col: 4, uom_col: 5,
       unit_material_col: 6, total_material_col: 7,
-      unit_labor_col: 8, total_labor_col: 9, total_col: 11
+      unit_labor_col: 8, total_labor_col: 9, total_col: 11,
+      # Required specifically for this layout: the real file repeats its header block
+      # for print pagination, and the repeated qty cell holds literal text
+      # ("Quantity") that's non-empty but not a number -- without this, that row would
+      # be wrongly imported as a bogus item.
+      require_numeric_qty: true
     }.freeze
   }.freeze
 
@@ -117,7 +126,8 @@ class BoqIngestor
       next if col_item.upcase.include?("TOTAL") || col_item.upcase.include?("SUB-TOTAL")
 
       qty = clean_number(col_qty)
-      if !col_item.empty? && !col_qty.empty? && qty
+      qty_ok = layout[:require_numeric_qty] ? !qty.nil? : true
+      if !col_item.empty? && !col_qty.empty? && qty_ok
         new_items << {
           phase: current_phase.presence || "Uncategorized Phase",
           item: col_item,

@@ -40,6 +40,23 @@ class BoqIngestorTest < ActiveSupport::TestCase
     assert_equal "Lot", panel.uom
   end
 
+  test "simple layout still imports a row with non-numeric qty text, storing qty as nil (pre-existing behavior)" do
+    # The detailed layout requires qty to parse as a real number (to correctly skip a
+    # repeated header block whose qty cell holds literal text) -- but the simple
+    # layout must NOT gain that requirement, since it never had it and some real
+    # BOQs use non-numeric qty text like "L.S." (lump sum).
+    rows = [
+      ["ITEM", "DESCRIPTION", "QTY", "UNIT", "U/C MAT", "TOTAL MAT", "U/C LABOR", "TOTAL LABOR", "TOTAL"],
+      ["", "Lump sum electrical works", "L.S.", "Lot", "", "50,000", "", "10,000", "60,000"]
+    ]
+    result = BoqIngestor.ingest_rows(rows, "AR BOM", "PRJ-LS", "SP Bedana", "boq.xlsx")
+    assert_equal "✅ Successfully processed 1 items from \"AR BOM\" into the database.", result
+
+    item = BoqItem.order(:id).first
+    assert_equal "Lump sum electrical works", item.item
+    assert_nil item.qty
+  end
+
   test "skips SUB-TOTAL rows" do
     BoqIngestor.ingest_rows(SAMPLE_ROWS.map(&:dup), "BOQ", "PRJ2", "", "f.xlsx")
     refute BoqItem.where("item ILIKE ?", "%TOTAL%").exists?
