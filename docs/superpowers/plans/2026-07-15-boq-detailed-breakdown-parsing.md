@@ -442,20 +442,21 @@ with:
       col_phase = cell(row, layout[:phase_col])
       col_item  = cell(row, layout[:item_col])
       col_qty   = cell(row, layout[:qty_col])
+      phase_marker = raw_cell_text(row, layout[:phase_col])
 
-      if col_phase.match?(TOP_LEVEL_SECTION_ROW) && col_qty.empty?
+      if phase_marker.match?(TOP_LEVEL_SECTION_ROW) && col_qty.empty?
         current_phase = col_item
         current_scope = ""
         next
       end
 
-      if col_phase.match?(PHASE_ROW) && col_qty.empty? && !col_phase.match?(SCOPE_ROW)
+      if phase_marker.match?(PHASE_ROW) && col_qty.empty? && !phase_marker.match?(SCOPE_ROW)
         current_phase = col_phase.sub(PHASE_PREFIX, "").strip
         current_scope = ""
         next
       end
 
-      if col_phase.match?(SCOPE_ROW) && col_qty.empty?
+      if phase_marker.match?(SCOPE_ROW) && col_qty.empty?
         current_scope = col_item
         next
       end
@@ -484,7 +485,7 @@ with:
     end
 ```
 
-Add a new helper method near `cell`/`clean_number`:
+Add new helper methods near `cell`/`clean_number`:
 ```ruby
   # Strips internal whitespace in addition to the usual strip+upcase, so header cells
   # using letter-spacing for visual effect (e.g. "D E S C R I P T I O N", seen in the
@@ -492,7 +493,24 @@ Add a new helper method near `cell`/`clean_number`:
   def self.normalize_header(val)
     val.to_s.strip.upcase.gsub(/\s+/, "")
   end
+
+  # Like `cell`, but without the whole-number-Float-to-Integer rounding -- used where
+  # a value's exact decimal form matters (phase/scope marker classification), since
+  # Excel can store markers like "1.0" as a genuine number rather than text, and
+  # rounding it to "1" would break matching against a pattern like \A\d+\.0\z. Verified
+  # against the real client file during implementation: its phase markers ("1.0",
+  # "2.0", "3.0") are stored as actual Excel numbers, not text, and without this fix
+  # every item was silently landing in "Uncategorized Phase" instead of its real phase.
+  def self.raw_cell_text(row, idx)
+    row[idx].to_s.strip
+  end
 ```
+
+Use `raw_cell_text` (not `cell`) specifically for the three phase/scope classification checks
+(`TOP_LEVEL_SECTION_ROW`, `PHASE_ROW`, `SCOPE_ROW` matches) in the row-parsing loop below —
+`col_phase` (via `cell`) is still used for the display-text substitution
+(`col_phase.sub(PHASE_PREFIX, "")`), and `col_item`/`col_qty` are unaffected by this
+distinction.
 
 - [ ] **Step 3: Run the new tests, confirm they pass**
 

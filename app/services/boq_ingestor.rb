@@ -3,13 +3,30 @@
 # project + boq_items rows. Return values are the exact strings the client
 # displays.
 require "roo"
+require "spreadsheet"
 
 class BoqIngestor
   TARGET_SHEET_PATTERNS = ["AR BOM", "DETAILED", "BOQ", "BILL OF QUANTITIES", "BOM", "BILL OF MATERIALS"].freeze
   QTY_HEADERS = ["QTY", "QTY.", "QUANTITY"].freeze
   PHASE_PREFIX = /\A([a-zA-Z0-9IVXLCDM]+\.\s*)/
   PHASE_ROW = /\A([a-zA-Z0-9IVXLCDM]+\.)?\s*[A-Za-z]/
-  SCOPE_ROW = /\A\d+\.\d+/
+  TOP_LEVEL_SECTION_ROW = /\A\d+\.0\z/
+  SCOPE_ROW = /\A\d+\.\d+\z/
+
+  # Two known real-world column layouts, selected by which column the QTY/QUANTITY
+  # header cell is found in. Column indices are 0-based.
+  LAYOUTS_BY_QTY_COLUMN = {
+    2 => { # existing "simple" layout -- ITEM,DESCRIPTION,QTY,UNIT,U/C MAT,TOTAL MAT,U/C LABOR,TOTAL LABOR,TOTAL
+      phase_col: 0, item_col: 1, qty_col: 2, uom_col: 3,
+      unit_material_col: 4, total_material_col: 5,
+      unit_labor_col: 6, total_labor_col: 7, total_col: 8
+    }.freeze,
+    4 => { # "detailed breakdown" layout -- verified against the real client BOM file
+      phase_col: 1, item_col: 2, qty_col: 4, uom_col: 5,
+      unit_material_col: 6, total_material_col: 7,
+      unit_labor_col: 8, total_labor_col: 9, total_col: 11
+    }.freeze
+  }.freeze
 
   def self.call(base64_data:, file_name:, project_code:, customer_data:)
     clean_code = project_code.to_s.strip.gsub(/\s+/, " ")
@@ -42,15 +59,23 @@ class BoqIngestor
   # Parses raw cell rows (array of arrays, 0-based) exactly like processData_.
   def self.ingest_rows(raw_data, sheet_name, project_code, company, file_name)
     header_row_idx = nil
+    layout = nil
     raw_data.each_with_index do |row, i|
-      col_c = cell(row, 2).upcase
-      if QTY_HEADERS.include?(col_c)
-        header_row_idx = i
-        break
+      qty_col_idx = row.each_index.find { |idx| QTY_HEADERS.include?(normalize_header(row[idx])) }
+      next unless qty_col_idx
+
+      layout = LAYOUTS_BY_QTY_COLUMN[qty_col_idx]
+      unless layout
+        raise "Unrecognized column layout in sheet #{sheet_name} -- found a QTY/QUANTITY " \
+              "header in column index #{qty_col_idx}, but only column 2 or column 4 are " \
+              "recognized layouts."
       end
+      header_row_idx = i
+      break
     end
     unless header_row_idx
-      raise "Could not find 'QTY' in Column C of sheet #{sheet_name} to use as the header anchor."
+      raise "Could not find a 'QTY'/'QUANTITY' header cell anywhere in sheet #{sheet_name} " \
+            "to use as the header anchor."
     end
 
     current_phase = ""
@@ -62,34 +87,47 @@ class BoqIngestor
       next if i <= header_row_idx
       next if row.all? { |c| c.to_s.strip.empty? }
 
-      col_a = cell(row, 0)
-      col_b = cell(row, 1)
-      col_c = cell(row, 2)
+      col_phase = cell(row, layout[:phase_col])
+      col_item  = cell(row, layout[:item_col])
+      col_qty   = cell(row, layout[:qty_col])
+      # Excel stores markers like "1.0"/"2.0" as genuine numbers, not text, when the
+      # source column is otherwise numeric-looking -- `cell()`'s whole-number-Float
+      # rounding (needed elsewhere for clean qty/cost display) would silently turn
+      # "1.0" into "1" and break TOP_LEVEL_SECTION_ROW/SCOPE_ROW matching, so
+      # classification uses the unrounded raw text instead.
+      phase_marker = raw_cell_text(row, layout[:phase_col])
 
-      if col_a.match?(PHASE_ROW) && col_c.empty? && !col_a.match?(SCOPE_ROW)
-        current_phase = col_a.sub(PHASE_PREFIX, "").strip
+      if phase_marker.match?(TOP_LEVEL_SECTION_ROW) && col_qty.empty?
+        current_phase = col_item
         current_scope = ""
         next
       end
 
-      if col_a.match?(SCOPE_ROW) && col_c.empty?
-        current_scope = col_b
+      if phase_marker.match?(PHASE_ROW) && col_qty.empty? && !phase_marker.match?(SCOPE_ROW)
+        current_phase = col_phase.sub(PHASE_PREFIX, "").strip
+        current_scope = ""
         next
       end
 
-      next if col_b.upcase.include?("TOTAL") || col_b.upcase.include?("SUB-TOTAL")
+      if phase_marker.match?(SCOPE_ROW) && col_qty.empty?
+        current_scope = col_item
+        next
+      end
 
-      if !col_b.empty? && !col_c.empty?
+      next if col_item.upcase.include?("TOTAL") || col_item.upcase.include?("SUB-TOTAL")
+
+      qty = clean_number(col_qty)
+      if !col_item.empty? && !col_qty.empty? && qty
         new_items << {
           phase: current_phase.presence || "Uncategorized Phase",
-          item: col_b,
-          qty: clean_number(col_c),
-          uom: cell(row, 3),
-          unit_labor_cost: clean_number(row[6]),
-          unit_material_cost: clean_number(row[4]),
-          total_labor: clean_number(row[7]),
-          total_material: clean_number(row[5]),
-          total_cost: clean_number(row[8]),
+          item: col_item,
+          qty: qty,
+          uom: cell(row, layout[:uom_col]),
+          unit_labor_cost: clean_number(row[layout[:unit_labor_col]]),
+          unit_material_cost: clean_number(row[layout[:unit_material_col]]),
+          total_labor: clean_number(row[layout[:total_labor_col]]),
+          total_material: clean_number(row[layout[:total_material_col]]),
+          total_cost: clean_number(row[layout[:total_col]]),
           project_code: project_code.strip,
           source_file: file_name,
           entry_date: timestamp,
@@ -113,12 +151,41 @@ class BoqIngestor
     Tempfile.create(["boq", ".#{ext}"], binmode: true) do |f|
       f.write(Base64.decode64(base64_data))
       f.flush
-      workbook = Roo::Spreadsheet.open(f.path, extension: ext.to_sym)
-      sheet_name = find_boq_sheet_name(workbook)
-      sheet = workbook.sheet(sheet_name)
-      rows = (1..(sheet.last_row || 0)).map { |r| sheet.row(r) }
-      return [sheet_name, rows]
+      if ext == "xls"
+        return read_legacy_xls(f.path)
+      else
+        return read_roo_workbook(f.path, ext)
+      end
     end
+  end
+
+  def self.read_roo_workbook(path, ext)
+    workbook = Roo::Spreadsheet.open(path, extension: ext.to_sym)
+    sheet_name = find_boq_sheet_name(workbook)
+    sheet = workbook.sheet(sheet_name)
+    rows = (1..(sheet.last_row || 0)).map { |r| sheet.row(r).map { |v| resolve_cell_value(v) } }
+    [sheet_name, rows]
+  end
+
+  def self.read_legacy_xls(path)
+    workbook = Spreadsheet.open(path)
+    sheet_name = find_boq_sheet_name_legacy(workbook)
+    sheet = workbook.worksheet(sheet_name)
+    rows = (0...sheet.row_count).map do |r|
+      row = sheet.row(r)
+      (0...sheet.column_count).map { |c| resolve_cell_value(row[c]) }
+    end
+    # The `spreadsheet` gem keeps its own open file handle on the underlying OLE2
+    # document alive until the Workbook object is garbage collected -- on Windows
+    # (unlike Linux/Railway) an open file can't be deleted, so without this, the
+    # caller's Tempfile cleanup raises Errno::EACCES right after this method
+    # returns, even though parsing itself succeeded. Verified fix during design:
+    # dropping the reference and forcing a GC pass here releases the handle before
+    # the caller's Tempfile.create block tries to unlink the file.
+    sheet = nil
+    workbook = nil
+    GC.start
+    [sheet_name, rows]
   end
 
   def self.find_boq_sheet_name(workbook)
@@ -128,6 +195,24 @@ class BoqIngestor
       return name if TARGET_SHEET_PATTERNS.any? { |p| up.include?(p) }
     end
     workbook.sheets.first
+  end
+
+  def self.find_boq_sheet_name_legacy(workbook)
+    names = workbook.worksheets.map(&:name)
+    names.each do |name|
+      up = name.upcase
+      next if up.include?("SUM")
+      return name if TARGET_SHEET_PATTERNS.any? { |p| up.include?(p) }
+    end
+    names.first
+  end
+
+  # Both `roo` (.xlsx/.xlsm/.ods/.csv) and `spreadsheet` (.xls) can hand back a
+  # formula wrapper instead of a plain value for computed cells -- normalize
+  # to the cached calculated result either way so downstream parsing never
+  # has to know which library produced a given row.
+  def self.resolve_cell_value(v)
+    v.respond_to?(:value) ? v.value : v
   end
 
   def self.save_customer_info(project_code, data)
@@ -157,6 +242,21 @@ class BoqIngestor
     v = row[idx]
     v = v.to_i if v.is_a?(Float) && v == v.to_i
     v.to_s.strip
+  end
+
+  # Like `cell`, but without the whole-number-Float-to-Integer rounding -- used where
+  # a value's exact decimal form matters (phase/scope marker classification), since
+  # Excel can store markers like "1.0" as a genuine number rather than text, and
+  # rounding it to "1" would break matching against a pattern like \A\d+\.0\z.
+  def self.raw_cell_text(row, idx)
+    row[idx].to_s.strip
+  end
+
+  # Strips internal whitespace in addition to the usual strip+upcase, so header cells
+  # using letter-spacing for visual effect (e.g. "D E S C R I P T I O N", seen in the
+  # real client file) still match plain keywords like "DESCRIPTION" or "QTY".
+  def self.normalize_header(val)
+    val.to_s.strip.upcase.gsub(/\s+/, "")
   end
 
   def self.clean_number(val)
