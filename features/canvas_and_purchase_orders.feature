@@ -31,6 +31,28 @@ Feature: Canvassing/Bidding and Purchase Order dispatch
     And the canvas pivot should list suppliers "Holcim Depot" and "ACME Supply"
     And the canvas pivot item "Cement" should have remaining cost 60200.0
 
+  Scenario: Canvas pivot surfaces each supplier's brand and delivery fee for comparison
+    Given an MRF has been submitted and approved for "Cement" quantity 50
+    When I save a supplier quote from "Holcim Depot" for item "Cement" amount 4000 brand "Holcim" delivery fee 250
+    And I save a supplier quote from "ACME Supply" for item "Cement" amount 3800 brand "Generic" delivery fee 0
+    And I fetch the canvas pivot data for the MRF
+    Then the request should succeed
+    And the canvas pivot item "Cement" from "Holcim Depot" should show brand "Holcim"
+    And the canvas pivot item "Cement" from "ACME Supply" should show brand "Generic"
+    And the canvas pivot should show a delivery fee of 250.0 for "Holcim Depot"
+    And the canvas pivot should show a delivery fee of 0.0 for "ACME Supply"
+
+  Scenario: A supplier's delivery fee is scoped once per supplier, not duplicated per item they quote
+    Given an MRF has been submitted and approved for "Cement" quantity 50
+    And another item "Rebar" quantity 20 has also been approved under the same MRF
+    When I save a supplier quote from "Holcim Depot" for item "Cement" amount 4000 brand "Holcim" delivery fee 250
+    And I save a supplier quote from "Holcim Depot" for item "Rebar" amount 1500 brand "Holcim" delivery fee 250
+    And I fetch the canvas pivot data for the MRF
+    Then the request should succeed
+    And the canvas pivot item "Cement" from "Holcim Depot" should show amount 4000.0
+    And the canvas pivot item "Rebar" from "Holcim Depot" should show amount 1500.0
+    And the canvas pivot should show a delivery fee of 250.0 for "Holcim Depot"
+
   Scenario: Awarding a supplier back-calculates the unit price from the quoted subtotal
     Given an MRF has been submitted and approved for "Cement" quantity 50
     When I save a supplier quote from "Holcim Depot" for item "Cement" amount 4000 brand "Holcim"

@@ -48,6 +48,39 @@ Then("the canvas pivot item {string} should have remaining cost {float}") do |it
   end
 end
 
+When("I save a supplier quote from {string} for item {string} amount {int} brand {string} delivery fee {int}") do
+  |supplier, item, amount, brand, fee|
+  api_post("saveSupplierQuotes", @mrf_code, supplier,
+           [{ "item" => item, "amount" => amount, "brand" => brand }], [], @current_email, fee)
+end
+
+def canvas_quote_for(item, supplier)
+  row = @last_result["items"].find { |i| i["desc"] == item }
+  raise "no canvas pivot item found for #{item.inspect}" unless row
+  quote = row["quotes"][supplier]
+  raise "no quote from #{supplier.inspect} for #{item.inspect}" unless quote
+  quote
+end
+
+Then("the canvas pivot item {string} from {string} should show brand {string}") do |item, supplier, expected|
+  actual = canvas_quote_for(item, supplier)["brand"]
+  raise "expected brand #{expected.inspect} for #{supplier.inspect}, got #{actual.inspect}" unless actual == expected
+end
+
+Then("the canvas pivot item {string} from {string} should show amount {float}") do |item, supplier, expected|
+  actual = canvas_quote_for(item, supplier)["amount"].to_f
+  unless (actual - expected).abs < 0.01
+    raise "expected amount #{expected} for #{supplier.inspect}, got #{actual}"
+  end
+end
+
+Then("the canvas pivot should show a delivery fee of {float} for {string}") do |expected, supplier|
+  actual = @last_result["deliveryFees"][supplier].to_f
+  unless (actual - expected).abs < 0.01
+    raise "expected delivery fee #{expected} for #{supplier.inspect}, got #{actual}"
+  end
+end
+
 Then("the canvas MRF list should show {string} as {word} for the MRF") do |field, expected_word|
   api_post!("getCanvasMRFList")
   row = @last_result.find { |r| r["mrfId"] == @mrf_code }
