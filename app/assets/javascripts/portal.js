@@ -1733,22 +1733,33 @@ function loadCanvasPivot() {
         html += `</tr></thead><tbody>`;
 
         let lockedRunningTotal = 0;
+        const lockedFeeSuppliers = new Set();
 
         data.items.forEach((it, rIdx) => {
             const remDisplay = `₱${(it.remainingCost || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-            
+
             html += `<tr>
                 <td><span class="fw-bold">${it.desc}</span><br><small class="text-danger fw-bold">Rem: ${remDisplay}</small></td>
                 <td class="text-center">${it.qty === 0 ? 'Lot/Cost' : it.qty} ${it.unit}</td>`;
-            
+
             data.suppliers.forEach((sup, cIdx) => {
-                const amt = it.quotes[sup] ? `₱${it.quotes[sup].toLocaleString(undefined, {minimumFractionDigits: 2})}` : '-';
+                const quote = it.quotes[sup];
+                const amt = quote ? `₱${quote.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}` : '-';
+                const brandLine = (quote && quote.brand) ? `<br><small class="text-muted">${quote.brand}</small>` : '';
                 const safeDesc = it.desc.replace(/"/g, '&quot;');
                 const safeSup = sup.replace(/"/g, '&quot;');
-                const rawAmt = it.quotes[sup] || 0;
+                const rawAmt = quote ? quote.amount : 0;
 
                 const isWinningCell = (it.winningSupplier === sup);
-                if (isWinningCell) lockedRunningTotal += rawAmt;
+                if (isWinningCell) {
+                    lockedRunningTotal += rawAmt;
+                    // Delivery fee is a flat per-supplier shipment cost, not per item --
+                    // add it once per winning supplier, not once per item they won.
+                    if (!lockedFeeSuppliers.has(sup)) {
+                        lockedFeeSuppliers.add(sup);
+                        lockedRunningTotal += (data.deliveryFees[sup] || 0);
+                    }
+                }
 
                 let cellClasses = `text-center canvas-cell row-${rIdx}`;
                 if (isWinningCell) cellClasses += ' bg-success text-white fw-bold';
@@ -1757,15 +1768,22 @@ function loadCanvasPivot() {
                 let cursor = '';
 
                 // Only allow clicking if NOT read-only
-                if (!isReadOnly && it.quotes[sup]) {
+                if (!isReadOnly && quote) {
                     isClickable = `onclick="selectWinner(this)" data-item="${safeDesc}" data-sup="${safeSup}" data-amt="${rawAmt}" data-qty="${it.qty}"`;
                     cursor = 'cursor:pointer;';
                 }
 
-                html += `<td class="${cellClasses}" ${isClickable} style="${cursor}">${amt}</td>`;
+                html += `<td class="${cellClasses}" ${isClickable} style="${cursor}">${amt}${brandLine}</td>`;
             });
             html += `</tr>`;
         });
+
+        html += `<tr class="table-light"><td class="fw-bold">Delivery Fee</td><td></td>`;
+        data.suppliers.forEach(sup => {
+            const fee = data.deliveryFees[sup] || 0;
+            html += `<td class="text-center fw-bold">₱${fee.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>`;
+        });
+        html += `</tr>`;
 
         html += `</tbody></table></div>`;
         
@@ -1804,13 +1822,19 @@ function selectWinner(cell) {
         qty: parseFloat(cell.dataset.qty) 
     });
 
-    // Compute and update the Running Total
+    // Compute and update the Running Total, including each distinct winning
+    // supplier's delivery fee once -- it's a flat per-shipment cost, not per item.
     let runningTotal = 0;
+    const feeSuppliers = new Set();
     document.querySelectorAll('.selected-winner').forEach(winnerCell => {
         const data = JSON.parse(winnerCell.dataset.winnerData);
         runningTotal += data.amount;
+        if (!feeSuppliers.has(data.supplier)) {
+            feeSuppliers.add(data.supplier);
+            runningTotal += (currentCanvasData.deliveryFees[data.supplier] || 0);
+        }
     });
-    
+
     document.getElementById('canvasRunningTotal').innerText = `₱${runningTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 }
 

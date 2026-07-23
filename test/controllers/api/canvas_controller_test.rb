@@ -50,8 +50,23 @@ class Api::CanvasControllerTest < ActionDispatch::IntegrationTest
     assert_equal ["ACME"], body["suppliers"]
     item = body["items"][0]
     assert_equal "Cement", item["desc"]
-    assert_equal({ "ACME" => 4000.0 }, item["quotes"]) # case-insensitive item match
+    assert_equal({ "amount" => 4000.0, "brand" => "" }, item["quotes"]["ACME"]) # case-insensitive item match
     assert_equal 60_100.0, item["remainingCost"]       # 100 qty + 50k mat + 10k labor
+  end
+
+  test "canvas pivot includes each supplier's brand and delivery fee for comparison" do
+    BoqItem.create!(project_code: "PRJ1", phase: "Civil", item: "Cement", qty: 100,
+                    uom: "bags", total_material: 50_000, labor_cost_k: 10_000)
+    # Anna: "delivery fee hindi sya nattake into account when comparing quotations
+    # sa canvas sheet" / "pati yung brands nawala sa canvas sheet" -- both the fee
+    # and the brand were saved but never sent back to the Canvas & Award screen.
+    api("saveSupplierQuotes", "MRF-PRJ1-1", "ACME",
+        [{ "item" => "cement", "amount" => 4000, "brand" => "Holcim" }], [], "admin@test.local", 250)
+
+    body = api("getCanvasPivotData", "MRF-PRJ1-1")
+    item = body["items"][0]
+    assert_equal({ "amount" => 4000.0, "brand" => "Holcim" }, item["quotes"]["ACME"])
+    assert_equal({ "ACME" => 250.0 }, body["deliveryFees"])
   end
 
   test "awarding winners creates one PO per supplier with back-calculated prices" do

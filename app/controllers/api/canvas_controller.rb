@@ -96,14 +96,19 @@ class Api::CanvasController < Api::BaseController
     end
 
     suppliers = []
+    delivery_fees = {}
     SupplierQuote.where(mrf_code: target).order(:id).each do |q|
       sup = q.supplier.to_s.strip
       suppliers << sup unless suppliers.include?(sup)
+      # Delivery fee is entered once per supplier per Encode Quotes submission
+      # (a flat fee for the whole shipment) and stored on every quote row from
+      # that submission -- take it once per supplier, not per item.
+      delivery_fees[sup] = q.delivery_fee.to_f
       matched = items_map.keys.find { |k| k.downcase == q.item.to_s.strip.downcase }
-      items_map[matched][:quotes][sup] = q.amount.to_f if matched
+      items_map[matched][:quotes][sup] = { amount: q.amount.to_f, brand: q.brand.to_s } if matched
     end
 
-    render json: { suppliers: suppliers, items: items_map.values }
+    render json: { suppliers: suppliers, deliveryFees: delivery_fees, items: items_map.values }
   end
 
   # Port of awardCanvasWinners(mrfId, winners, userEmail) — code.js:1980
