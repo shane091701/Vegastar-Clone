@@ -85,6 +85,24 @@ Feature: Subcontractors and Work Packages
     Then the request should succeed
     And milestone 1 for that work package should have amount 2000
 
+  Scenario: A 0%-target Downpayment milestone is flagged ready to pay by the very first progress report, even at 0 percent
+    Given a subcontractor "BuildRight Corp" is registered
+    When I start a new work package for "BuildRight Corp" on project "PRJ1" labeled "Masonry Works" basis "labor" contract value 10000
+    And with BOQ lines:
+      | phase | scope | item   | laborCost | materialCost | totalCost |
+      | Civil | 1.1   | Wall A | 3000      | 100           | 3100      |
+    And with milestones:
+      | seq | label       | targetPct | paymentPct |
+      | 1   | Downpayment | 0         | 20         |
+      | 2   | Completion  | 100       | 80         |
+    And I submit the work package
+    Then the request should succeed
+
+    When I submit a progress report for that work package at 0 percent complete with narrative "Mobilization not yet started"
+    Then the request should succeed
+    And milestone 1 for that work package should be ready to pay
+    And milestone 2 for that work package should not be ready to pay
+
   Scenario: A milestone target percentage cannot be negative
     Given a subcontractor "BuildRight Corp" is registered
     When I start a new work package for "BuildRight Corp" on project "PRJ2" labeled "Bad" basis "labor" contract value 500
