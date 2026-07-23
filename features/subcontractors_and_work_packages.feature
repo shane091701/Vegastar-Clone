@@ -71,6 +71,32 @@ Feature: Subcontractors and Work Packages
     And I submit the work package
     Then the request should fail with an error matching "must sum to exactly 100"
 
+  Scenario: A downpayment milestone can have a target of 0 percent, payable before any progress is reported
+    Given a subcontractor "BuildRight Corp" is registered
+    When I start a new work package for "BuildRight Corp" on project "PRJ1" labeled "Masonry Works" basis "labor" contract value 10000
+    And with BOQ lines:
+      | phase | scope | item   | laborCost | materialCost | totalCost |
+      | Civil | 1.1   | Wall A | 3000      | 100           | 3100      |
+    And with milestones:
+      | seq | label       | targetPct | paymentPct |
+      | 1   | Downpayment | 0         | 20         |
+      | 2   | Completion  | 100       | 80         |
+    And I submit the work package
+    Then the request should succeed
+    And milestone 1 for that work package should have amount 2000
+
+  Scenario: A milestone target percentage cannot be negative
+    Given a subcontractor "BuildRight Corp" is registered
+    When I start a new work package for "BuildRight Corp" on project "PRJ2" labeled "Bad" basis "labor" contract value 500
+    And with BOQ lines:
+      | phase | scope | item | laborCost | materialCost | totalCost |
+      | P     | S     | I    | 100       | 0             | 100       |
+    And with milestones:
+      | seq | label   | targetPct | paymentPct |
+      | 1   | Invalid | -5        | 100        |
+    And I submit the work package
+    Then the request should fail with an error matching "Target %"
+
   Scenario: Submitting a progress report auto-flags milestones whose target has been met
     Given a work package exists for "BuildRight Corp" on project "PRJ1" contract value 10000 with a single line "Wall A" labor cost 3000
     When I submit a progress report for that work package at 30 percent complete with narrative "Blocks laid"

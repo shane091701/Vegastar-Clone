@@ -6471,7 +6471,7 @@ async function submitWorkPackage() {
     var targetPct  = parseFloat(row.querySelector('.wp-mil-target').value)  || 0;
     var paymentPct = parseFloat(row.querySelector('.wp-mil-payment').value) || 0;
     if (!milLabel)    { milErr = 'Milestone ' + (i+1) + ': label is required.'; return; }
-    if (targetPct <= 0)  { milErr = 'Milestone ' + (i+1) + ': Target % must be > 0.'; return; }
+    if (targetPct < 0)  { milErr = 'Milestone ' + (i+1) + ': Target % cannot be negative.'; return; }
     if (paymentPct <= 0) { milErr = 'Milestone ' + (i+1) + ': Payment % must be > 0.'; return; }
     milestones.push({ seq: i + 1, label: milLabel, targetPct: targetPct, paymentPct: paymentPct });
   });

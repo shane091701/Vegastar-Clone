@@ -34,7 +34,9 @@ class WorkPackageCreator
       raise "Duplicate milestone sequence: #{seq.to_i}" if seqs_seen.include?(seq.to_i)
       seqs_seen << seq.to_i
       target = m["targetPct"].to_f
-      raise "Milestone #{i + 1}: Target % must be between 1 and 100." if target <= 0 || target > 100
+      # 0 is valid and expected for a Downpayment milestone -- payable up front,
+      # before any progress has been reported (see MilestoneAutoFlagger).
+      raise "Milestone #{i + 1}: Target % must be between 0 and 100." if target < 0 || target > 100
       raise "Milestone #{i + 1}: Payment % must be > 0." if m["paymentPct"].to_f <= 0
       payment_sum += m["paymentPct"].to_f
     end
