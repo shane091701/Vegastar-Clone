@@ -16,9 +16,12 @@ class Api::RtbController < Api::BaseController
   # Port of submitProjectProgress(payload, userEmail) — code.js:598
   def submit_project_progress
     payload = arg(0) || {}
+    overall_percent = payload["overallPercent"].to_f
+    raise "Overall % must be between 0 and 100." if overall_percent < 0 || overall_percent > 100
+
     ProjectProgress.create!(
       project_code: payload["projectCode"].to_s.strip,
-      overall_percent: payload["overallPercent"].to_f,
+      overall_percent: overall_percent,
       phase_breakdown: payload["phaseBreakdown"] || [],
       encoder_email: (args[1].presence || current_user.email).to_s
     )

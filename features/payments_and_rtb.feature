@@ -48,6 +48,13 @@ Feature: Payments, Checks, and RTB / Collections lifecycle
     Then the request should succeed
     And the latest project progress for "PRJ1" should be 45 percent
 
+  Scenario: Overall project progress percent cannot be negative or over 100
+    Given a project "PRJ1" already exists
+    When I submit project progress for "PRJ1" overall percent -10
+    Then the request should fail with an error matching "Overall % must be between 0 and 100"
+    When I submit project progress for "PRJ1" overall percent 150
+    Then the request should fail with an error matching "Overall % must be between 0 and 100"
+
   Scenario: An RTB request requires the project to have a Quoted Cost set
     Given a project "PRJ NOQC" already exists
     When I submit an RTB request for project "PRJ NOQC" percent to bill 20
