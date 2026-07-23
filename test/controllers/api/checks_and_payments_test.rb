@@ -59,6 +59,22 @@ class Api::ChecksAndPaymentsTest < ActionDispatch::IntegrationTest
     assert terms.find { |t| t["description"] == "30 days" }["isPaid"]
   end
 
+  test "issue payment details correctly normalizes a payment term of exactly 1 percent" do
+    MrfItem.create!(item: "Cement", project_code: "PRJ1", mrf_code: "MRF-PRJ1-1",
+                    status: "Approved", po_code: "PO-9")
+    PurchaseOrderItem.create!(po_number: "PO-9", supplier: "ACME", item_name: "Cement",
+                              quantity: 10, unit_price: 100, status: "Sent")
+    PaymentTerm.create!(mrf_code: "MRF-PRJ1-1", supplier: "ACME",
+                        description: "Retention", percentage: "1%")
+
+    terms = api("getIssuePaymentDetails", ["PO-9"])
+    retention = terms.find { |t| t["description"] == "Retention" }
+    # A 1% term must come back as 0.01, not 1.0 -- the frontend multiplies this
+    # by poTotal and displays it as a whole percent, so 1.0 would show "100%"
+    # and prefill the entire PO total as the amount due for a 1% retention.
+    assert_equal 0.01, retention["percentage"]
+  end
+
   test "historical pricing searches PO items case-insensitively" do
     MrfItem.create!(item: "Cement", project_code: "PRJ1", mrf_code: "M-1",
                     status: "Approved", po_code: "PO-9")

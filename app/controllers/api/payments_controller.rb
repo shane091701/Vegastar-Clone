@@ -39,8 +39,13 @@ class Api::PaymentsController < Api::BaseController
       if mrf_id.present? && supplier.present?
         PaymentTerm.where(mrf_code: mrf_id).order(:id).each do |t|
           next unless t.supplier.to_s.strip.downcase == supplier.downcase
+          # PaymentTerm.percentage is always stored as a whole-number percent
+          # string (e.g. "1%", "40%", "100%" -- see canvas_controller.rb's
+          # PaymentTerm.create!), so it must always be divided by 100, not
+          # just when it's "> 1" -- that heuristic silently treated an exact
+          # 1% term as 100%.
           num = t.percentage.to_s.delete("%").strip.to_f
-          pct = num > 1 ? num / 100 : num
+          pct = num / 100
           terms << { description: t.description.to_s.strip, percentage: pct,
                      dueDate: DueDateCalculator.compute_due_date(base_received, t.description.to_s) }
         end
