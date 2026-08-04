@@ -43,7 +43,7 @@ let _resubmitReturnedId = null;   // set when editing a Returned BOQ for resubmi
 let projectCompanyMap = {};   // { projectCode: company }, loaded once at login
 const COMPANY_COLORS = {
   'ct': '#1d3461',              // Navy Blue
-  'vegastar': '#b8860b',       // Dark Yellow / gold
+  'storyseller systems': '#b8860b', // Dark Yellow / gold
   'krone konstruct': '#16a34a' // Green
 };
 
@@ -85,12 +85,12 @@ function whenProjectMapReady(callback) {
 
 function applyDropdownCompanyHighlight(selectEl) {
   if (!selectEl) return;
-  selectEl.classList.remove('proj-hl-ct', 'proj-hl-vegastar', 'proj-hl-krone');
+  selectEl.classList.remove('proj-hl-ct', 'proj-hl-storyseller', 'proj-hl-krone');
   const val = selectEl.value;
   if (!val || val === 'All') return; // no selection or "All" filter state → default look
   const company = (projectCompanyMap[val] || '').toString().trim().toLowerCase();
   if (company === 'ct') selectEl.classList.add('proj-hl-ct');
-  else if (company === 'vegastar') selectEl.classList.add('proj-hl-vegastar');
+  else if (company === 'storyseller systems') selectEl.classList.add('proj-hl-storyseller');
   else if (company === 'krone konstruct') selectEl.classList.add('proj-hl-krone');
 }
 
@@ -119,7 +119,7 @@ function applyExpenseProjectHighlight() {
   if (!select) return;
 
   // Clear any previously applied highlight classes first
-  select.classList.remove('company-highlight-ct', 'company-highlight-vegastar', 'company-highlight-krone');
+  select.classList.remove('company-highlight-ct', 'company-highlight-storyseller', 'company-highlight-krone');
 
   const projectCode = select.value;
   if (!projectCode) return; // no selection — leave default appearance
@@ -127,8 +127,8 @@ function applyExpenseProjectHighlight() {
   const company = (projectCompanyMap[projectCode] || '').toString().trim().toLowerCase();
   if (company === 'ct') {
     select.classList.add('company-highlight-ct');
-  } else if (company === 'vegastar') {
-    select.classList.add('company-highlight-vegastar');
+  } else if (company === 'storyseller systems') {
+    select.classList.add('company-highlight-storyseller');
   } else if (company === 'krone konstruct') {
     select.classList.add('company-highlight-krone');
   }
@@ -2189,18 +2189,13 @@ function startUpload() {
   const fileInput = document.getElementById('fileInput');
   const projectCode   = document.getElementById('projectCode').value.trim();
   const customerName  = document.getElementById('customerName').value.trim();
-  const assignCompany = document.getElementById('assignCompany').value;
+  const assignCompany = '';
   const btn    = document.getElementById('uploadBtn');
   const loader = document.getElementById('loader');
   const btnText = document.getElementById('btnText');
 
   if (!fileInput.files[0] || !projectCode || !customerName) {
     updateStatus('Please provide a Project Code, Customer Name, and a File.', 'text-danger');
-    return;
-  }
-
-  if (!assignCompany) {
-    updateStatus('Please select an Assigned Company before uploading.', 'text-danger');
     return;
   }
 
@@ -2308,7 +2303,6 @@ function resetUI() {
   document.getElementById('customerBilling').value = '';
   document.getElementById('customerBirthday').value = '';
   document.getElementById('customerTin').value = '';
-  document.getElementById('assignCompany').value = '';
 
   // Clear milestone fields
   const boqQC = document.getElementById('boq-quotedCost');

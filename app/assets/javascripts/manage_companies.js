@@ -18,7 +18,7 @@
 
   // Every screen with an Assign Company dropdown -- add more IDs here if
   // another one is added later.
-  var DROPDOWN_IDS = ["assignCompany", "nboq-assignCompany"];
+  var DROPDOWN_IDS = ["nboq-assignCompany"];
 
   function populateDropdowns() {
     DROPDOWN_IDS.forEach(function (id) {

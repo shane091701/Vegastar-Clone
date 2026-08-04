@@ -1,4 +1,4 @@
-# Vegastar ERP — Manual Testing Guide: MRF → Delivery Flow
+# Storyseller Systems ERP — Manual Testing Guide: MRF → Delivery Flow
 
 This describes how the system actually works end-to-end so you can test it
 manually (e.g. with Postman/Insomnia/curl) before or alongside automated

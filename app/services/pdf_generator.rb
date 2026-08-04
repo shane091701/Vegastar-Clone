@@ -3,6 +3,7 @@
 # as an ActiveStorage attachment on a GeneratedPdf record, and returns an
 # inline URL the client can open — the equivalent of the original Drive URL.
 require "ferrum"
+require "base64"
 
 class PdfGenerator
   BROWSER_CANDIDATES = [
@@ -66,12 +67,17 @@ class PdfGenerator
     end
   end
 
+  LOGO_DATA_URI = begin
+    path = Rails.root.join("app/assets/images/logo.png")
+    "data:image/png;base64,#{Base64.strict_encode64(File.binread(path))}"
+  end
+
   # Port of getPdfLogoHeaderHtml_ — Source/code.js:2245
   def self.logo_header_html(doc_title)
     <<~HTML
       <div style="text-align:center; margin-bottom:20px;">
-        <img src="https://i.imgur.com/dhbq2a5.png" alt="Vegastar Logo" style="max-height: 70px; width: auto; margin-bottom: 10px;"
-             onerror="this.outerHTML='<h1 style=&quot;color:#f8b400;margin:0;&quot;>Vegastar</h1>'">
+        <img src="#{LOGO_DATA_URI}" alt="Storyseller Systems Logo" style="max-height: 70px; width: auto; margin-bottom: 10px;"
+             onerror="this.outerHTML='<h1 style=&quot;color:#f8b400;margin:0;&quot;>Storyseller Systems</h1>'">
         <p style="margin:5px 0; font-weight:bold; text-transform:uppercase;">#{doc_title}</p>
       </div>
     HTML
