@@ -14,7 +14,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
   ].freeze
 
   test "parses phases, scopes, and items exactly like processData_" do
-    result = BoqIngestor.ingest_rows(SAMPLE_ROWS.map(&:dup), "AR BOM", "PRJ1", "SP Bedana", "boq.xlsx")
+    result = BoqIngestor.ingest_rows(SAMPLE_ROWS.map(&:dup), "AR BOM", "PRJ1", "Storyseller Systems", "boq.xlsx")
     assert_equal "✅ Successfully processed 3 items from \"AR BOM\" into the database.", result
 
     items = BoqItem.order(:id).to_a
@@ -32,7 +32,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
     assert_equal 45_000.0, concrete.total_material.to_f   # source col F
     assert_equal 57_000.0, concrete.total_cost.to_f       # source col I
     assert_equal "PRJ1", concrete.project_code
-    assert_equal "SP Bedana", concrete.company
+    assert_equal "Storyseller Systems", concrete.company
 
     panel = items[2]
     assert_equal "ELECTRICAL", panel.phase # roman numeral prefix stripped
@@ -49,7 +49,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
       ["ITEM", "DESCRIPTION", "QTY", "UNIT", "U/C MAT", "TOTAL MAT", "U/C LABOR", "TOTAL LABOR", "TOTAL"],
       ["", "Lump sum electrical works", "L.S.", "Lot", "", "50,000", "", "10,000", "60,000"]
     ]
-    result = BoqIngestor.ingest_rows(rows, "AR BOM", "PRJ-LS", "SP Bedana", "boq.xlsx")
+    result = BoqIngestor.ingest_rows(rows, "AR BOM", "PRJ-LS", "Storyseller Systems", "boq.xlsx")
     assert_equal "✅ Successfully processed 1 items from \"AR BOM\" into the database.", result
 
     item = BoqItem.order(:id).first
@@ -73,7 +73,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
   test "raises a clear error when the QTY header lands in an unrecognized column" do
     weird_rows = [["", "", "", "QTY", "", "", "", "", ""]] # QTY in column index 3 -- neither known layout
     error = assert_raises(RuntimeError) do
-      BoqIngestor.ingest_rows(weird_rows, "mystery sheet", "PRJ-X", "SP Bedana", "boq.xlsx")
+      BoqIngestor.ingest_rows(weird_rows, "mystery sheet", "PRJ-X", "Storyseller Systems", "boq.xlsx")
     end
     assert_match(/column/i, error.message)
   end
@@ -111,7 +111,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
       ["", "Panel Board", "1", "Lot", "", "25,000", "", "5,000", "30,000"]
     ]
 
-    BoqIngestor.ingest_rows(rows, "AR BOM", "PRJ-MULTI", "SP Bedana", "boq.xlsx")
+    BoqIngestor.ingest_rows(rows, "AR BOM", "PRJ-MULTI", "Storyseller Systems", "boq.xlsx")
 
     items = BoqItem.order(:id).pluck(:item)
     assert_includes items, "Concrete 4000psi",
@@ -147,7 +147,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
   ].freeze
 
   test "parses the detailed-breakdown layout (QTY anchor in column E)" do
-    result = BoqIngestor.ingest_rows(DETAILED_SAMPLE_ROWS.map(&:dup), "detailed breakdown", "PRJ-DB", "SP Bedana", "boq.xls")
+    result = BoqIngestor.ingest_rows(DETAILED_SAMPLE_ROWS.map(&:dup), "detailed breakdown", "PRJ-DB", "Storyseller Systems", "boq.xls")
     assert_equal "✅ Successfully processed 2 items from \"detailed breakdown\" into the database.", result
 
     items = BoqItem.order(:id).to_a
@@ -173,7 +173,7 @@ class BoqIngestorTest < ActiveSupport::TestCase
   end
 
   test "does not misidentify a repeated mid-document header block, or a blank-qty subtotal rollup row, as line items" do
-    result = BoqIngestor.ingest_rows(DETAILED_SAMPLE_ROWS.map(&:dup), "detailed breakdown", "PRJ-DB2", "SP Bedana", "boq.xls")
+    result = BoqIngestor.ingest_rows(DETAILED_SAMPLE_ROWS.map(&:dup), "detailed breakdown", "PRJ-DB2", "Storyseller Systems", "boq.xls")
     assert_equal "✅ Successfully processed 2 items from \"detailed breakdown\" into the database.", result
     # 2 items expected (Mobilization + the lumber row) -- NOT 4, which is what you'd get
     # if the repeated "D E S C R I P T I O N" header row (qty column = literal text

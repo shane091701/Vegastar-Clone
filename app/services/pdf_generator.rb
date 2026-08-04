@@ -76,8 +76,8 @@ class PdfGenerator
   def self.logo_header_html(doc_title)
     <<~HTML
       <div style="text-align:center; margin-bottom:20px;">
-        <img src="#{LOGO_DATA_URI}" alt="SP Bedana Logo" style="max-height: 70px; width: auto; margin-bottom: 10px;"
-             onerror="this.outerHTML='<h1 style=&quot;color:#f8b400;margin:0;&quot;>SP Bedana</h1>'">
+        <img src="#{LOGO_DATA_URI}" alt="Storyseller Systems Logo" style="max-height: 70px; width: auto; margin-bottom: 10px;"
+             onerror="this.outerHTML='<h1 style=&quot;color:#f8b400;margin:0;&quot;>Storyseller Systems</h1>'">
         <p style="margin:5px 0; font-weight:bold; text-transform:uppercase;">#{doc_title}</p>
       </div>
     HTML

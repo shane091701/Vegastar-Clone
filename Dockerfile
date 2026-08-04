@@ -2,8 +2,8 @@
 # check=error=true
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t sp-bedana-erp .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name sp-bedana-erp sp-bedana-erp
+# docker build -t storyseller-systems-erp .
+# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name storyseller-systems-erp storyseller-systems-erp
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 

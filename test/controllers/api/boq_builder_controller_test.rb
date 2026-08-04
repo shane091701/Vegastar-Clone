@@ -2,7 +2,7 @@ require "test_helper"
 
 class Api::BoqBuilderControllerTest < ActionDispatch::IntegrationTest
   PAYLOAD = {
-    "project" => { "code" => "NB1", "customerName" => "Juan", "company" => "SP Bedana",
+    "project" => { "code" => "NB1", "customerName" => "Juan", "company" => "Storyseller Systems",
                    "quotedCost" => "100000", "milestoneTerms" => [] },
     "items" => [
       { "phase" => "Civil", "scope" => "Foundation", "name" => "Concrete", "unit" => "cu.m",
