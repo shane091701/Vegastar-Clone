@@ -62,7 +62,7 @@ end
 gem "bcrypt", "~> 3.1"
 gem "roo", "~> 2.10"
 gem "spreadsheet", "~> 1.3"
-gem "ferrum", "~> 0.15"
+gem "ferrum", "~> 0.18"
 
 group :development do
   gem "letter_opener"
