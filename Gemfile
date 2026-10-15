@@ -60,7 +60,7 @@ group :test do
 end
 
 gem "bcrypt", "~> 3.1"
-gem "roo", "~> 2.10"
+gem "roo", "~> 3.0"
 gem "spreadsheet", "~> 1.3"
 gem "ferrum", "~> 0.15"
 
